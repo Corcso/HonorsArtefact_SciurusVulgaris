@@ -24,6 +24,12 @@
     <ClInclude Include="HandmadeMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsUtility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Input.cpp">
@@ -33,6 +39,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="entry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsInitialize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsUtility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -135,12 +135,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Graphics.h" />
+    <ClInclude Include="GraphicsUtility.h" />
     <ClInclude Include="HandmadeMath.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="PCH.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="entry.cpp" />
+    <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="GraphicsInitialize.cpp" />
+    <ClCompile Include="GraphicsUtility.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
