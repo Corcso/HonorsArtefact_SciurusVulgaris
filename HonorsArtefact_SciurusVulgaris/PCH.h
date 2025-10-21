@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
+#include <vector>
+#include <algorithm>
 
 // Windows Includes
 #include <windows.h>
