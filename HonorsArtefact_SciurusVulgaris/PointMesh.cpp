@@ -56,3 +56,76 @@ void PointMesh::CopyPointsToVRAM()
     VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
     //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
 }
+
+void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
+{
+    // Read from the text file
+    std::ifstream OBJFile(pathOBJ);
+
+    std::string line;
+
+    // Use a while loop together with the getline() function to read the file line by line
+    while (std::getline(OBJFile, line)) {
+        if (line.length() < 3) continue;
+        if (line[0] == 'v') {
+            std::string thisLinePoints[3];
+            int currentPointIndex = 0;
+            std::string currentPoint = "";
+
+            for (int c = 2; c < line.length(); ++c) {
+                if (line[c] == ' ') {
+                    thisLinePoints[currentPointIndex] = currentPoint;
+                    currentPoint = "";
+                    currentPointIndex++;
+                }
+                else{
+                    currentPoint += line[c];
+                }
+            }
+            thisLinePoints[currentPointIndex] = currentPoint;
+
+            points.push_back({
+                   HMM_V3(std::stof(thisLinePoints[0]), std::stof(thisLinePoints[1]), std::stof(thisLinePoints[2])), HMM_V3(0, 0, 0)
+                });
+        }
+    }
+
+    // Close the file
+    OBJFile.close();
+
+    // Read from the text file
+    std::ifstream MTLFile(pathMTL);
+
+    int index = 0;
+    // Use a while loop together with the getline() function to read the file line by line
+    while (std::getline(MTLFile, line)) {
+        if (line.length() < 3) continue;
+        if (line[0] == 'K' && line[1] == 'd') {
+            std::string thisLinePoints[3];
+            int currentPointIndex = 0;
+            std::string currentPoint = "";
+
+            for (int c = 3; c < line.length(); ++c) {
+                if (line[c] == ' ') {
+                    thisLinePoints[currentPointIndex] = currentPoint;
+                    currentPoint = "";
+                    currentPointIndex++;
+                }
+                else {
+                    currentPoint += line[c];
+                }
+            }
+            thisLinePoints[currentPointIndex] = currentPoint;
+
+            points[index].color = HMM_V3(std::stof(thisLinePoints[0]), std::stof(thisLinePoints[1]), std::stof(thisLinePoints[2]));
+            index++;
+        }
+    }
+
+    for (int i = 0; i < points.size(); ++i) {
+        indices.push_back(i);
+    }
+
+    // Close the file
+    MTLFile.close();
+}

@@ -3,6 +3,7 @@
 // STL Includes
 #include <iostream>
 #include <string>
+#include <fstream>
 #include <cstdint>
 #include <vector>
 #include <algorithm>

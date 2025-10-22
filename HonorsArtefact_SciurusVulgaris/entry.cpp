@@ -12,7 +12,9 @@ int main() {
 
 	PointMesh myPoints;
 
-	AddPCData(&myPoints);
+	//AddPCData(&myPoints);
+	myPoints.LoadFromFileOBJMTL("./flowerPoints.obj",
+		"./flowerPoints.mtl");
 
 	myPoints.CopyPointsToVRAM();
 
