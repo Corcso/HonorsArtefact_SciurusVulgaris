@@ -162,6 +162,11 @@
     <ClCompile Include="VulkanSetup.cpp" />
     <ClCompile Include="VulkanUtility.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VULKAN_CompileAllShaders.bat" />
+    <None Include="VULKAN_fragment.frag" />
+    <None Include="VULKAN_vertex.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

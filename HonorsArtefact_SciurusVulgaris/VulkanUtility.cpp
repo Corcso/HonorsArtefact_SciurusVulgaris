@@ -62,7 +62,7 @@ void VulkanUtility::CreateBufferAndAssignMemory(VkDeviceSize size, VkBufferUsage
         throw -1;
     }*/
 
-    *bufferMemory = graphicsService->memoryAllocator.BindBufferToMemory(Graphics::GetVkDevice(), graphicsService->physicalDevice, properties, mapUsage, *buffer);
+    *bufferMemory = Graphics::GetMemoryAllocator().BindBufferToMemory(Graphics::GetVkDevice(), Graphics::GetVkPhysicalDevice(), properties, mapUsage, *buffer);
 
 //    vkBindBufferMemory(Graphics::GetVkDevice(), *buffer, *bufferMemory, 0);
 }
@@ -90,7 +90,7 @@ void VulkanUtility::CreateImageAndAssignMemory(uint32_t width, uint32_t height, 
         throw -1;
     }
 
-    *imageMemory = graphicsService->memoryAllocator.BindImageToMemory(Graphics::GetVkDevice(), graphicsService->physicalDevice, properties, mapUsage, *image);
+    *imageMemory = Graphics::GetMemoryAllocator().BindImageToMemory(Graphics::GetVkDevice(), Graphics::GetVkPhysicalDevice(), properties, mapUsage, *image);
 }
 
 void VulkanUtility::DestroyBuffer(VkBuffer buffer)
@@ -118,7 +118,7 @@ void VulkanUtility::FreeGPUMemory(VkDeviceMemory memory)
 void VulkanUtility::FreeGPUMemoryBlock(VulkanMemoryAllocator::VulkanMemoryBlock memoryBlock)
 {
     
-    graphicsService->memoryAllocator.FreeMemory(Graphics::GetVkDevice(), memoryBlock);
+    Graphics::GetMemoryAllocator().FreeMemory(Graphics::GetVkDevice(), memoryBlock);
 }
 
 void VulkanUtility::CopyBufferData(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -128,7 +128,7 @@ void VulkanUtility::CopyBufferData(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDev
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = graphicsService->commandPool;
+    allocInfo.commandPool = Graphics::GetCommandPool();
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -158,7 +158,7 @@ void VulkanUtility::CopyBufferData(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDev
     vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
 
-    vkFreeCommandBuffers(Graphics::GetVkDevice(), graphicsService->commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
 void VulkanUtility::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
@@ -168,7 +168,7 @@ void VulkanUtility::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = graphicsService->commandPool;
+    allocInfo.commandPool = Graphics::GetCommandPool();
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -217,10 +217,10 @@ void VulkanUtility::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(graphicsService->graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphicsService->graphicsQueue);
+    vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
 
-    vkFreeCommandBuffers(Graphics::GetVkDevice(), graphicsService->commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
 void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -230,7 +230,7 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = graphicsService->commandPool;
+    allocInfo.commandPool = Graphics::GetCommandPool();
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -299,10 +299,10 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(graphicsService->graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphicsService->graphicsQueue);
+    vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
 
-    vkFreeCommandBuffers(Graphics::GetVkDevice(), graphicsService->commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
 void VulkanUtility::MapCopyToGPU(VkDeviceMemory memory, void* data, size_t size, VkDeviceSize offset, VkMemoryMapFlags flags)
@@ -321,11 +321,11 @@ void VulkanUtility::MapCopyBlockToGPU(VulkanMemoryAllocator::VulkanMemoryBlock m
     
     if (memory.poolID.mapUsage == VulkanMemoryAllocator::VulkanMemoryMapUsage::OPEN) return;
     void* mappedMemory;
-    vkMapMemory(Graphics::GetVkDevice(), graphicsService->memoryAllocator.GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &mappedMemory);
+    vkMapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &mappedMemory);
     // Copy Data
     memcpy(mappedMemory, data, size);
     // Unmap Data
-    vkUnmapMemory(Graphics::GetVkDevice(), graphicsService->memoryAllocator.GetBlockMemoryAllocation(memory));
+    vkUnmapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory));
 }
 
 void* VulkanUtility::OpenMemoryMap(VkDeviceMemory memory, size_t size, VkDeviceSize offset, VkMemoryMapFlags flags)
@@ -340,7 +340,7 @@ void* VulkanUtility::OpenMemoryBlockMap(VulkanMemoryAllocator::VulkanMemoryBlock
     /*if (memory.poolID.instantCloseMap) return nullptr;
     
     void* toReturn;
-    vkMapMemory(Graphics::GetVkDevice(), graphicsService->memoryAllocator.GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &toReturn);
+    vkMapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &toReturn);
     return toReturn;*/
     return nullptr;
 }

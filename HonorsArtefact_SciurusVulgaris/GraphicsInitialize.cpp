@@ -33,6 +33,9 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     RECT windowRect = clientRect;
     AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
+    instance.currentHeight = clientRect.bottom;
+    instance.currentWidth = clientRect.right;
+
     instance.window = CreateWindowW(instance.WINDOW_CLASS_NAME, title.c_str(),
         WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
         windowRect.right - windowRect.left,
@@ -240,7 +243,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     vkGetDeviceQueue(instance.vkDevice, indices.presentFamily, 0, &instance.vkPresentQueue);
 
     // >>> Create swap chain
-    VulkanSetup::CreateSwapChain(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSurface, currentWidth, currentHeight, &instance.vkSwapChainFormat, &instance.vkSwapChainExtent, &instance.vkSwapChainImages, &instance.vkSwapChain);
+    VulkanSetup::CreateSwapChain(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSurface, instance.currentWidth, instance.currentHeight, &instance.vkSwapChainFormat, &instance.vkSwapChainExtent, &instance.vkSwapChainImages, &instance.vkSwapChain);
     VulkanSetup::CreateImageViewsForSwapChain(instance.vkDevice, instance.vkSwapChainFormat, instance.vkSwapChainImages, &instance.vkSwapChainImageViews);
 
     // Setup render pass
@@ -249,30 +252,48 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     // Setup descriptor pool
     VulkanSetup::CreateDescriptorPool(instance.vkDevice, 1, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
 
-    SetupDescriptorSets();
+    std::vector<VkDescriptorSetLayoutBinding> uboLayoutBindings(1);
+    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[0].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    // Not used for images
+    uboLayoutBindings[0].pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = uboLayoutBindings.size();
+    layoutInfo.pBindings = uboLayoutBindings.data();
+
+    if (vkCreateDescriptorSetLayout(instance.vkDevice, &layoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+        instance.perFramePerObjectDescriptors.push_back(std::vector<VulkanDescriptor>());
+    }
 
     // Setup pipeline
     std::vector<VkDescriptorSetLayout> allDescriptorSetLayouts = {
-        perObjectSetLayout
+        instance.vkDescriptorSetLayout
     };
-    VulkanSetup::CreateGraphicsPipeline(device, renderPass, swapChainExtent, allDescriptorSetLayouts, &pipelineLayout, &graphicsPipeline);
+    VulkanSetup::CreateGraphicsPipeline(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent,
+        allDescriptorSetLayouts, &instance.vkMainPipelineLayout, &instance.vkMainPipeline);
 
     // Setup depth buffer
-    VulkanSetup::CreateDepthBuffer(device, physicalDevice, swapChainExtent, &depthImage, &depthImageMemory, &depthImageView);
+    VulkanSetup::CreateDepthBuffer(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSwapChainExtent, &instance.vkDepthImage,
+        &instance.vkDepthImageMemory, &instance.vkDepthImageView);
 
     // Setup frame buffers
-    VulkanSetup::CreateFrameBuffers(device, renderPass, swapChainExtent, swapChainImageViews, depthImageView, &swapChainFramebuffers);
+    VulkanSetup::CreateFrameBuffers(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent, instance.vkSwapChainImageViews, instance.vkDepthImageView, &instance.vkSwapChainFrameBuffers);
 
     // Setup command pool & buffers
-    VulkanSetup::CreateCommandPool(device, physicalDevice, surface, &commandPool);
-    VulkanSetup::CreateCommandBuffers(device, commandPool, &commandBuffers);
+    VulkanSetup::CreateCommandPool(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSurface, &instance.vkCommandPool);
+    VulkanSetup::CreateCommandBuffers(instance.vkDevice, instance.vkCommandPool, &instance.vkCommandBuffers);
 
     // Create Sync objects
-    VulkanSetup::CreateSyncObjects(device, &inFlightFences, &imageAvailableSemaphores, &renderFinishedSemaphores);
-
-    // Store clear colour
-    this->clearColor = clearColor;
-
+    VulkanSetup::CreateSyncObjects(instance.vkDevice, &instance.vkInFlightFences, &instance.vkImageAvailableSemaphores, &instance.vkRenderFinishedSemaphores);
 
 //    // Editor only ImGui Setup
 //    ImGui_ImplVulkan_InitInfo init_info = {};
@@ -300,5 +321,5 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 //        &editorDepthImage, &editorDepthImageView, &editorDepthImageMemory);
 //
 //    editorViewportDescriptorSet = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(editorViewportSampler, editorViewportImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-    return 0;
+    return ;
 }

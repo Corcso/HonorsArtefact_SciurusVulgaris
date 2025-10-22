@@ -316,8 +316,9 @@ VkFormat VulkanSetup::GetDepthBufferFormat(VkPhysicalDevice physicalDevice)
 void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPass, VkExtent2D swapChainExtent,const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts, VkPipelineLayout* pipelineLayout, VkPipeline* graphicsPipeline)
 {
     // Get shader code
-    auto vertShaderCode = VulkanUtility::ReadFile("./StaticResources/VULKAN_COMPILED_vertex.spv");
-    auto fragShaderCode = VulkanUtility::ReadFile("./StaticResources/VULKAN_COMPILED_fragment.spv");
+    
+    auto vertShaderCode = VulkanUtility::ReadFile("./VULKAN_COMPILED_vertex.spv");
+    auto fragShaderCode = VulkanUtility::ReadFile("./VULKAN_COMPILED_fragment.spv");
 
     VkShaderModule vertShaderModule = VulkanUtility::CreateShaderModule(device, vertShaderCode);
     VkShaderModule fragShaderModule = VulkanUtility::CreateShaderModule(device, fragShaderCode);

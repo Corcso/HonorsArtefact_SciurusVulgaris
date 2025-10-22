@@ -1,5 +1,6 @@
 #pragma once
 #include "PCH.h"
+#include "VulkanDescriptor.h"
 
 const std::vector<std::string> VK_DEVICE_EXTENSIONS_REQUIRED{
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -19,6 +20,8 @@ public:
 	static VkDevice GetVkDevice() { return instance.vkDevice; }
 	static VkQueue GetVkGraphicsQueue() { return instance.vkGraphicsQueue; }
 	static VkQueue GetVkPresentQueue() { return instance.vkPresentQueue; }
+	static VulkanMemoryAllocator& GetMemoryAllocator() { return instance.VRAMAllocator; }
+	static VkCommandPool GetCommandPool() { return instance.vkCommandPool; }
 
 private:
 	static Graphics instance;
@@ -37,8 +40,36 @@ private:
 	VkExtent2D vkSwapChainExtent;
 	std::vector<VkImage> vkSwapChainImages;
 	std::vector<VkImageView> vkSwapChainImageViews;
+	std::vector<VkFramebuffer> vkSwapChainFrameBuffers;
 	VkSwapchainKHR vkSwapChain;
 	VkRenderPass vkRenderPass;
+
+	// Memory allocator
+	VulkanMemoryAllocator VRAMAllocator;
+
+	// Descriptors
 	VkDescriptorPool vkDescriptorPool;
+	VkDescriptorSetLayout vkDescriptorSetLayout;
+	std::vector<std::vector<VulkanDescriptor>> perFramePerObjectDescriptors;
+
+	VkPipelineLayout vkMainPipelineLayout;
+	VkPipeline vkMainPipeline;
+
+	VkImage vkDepthImage;
+	VkImageView vkDepthImageView;
+	VkDeviceMemory vkDepthImageMemory;
+
+	VkCommandPool vkCommandPool;
+	std::vector<VkCommandBuffer> vkCommandBuffers;
+
+	// Sync
+	std::vector<VkFence> vkInFlightFences;
+	std::vector<VkSemaphore> vkImageAvailableSemaphores;
+	std::vector<VkSemaphore> vkRenderFinishedSemaphores;
+
+	// Variables
+	HMM_Vec4 clearColor{ 0, 0, 0, 0 };
+
+	int currentWidth, currentHeight;
 };
 

@@ -75,4 +75,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="VULKAN_CompileAllShaders.bat">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="VULKAN_fragment.frag">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="VULKAN_vertex.vert">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
