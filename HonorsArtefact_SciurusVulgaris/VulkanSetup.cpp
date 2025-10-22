@@ -1,5 +1,5 @@
 #include "PCH.h"
-
+#include "Graphics.h"
 #include "VulkanSetup.h"
 #include "VulkanUtility.h"
 #include "PointMesh.h"
@@ -380,7 +380,7 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
     // Setup input assembler
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
     // Setup viewport see section in https://vulkan-tutorial.com/en/Drawing_a_triangle/Graphics_pipeline_basics/Fixed_functions

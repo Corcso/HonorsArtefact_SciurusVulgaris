@@ -7,9 +7,9 @@ layout(location = 0) out vec3 outWorldPos;
 layout(location = 1) out vec4 outColor;
 
 layout(binding = 0) uniform UniformBufferObject {
-    mat4 proj;
-    mat4 view;
     mat4 world;
+    mat4 view;
+    mat4 proj;
 } ubo;
 
 //layout(set = 1, binding = 1) uniform LightInfo {
