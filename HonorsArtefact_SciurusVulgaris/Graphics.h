@@ -28,6 +28,9 @@ public:
 	static VkQueue GetVkPresentQueue() { return instance.vkPresentQueue; }
 	static VulkanMemoryAllocator& GetMemoryAllocator() { return instance.VRAMAllocator; }
 	static VkCommandPool GetCommandPool() { return instance.vkCommandPool; }
+	static VkFormat GetSwapChainFormat() { return instance.vkSwapChainFormat; }
+	static VkExtent2D GetSwapChainExtent() { return instance.vkSwapChainExtent; }
+	static VkCommandBuffer GetThisFramesCommandBuffer() { return instance.vkCommandBuffers[instance.currentFrame]; }
 
 	static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanDescriptor>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
