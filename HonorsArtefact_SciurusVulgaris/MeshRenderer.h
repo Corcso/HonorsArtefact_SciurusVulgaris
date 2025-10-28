@@ -1,6 +1,7 @@
 #pragma once
 #include "VulkanMemoryAllocator.h"
 #include "TriListMesh.h"
+#include "VulkanDescriptor.h"
 
 class MeshRenderer
 {

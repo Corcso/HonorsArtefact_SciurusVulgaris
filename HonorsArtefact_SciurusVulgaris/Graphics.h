@@ -31,6 +31,7 @@ public:
 	static VkFormat GetSwapChainFormat() { return instance.vkSwapChainFormat; }
 	static VkExtent2D GetSwapChainExtent() { return instance.vkSwapChainExtent; }
 	static VkCommandBuffer GetThisFramesCommandBuffer() { return instance.vkCommandBuffers[instance.currentFrame]; }
+	static VkDescriptorPool GetDescriptorPool() { return instance.vkDescriptorPool; }
 
 	static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanDescriptor>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
