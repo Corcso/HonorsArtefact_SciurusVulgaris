@@ -35,6 +35,13 @@ public:
 
 	static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanDescriptor>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
+	static void CheckVulkanResult(VkResult res)
+	{
+		if (res == VK_SUCCESS)
+			return;
+		throw - 1;
+	}
+
 private:
 	struct WCP_Matrices {
 		HMM_Mat4 world;

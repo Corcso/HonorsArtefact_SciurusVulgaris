@@ -19,9 +19,9 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     HDC hDC;
 
     // ImGui input
-   /* extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     if (ImGui_ImplWin32_WndProcHandler(hwnd, message, wParam, lParam))
-        return true;*/
+        return true;
 
     // Switch case over different message types we care about
     switch (message)

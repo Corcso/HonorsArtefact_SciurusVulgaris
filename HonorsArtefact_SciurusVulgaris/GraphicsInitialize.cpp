@@ -68,16 +68,16 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     //---------------------
 
 
-    //// Im gui init
-    //// Setup Dear ImGui context
-    //IMGUI_CHECKVERSION();
-    //ImGui::CreateContext();
-    //ImGuiIO& io = ImGui::GetIO();
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-    //// Setup Platform/Renderer backends
-    //ImGui_ImplWin32_Init(window);
+    // Im gui init
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+    // Setup Platform/Renderer backends
+    ImGui_ImplWin32_Init(instance.window);
 
 
     // Begin Vulkan Setup
@@ -295,24 +295,24 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     // Create Sync objects
     VulkanSetup::CreateSyncObjects(instance.vkDevice, &instance.vkInFlightFences, &instance.vkImageAvailableSemaphores, &instance.vkRenderFinishedSemaphores);
 
-//    // Editor only ImGui Setup
-//    ImGui_ImplVulkan_InitInfo init_info = {};
-//    //init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion, otherwise will default to header version.
-//    init_info.Instance = instance;
-//    init_info.PhysicalDevice = physicalDevice;
-//    init_info.Device = device;
-//    init_info.QueueFamily = indices.graphicsFamily;
-//    init_info.Queue = graphicsQueue;
-//    init_info.PipelineCache = VK_NULL_HANDLE;
-//    init_info.DescriptorPool = descriptorPool;
-//    init_info.RenderPass = renderPass;
-//    init_info.Subpass = 0;
-//    init_info.MinImageCount = 2;
-//    init_info.ImageCount = swapChainImages.size();
-//    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-//    init_info.Allocator = VK_NULL_HANDLE;
-//    init_info.CheckVkResultFn = check_vk_result;
-//    ImGui_ImplVulkan_Init(&init_info);
+    // Editor only ImGui Setup
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    //init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion, otherwise will default to header version.
+    init_info.Instance = instance.vkInstance;
+    init_info.PhysicalDevice = instance.vkPhysicalDevice;
+    init_info.Device = instance.vkDevice;
+    init_info.QueueFamily = indices.graphicsFamily;
+    init_info.Queue = instance.vkGraphicsQueue;
+    init_info.PipelineCache = VK_NULL_HANDLE;
+    init_info.DescriptorPool = instance.vkDescriptorPool;
+    init_info.RenderPass = instance.vkRenderPass;
+    init_info.Subpass = 0;
+    init_info.MinImageCount = 2;
+    init_info.ImageCount = instance.vkSwapChainImages.size();
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.Allocator = VK_NULL_HANDLE;
+    init_info.CheckVkResultFn = CheckVulkanResult;
+    ImGui_ImplVulkan_Init(&init_info);
 //
 //    editorViewportExtent = { 800, 800 };
 //

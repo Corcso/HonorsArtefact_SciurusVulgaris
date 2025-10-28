@@ -5,6 +5,10 @@ Graphics Graphics::instance;
 
 void Graphics::BeginRender()
 {
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
     // Wait until previous frame is finished. 
     vkWaitForFences(instance.vkDevice, 1, &instance.vkInFlightFences[instance.currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -96,6 +100,9 @@ void Graphics::Render(PointMesh* points)
 
 void Graphics::EndRender()
 {
+    ImGui::ShowDemoWindow();
+    ImGui::Render();
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
     // Finish recording command buffer
     vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
 
