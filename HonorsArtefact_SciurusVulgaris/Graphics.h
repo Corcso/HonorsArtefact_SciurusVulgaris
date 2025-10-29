@@ -2,6 +2,7 @@
 #include "PCH.h"
 #include "VulkanDescriptor.h"
 #include "PointMesh.h"
+#include "MeshRenderer.h"
 
 const std::vector<std::string> VK_DEVICE_EXTENSIONS_REQUIRED{
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -54,6 +55,9 @@ private:
 	const LPCWSTR WINDOW_CLASS_NAME = L"2200592-SciurusVulgaris";
 
 	int frameinc; // TODO REMOVE
+	ImTextureID meshRenderOutput;
+	MeshRenderer meshRenderer;
+	TriListMesh myMesh;
 
 	HWND window;
 

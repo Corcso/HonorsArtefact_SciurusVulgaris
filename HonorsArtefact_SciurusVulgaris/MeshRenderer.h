@@ -8,6 +8,11 @@ class MeshRenderer
 public:
 	void CreateAll() {
 		CreateImages();
+		CreateSampler();
+		CreateRenderPass();
+		CreateFrameBuffer();
+		CreateDescriptorLayout();
+		CreatePipeline();
 	}
 
 	void CreateImages();
@@ -20,6 +25,9 @@ public:
 	void BeginRender(HMM_Vec4 clearColor);
 	void Render(TriListMesh* mesh);
 	void EndRender();
+
+	VkImageView GetImageView() { return vkColorImageView; }
+	VkSampler GetSampler() { return vkSampler; }
 private:
 	VkRenderPass vkRenderPass;
 	VkDescriptorSetLayout vkDescriptorSetLayout;

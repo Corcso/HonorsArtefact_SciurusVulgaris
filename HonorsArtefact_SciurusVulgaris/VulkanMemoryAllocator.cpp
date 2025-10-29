@@ -61,41 +61,57 @@
 
     void VulkanMemoryAllocator::RenderMemoryUsageStat()
     {
-        //ImGui::Begin("Vulkan VRAM Alloc");
+        ImGui::Begin("Vulkan VRAM Alloc");
 
-        //for (auto& poolList : memoryPools) {
-        //    std::string poolNodeName = std::to_string(poolList.first.blockSize) + "B Type:" + std::to_string(poolList.first.memoryTypeIndex) + " Map Type: " + std::to_string((int)poolList.first.mapUsage);
-        //    if (ImGui::TreeNodeEx(poolNodeName.c_str(), ImGuiTreeNodeFlags_DrawLinesFull | ImGuiTreeNodeFlags_DefaultOpen)) {
-        //        
-        //        uint32_t totalBlocksInUse = 0;
-        //        uint32_t totalBlocks = 0;
-        //        for (int i = 0; i < poolList.second.size(); i++) {
-        //            if (sizeToBlockCountPerAlloc.find(poolList.first.blockSize) != sizeToBlockCountPerAlloc.end()) {
-        //                // Check how full the pool is
-        //                uint32_t poolMaxBlocks = sizeToBlockCountPerAlloc[poolList.first.blockSize];
-        //                uint32_t takenBlocks = poolMaxBlocks;
-        //                for (auto& location : freeMemoryLocations[poolList.first]) {
-        //                    if (location.poolIndex == i) takenBlocks--;
-        //                }
-        //                ImGui::ProgressBar((float)takenBlocks / (float)poolMaxBlocks);
-        //                totalBlocksInUse += takenBlocks;
-        //                totalBlocks += poolMaxBlocks;
-        //            }
-        //            else {
-        //                ImGui::ProgressBar(1);
-        //                totalBlocksInUse++;
-        //                totalBlocks++;
-        //            }
-        //        }
-        //        if (poolList.second.size() == 0) ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "All Pools Closed");
+        for (auto& poolList : memoryPools) {
+            std::string poolNodeName = std::to_string(poolList.first.blockSize) + "B Type:" + std::to_string(poolList.first.memoryTypeIndex) + " Map Type: " + std::to_string((int)poolList.first.mapUsage);
+            if (ImGui::TreeNodeEx(poolNodeName.c_str(), ImGuiTreeNodeFlags_DrawLinesFull | ImGuiTreeNodeFlags_DefaultOpen)) {
+                
+                uint32_t totalBlocksInUse = 0;
+                uint32_t totalBlocks = 0;
+                for (int i = 0; i < poolList.second.size(); i++) {
+                    if (sizeToBlockCountPerAlloc.find(poolList.first.blockSize) != sizeToBlockCountPerAlloc.end()) {
+                        // Check how full the pool is
+                        uint32_t poolMaxBlocks = sizeToBlockCountPerAlloc[poolList.first.blockSize];
+                        uint32_t takenBlocks = poolMaxBlocks;
+                        for (auto& location : freeMemoryLocations[poolList.first]) {
+                            if (location.poolIndex == i) takenBlocks--;
+                        }
+                        ImGui::ProgressBar((float)takenBlocks / (float)poolMaxBlocks);
+                        totalBlocksInUse += takenBlocks;
+                        totalBlocks += poolMaxBlocks;
+                    }
+                    else {
+                        ImGui::ProgressBar(1);
+                        totalBlocksInUse++;
+                        totalBlocks++;
+                    }
+                }
+                if (poolList.second.size() == 0) ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "All Pools Closed");
 
-        //        else { ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), std::string("Total VRAM Usage: " + std::to_string(totalBlocksInUse * poolList.first.blockSize) + "B(In Use) / " + std::to_string(totalBlocks * poolList.first.blockSize) + "B(Reserved)").c_str()); }
+                else { 
+                    if (totalBlocks * poolList.first.blockSize < 1024) {
+                        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
+                            std::string("Total VRAM Usage: " + std::to_string(totalBlocksInUse * poolList.first.blockSize) + "B(In Use) / " +
+                                std::to_string(totalBlocks * poolList.first.blockSize) + "B(Reserved)").c_str());
+                    }
+                    else if (totalBlocks * poolList.first.blockSize < 1024 * 1024) {
+                        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
+                            std::string("Total VRAM Usage: " + std::to_string(totalBlocksInUse * poolList.first.blockSize / 1024) + "KB(In Use) / " +
+                                std::to_string(totalBlocks * poolList.first.blockSize / 1024) + "KB(Reserved)").c_str());
+                    }
+                    else {
+                        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f),
+                            std::string("Total VRAM Usage: " + std::to_string(totalBlocksInUse * poolList.first.blockSize / 1024 / 1024) + "MB(In Use) / " +
+                                std::to_string(totalBlocks * poolList.first.blockSize / 1024 / 1024) + "MB(Reserved)").c_str());
+                    }
+                }
 
-        //        ImGui::TreePop();
-        //    }
-        //}
+                ImGui::TreePop();
+            }
+        }
 
-        //ImGui::End();
+        ImGui::End();
     }
 
     VulkanMemoryAllocator::VulkanMemoryBlock VulkanMemoryAllocator::FindMemoryBlock(VkDevice device, VkMemoryAllocateInfo desiredAllocation, VulkanMemoryMapUsage mapUsage)

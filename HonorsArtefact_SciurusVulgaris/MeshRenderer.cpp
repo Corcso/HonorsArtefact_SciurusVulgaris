@@ -141,7 +141,7 @@ void MeshRenderer::CreateFrameBuffer()
 {
     VkImageView imageViewList[]{ vkColorImageView, vkDepthImageView };
 
-    VkFramebufferCreateInfo frameBufferCreateInfo;
+    VkFramebufferCreateInfo frameBufferCreateInfo{};
     frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     frameBufferCreateInfo.width = vkColorImageExtent.width;
     frameBufferCreateInfo.height = vkColorImageExtent.height;
@@ -150,7 +150,9 @@ void MeshRenderer::CreateFrameBuffer()
     frameBufferCreateInfo.renderPass = vkRenderPass;
     frameBufferCreateInfo.layers = 1;
 
-    vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &vkFrameBuffer);
+    if (vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &vkFrameBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
 }
 
 void MeshRenderer::CreateDescriptorLayout()
@@ -419,7 +421,7 @@ void MeshRenderer::Render(TriListMesh* mesh)
 
     frameinc++;
     WCP_Matrices dataForUBO{
-        HMM_Rotate_LH(frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(140, 1, 0.001, 30)
+        HMM_Rotate_LH(frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(50, 1, 0.001, 30)
     };
 
     memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
@@ -435,4 +437,30 @@ void MeshRenderer::Render(TriListMesh* mesh)
 void MeshRenderer::EndRender()
 {
     vkCmdEndRenderPass(Graphics::GetThisFramesCommandBuffer());
+
+    // Wait for viewport to be available for rendering
+    // TODO learn more about this!
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = vkColorImage;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    barrier.srcAccessMask = 0; // TODO
+    barrier.dstAccessMask = 0; // TODO
+
+    vkCmdPipelineBarrier(
+        Graphics::GetThisFramesCommandBuffer(),
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
 }

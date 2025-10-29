@@ -8,7 +8,7 @@ int main() {
 	std::cout << "I'm Alive";
 
 	Input::Initialize();
-	Graphics::Initialize(400, 400, L"test");
+	Graphics::Initialize(800, 800, L"test");
 
 	PointMesh myPoints;
 

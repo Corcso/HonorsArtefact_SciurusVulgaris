@@ -39,6 +39,10 @@ void Graphics::BeginRender()
     if (vkBeginCommandBuffer(instance.vkCommandBuffers[instance.currentFrame], &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
+    // Do mesh render
+    instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
+    instance.meshRenderer.Render(&instance.myMesh);
+    instance.meshRenderer.EndRender();
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -101,6 +105,13 @@ void Graphics::Render(PointMesh* points)
 void Graphics::EndRender()
 {
     ImGui::ShowDemoWindow();
+
+    ImGui::Begin("Mesh");
+    ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
+    ImGui::End();
+
+    instance.VRAMAllocator.RenderMemoryUsageStat();
+
     ImGui::Render();
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
     // Finish recording command buffer
