@@ -13,6 +13,8 @@ public:
 	std::vector<uint32_t> indices;
 	void CopyPointsToVRAM();
 
+	void LoadFile(std::string path);
+
 	// Vulkan Buffers
 	VkBuffer vertexBuffer;
 	VkBuffer indexBuffer;

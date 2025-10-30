@@ -2,6 +2,11 @@
 #include "TriListMesh.h"
 #include "VulkanUtility.h"
 
+// Include ASSIMP headers, (Kulling and assimp team, 2025) v6.0.2
+#include <assimp/Importer.hpp>    // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
+
 void TriListMesh::CopyPointsToVRAM()
 {
     // VERTEX BUFFER
@@ -55,4 +60,32 @@ void TriListMesh::CopyPointsToVRAM()
     VulkanUtility::DestroyBuffer(stagingIndexBuffer);
     VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
     //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
+}
+
+void TriListMesh::LoadFile(std::string path)
+{
+    Assimp::Importer importer;
+
+    const aiScene* scene = importer.ReadFile(path, aiPostProcessSteps::aiProcess_Triangulate);
+
+    for(int mesh = 0; mesh < scene->mNumMeshes; mesh++){
+        if (scene->mMeshes[mesh]->mNumVertices > 0) {
+            for (int v = 0; v < scene->mMeshes[mesh]->mNumVertices; v++) {
+                vertices.push_back(
+                    {
+                        HMM_V3(scene->mMeshes[mesh]->mVertices[v].x, scene->mMeshes[mesh]->mVertices[v].y, scene->mMeshes[mesh]->mVertices[v].z),
+                        HMM_V3(1, 1, 1)
+                    });
+            }
+        }
+        if (scene->mMeshes[mesh]->mNumFaces > 0) {
+            for (int face = 0; face < scene->mMeshes[mesh]->mNumFaces; face++) {
+                for (int index = 0; index < scene->mMeshes[mesh]->mFaces[face].mNumIndices; index++) {
+                    indices.push_back(scene->mMeshes[mesh]->mFaces[face].mIndices[index]);
+                }
+            }
+        }
+    }
+
+    // Scene deleted from heap when importer leaves scope
 }

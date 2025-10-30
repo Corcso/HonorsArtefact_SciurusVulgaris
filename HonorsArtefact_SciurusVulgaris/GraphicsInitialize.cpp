@@ -326,12 +326,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-    instance.myMesh.vertices = {
-        {HMM_V3(-1, 0, 0),HMM_V3(1, 0, 0)},
-        {HMM_V3(0, 1, 0),HMM_V3(0, 1, 0)},
-        {HMM_V3(1, 0, 0),HMM_V3(0, 0, 1)}
-    };
-    instance.myMesh.indices = { 0, 1, 2 };
+    instance.myMesh.LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");
     instance.myMesh.CopyPointsToVRAM();
 
     return ;
