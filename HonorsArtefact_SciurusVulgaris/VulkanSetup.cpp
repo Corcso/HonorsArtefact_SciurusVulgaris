@@ -638,14 +638,20 @@ void VulkanSetup::CreateSyncObjects(VkDevice device, std::vector<VkFence>* inFli
 
 void VulkanSetup::CreateDescriptorPool(VkDevice device, uint32_t descriptorCount, uint32_t maxSets, VkDescriptorPool* descriptorPool)
 {
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = descriptorCount;
+    VkDescriptorPoolSize poolSizeUniforms{};
+    poolSizeUniforms.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizeUniforms.descriptorCount = descriptorCount;
+
+    VkDescriptorPoolSize poolSizeSampler{};
+    poolSizeSampler.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizeSampler.descriptorCount = descriptorCount;
+
+    VkDescriptorPoolSize poolSizes[]{ poolSizeSampler, poolSizeUniforms };
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = 2;
+    poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = maxSets;
 
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, descriptorPool) != VK_SUCCESS) {
