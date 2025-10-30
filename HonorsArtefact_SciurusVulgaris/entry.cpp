@@ -13,7 +13,7 @@ int main() {
 	PointMesh myPoints;
 
 	//AddPCData(&myPoints);
-	myPoints.LoadFromFile("./flowerPoints.ply");
+	myPoints.LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
 
 	myPoints.CopyPointsToVRAM();
 
