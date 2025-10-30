@@ -14,6 +14,7 @@ public:
 	void CopyPointsToVRAM();
 
 	void LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL);
+	void LoadFromFile(std::string path);
 
 	// Vulkan Buffers
 	VkBuffer pointBuffer;

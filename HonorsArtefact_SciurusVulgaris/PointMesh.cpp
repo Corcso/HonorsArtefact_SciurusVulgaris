@@ -2,6 +2,11 @@
 #include "PointMesh.h"
 #include "VulkanUtility.h"
 
+// Include ASSIMP headers, (Kulling and assimp team, 2025) v6.0.2
+#include <assimp/Importer.hpp>    // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
+
 void PointMesh::CopyPointsToVRAM()
 {
     // VERTEX BUFFER
@@ -128,4 +133,36 @@ void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
 
     // Close the file
     MTLFile.close();
+}
+
+void PointMesh::LoadFromFile(std::string path)
+{
+    Assimp::Importer importer;
+
+    const aiScene* scene = importer.ReadFile(path, 0);
+    uint64_t currentIndex = 0;
+    for (int mesh = 0; mesh < scene->mNumMeshes; mesh++) {
+        if (scene->mMeshes[mesh]->mNumVertices > 0) {
+            for (int v = 0; v < scene->mMeshes[mesh]->mNumVertices; v++) {
+                // Check for color
+                HMM_Vec3 color = HMM_V3(1, 1, 1);
+                if (scene->mMeshes[mesh]->mColors[0] != nullptr) {
+                    color = HMM_V3(scene->mMeshes[mesh]->mColors[0][v].r, scene->mMeshes[mesh]->mColors[0][v].g, scene->mMeshes[mesh]->mColors[0][v].b);
+                }
+                
+                points.push_back(
+                    {
+                        HMM_V3(scene->mMeshes[mesh]->mVertices[v].x, scene->mMeshes[mesh]->mVertices[v].y, scene->mMeshes[mesh]->mVertices[v].z),
+                        color
+                    });
+
+                // Points have no faces just push back 0 -> numVertices
+                indices.push_back(currentIndex);
+                currentIndex++;
+            }
+        }
+       
+    }
+
+    // Scene deleted from heap when importer leaves scope
 }
