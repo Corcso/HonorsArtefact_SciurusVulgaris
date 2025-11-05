@@ -84,7 +84,7 @@ void MeshRenderer::CreateRenderPass()
     colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     // Read tutorial its hard to explain
     VkAttachmentReference colorAttachmentRef{};
@@ -438,29 +438,31 @@ void MeshRenderer::EndRender()
 {
     vkCmdEndRenderPass(Graphics::GetThisFramesCommandBuffer());
 
-    // Wait for viewport to be available for rendering
-    // TODO learn more about this!
-    VkImageMemoryBarrier barrier{};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.image = vkColorImage;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = 1;
-    barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = 1;
-    barrier.srcAccessMask = 0; // TODO
-    barrier.dstAccessMask = 0; // TODO
+    // I think I can get away with the below as I instruct the render pass to finish with the attachment in shader state
 
-    vkCmdPipelineBarrier(
-        Graphics::GetThisFramesCommandBuffer(),
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier
-    );
+    //// Wait for viewport to be available for rendering
+    //// TODO learn more about this!
+    //VkImageMemoryBarrier barrier{};
+    //barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    //barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    //barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    //barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    //barrier.image = vkColorImage;
+    //barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //barrier.subresourceRange.baseMipLevel = 0;
+    //barrier.subresourceRange.levelCount = 1;
+    //barrier.subresourceRange.baseArrayLayer = 0;
+    //barrier.subresourceRange.layerCount = 1;
+    //barrier.srcAccessMask = 0; // TODO
+    //barrier.dstAccessMask = 0; // TODO
+
+    //vkCmdPipelineBarrier(
+    //    Graphics::GetThisFramesCommandBuffer(),
+    //    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT /* TODO */, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */,
+    //    0,
+    //    0, nullptr,
+    //    0, nullptr,
+    //    1, &barrier
+    //);
 }
