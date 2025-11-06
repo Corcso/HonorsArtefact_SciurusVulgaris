@@ -206,6 +206,7 @@
     <ClCompile Include="VulkanUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="MeshFragment.frag" />
     <None Include="VULKAN_CompileAllShaders.bat" />
     <None Include="VULKAN_fragment.frag" />
     <None Include="VULKAN_meshVertex.vert" />

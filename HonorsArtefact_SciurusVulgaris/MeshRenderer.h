@@ -43,6 +43,12 @@ private:
 	VkFramebuffer vkFrameBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock vkColorImageMemory;
 
+	VkImage vkPositionImage;
+	VkImageView vkPositionImageView;
+	VkFormat vkPositionImageFormat;
+	VkExtent2D vkPositionImageExtent;
+	VulkanMemoryAllocator::VulkanMemoryBlock vkPositionImageMemory;
+
 	VkImage vkDepthImage;
 	VkImageView vkDepthImageView;
 	VkSampler vkSampler;
