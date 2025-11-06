@@ -612,10 +612,10 @@ void VulkanSetup::CreateCommandBuffers(VkDevice device, VkCommandPool commandPoo
     }
 }
 
-void VulkanSetup::CreateSyncObjects(VkDevice device, std::vector<VkFence>* inFlightFences, std::vector<VkSemaphore>* imageAvailableSemaphores, std::vector<VkSemaphore>* renderFinishedSemaphores)
+void VulkanSetup::CreateSyncObjects(VkDevice device, uint32_t swapChainImageCount, std::vector<VkFence>* inFlightFences, std::vector<VkSemaphore>* imageAvailableSemaphores, std::vector<VkSemaphore>* renderFinishedSemaphores)
 {
     imageAvailableSemaphores->resize(VULKAN_MAX_FRAMES_IN_FLIGHT);
-    renderFinishedSemaphores->resize(VULKAN_MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores->resize(swapChainImageCount); // Needs to be based from this see https://docs.vulkan.org/guide/latest/swapchain_semaphore_reuse.html
     inFlightFences->resize(VULKAN_MAX_FRAMES_IN_FLIGHT);
 
     // Semaphores and dences dont need much information. 
@@ -628,10 +628,13 @@ void VulkanSetup::CreateSyncObjects(VkDevice device, std::vector<VkFence>* inFli
     // Create them
     for (size_t i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
         if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &(*imageAvailableSemaphores)[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(device, &semaphoreInfo, nullptr, &(*renderFinishedSemaphores)[i]) != VK_SUCCESS ||
             vkCreateFence(device, &fenceInfo, nullptr, &(*inFlightFences)[i]) != VK_SUCCESS) {
-
             throw -1;
+        }
+    }
+    for (size_t i = 0; i < swapChainImageCount; i++) {
+        if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &(*renderFinishedSemaphores)[i]) != VK_SUCCESS) {
+            throw - 1;
         }
     }
 }

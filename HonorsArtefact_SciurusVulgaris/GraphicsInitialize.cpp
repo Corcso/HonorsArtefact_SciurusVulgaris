@@ -293,7 +293,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     VulkanSetup::CreateCommandBuffers(instance.vkDevice, instance.vkCommandPool, &instance.vkCommandBuffers);
 
     // Create Sync objects
-    VulkanSetup::CreateSyncObjects(instance.vkDevice, &instance.vkInFlightFences, &instance.vkImageAvailableSemaphores, &instance.vkRenderFinishedSemaphores);
+    VulkanSetup::CreateSyncObjects(instance.vkDevice, instance.vkSwapChainImages.size(), &instance.vkInFlightFences, &instance.vkImageAvailableSemaphores, &instance.vkRenderFinishedSemaphores);
 
     // Editor only ImGui Setup
     ImGui_ImplVulkan_InitInfo init_info = {};

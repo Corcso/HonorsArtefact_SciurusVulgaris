@@ -134,7 +134,7 @@ void Graphics::EndRender()
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &instance.vkCommandBuffers[instance.currentFrame];
 
-    VkSemaphore signalSemaphores[] = { instance.vkRenderFinishedSemaphores[instance.currentFrame] };
+    VkSemaphore signalSemaphores[] = { instance.vkRenderFinishedSemaphores[instance.thisRenderImageIndex] };
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
