@@ -114,6 +114,15 @@
         ImGui::End();
     }
 
+    void VulkanMemoryAllocator::FreeAllPools(VkDevice* device)
+    {
+        for (auto& poolList : memoryPools) {
+            for (auto& pool : poolList.second) {
+                vkFreeMemory(*device, pool, nullptr);
+            }
+        }
+    }
+
     VulkanMemoryAllocator::VulkanMemoryBlock VulkanMemoryAllocator::FindMemoryBlock(VkDevice device, VkMemoryAllocateInfo desiredAllocation, VulkanMemoryMapUsage mapUsage)
     {
         // Find block size

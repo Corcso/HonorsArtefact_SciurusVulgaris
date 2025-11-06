@@ -4,6 +4,38 @@
 #include "VulkanSetup.h"
 #include "VulkanUtility.h"
 
+void MeshRenderer::Shutdown()
+{
+    // Destroy Pipeline
+    vkDestroyPipeline(Graphics::GetVkDevice(), vkMainPipeline, nullptr);
+    vkDestroyPipelineLayout(Graphics::GetVkDevice(), vkMainPipelineLayout, nullptr);
+
+    // Destroy Frame Buffer
+    vkDestroyFramebuffer(Graphics::GetVkDevice(), vkFrameBuffer, nullptr);
+
+    // Destroy Render Pass
+    vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);
+
+    // Destroy Sampler
+    vkDestroySampler(Graphics::GetVkDevice(), vkSampler, nullptr);
+
+    // Destroy Images & Swap Chain
+    Graphics::GetMemoryAllocator().FreeMemory(Graphics::GetVkDevice(), vkColorImageMemory);
+    vkDestroyImageView(Graphics::GetVkDevice(), vkColorImageView, nullptr);
+    vkDestroyImage(Graphics::GetVkDevice(), vkColorImage, nullptr);
+    Graphics::GetMemoryAllocator().FreeMemory(Graphics::GetVkDevice(), vkDepthImageMemory);
+    vkDestroyImageView(Graphics::GetVkDevice(), vkDepthImageView, nullptr);
+    vkDestroyImage(Graphics::GetVkDevice(), vkDepthImage, nullptr);
+
+    // Destroy descriptors
+    for (auto& descriptor : perObjectDescriptors) {
+        descriptor.CleanupDescriptor();
+    }
+    
+    perObjectDescriptors.clear();
+    vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkDescriptorSetLayout, nullptr);
+}
+
 void MeshRenderer::CreateImages()
 {
     // Create local image for color

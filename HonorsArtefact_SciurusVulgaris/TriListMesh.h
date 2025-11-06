@@ -20,5 +20,7 @@ public:
 	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock vertexBufferMemory;
 	VulkanMemoryAllocator::VulkanMemoryBlock indexBufferMemory;
+
+	~TriListMesh();
 };
 

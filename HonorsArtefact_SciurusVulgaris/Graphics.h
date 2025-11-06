@@ -16,6 +16,8 @@ public:
 	Graphics(Graphics& copy) = delete;
 
 	static void Initialize(int width, int height, std::wstring title);
+	static void WaitUntilGPUIdle();
+	static void Shutdown();
 
 	static void BeginRender();
 	static void Render(PointMesh* points);
@@ -57,7 +59,7 @@ private:
 	int frameinc; // TODO REMOVE
 	ImTextureID meshRenderOutput;
 	MeshRenderer meshRenderer;
-	TriListMesh myMesh;
+	TriListMesh* myMesh;
 
 	HWND window;
 

@@ -60,6 +60,8 @@
 		VkDeviceMemory GetBlockMemoryAllocation(VulkanMemoryAllocator::VulkanMemoryBlock block);
 
 		void RenderMemoryUsageStat();
+
+		void FreeAllPools(VkDevice* device);
 	private:
 		
 

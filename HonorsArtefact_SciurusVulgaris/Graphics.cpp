@@ -41,7 +41,7 @@ void Graphics::BeginRender()
     }
     // Do mesh render
     instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
-    instance.meshRenderer.Render(&instance.myMesh);
+    instance.meshRenderer.Render(instance.myMesh);
     instance.meshRenderer.EndRender();
 
     VkRenderPassBeginInfo renderPassInfo{};

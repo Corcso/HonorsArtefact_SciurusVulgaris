@@ -5,6 +5,7 @@ Input Input::instance;
 
 void Input::Initialize()
 {
+    instance.quitCalled = false;
     for (uint8_t i = 0; i < 0xFF; ++i) {
         instance.keys[i] = InputState::UP;
     }
@@ -107,7 +108,7 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
     {
         PostQuitMessage(0);
-        //Services::GetTree()->Quit();
+        Input::QuitMainLoop();
     }
     break;
     default:
@@ -222,7 +223,7 @@ void Input::Update()
     }
 }
 
-void Input::ProcessEvents()
+bool Input::ProcessEvents()
 {
     // Windows event process loop, calls WndProc
     MSG msg = { 0 };
@@ -232,6 +233,13 @@ void Input::ProcessEvents()
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    return instance.quitCalled;
+}
+
+void Input::QuitMainLoop()
+{
+    instance.quitCalled = true;
 }
 
 Input::InputState operator&(const Input::InputState& l, const Input::InputState& r)

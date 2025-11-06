@@ -166,3 +166,11 @@ void PointMesh::LoadFromFile(std::string path)
 
     // Scene deleted from heap when importer leaves scope
 }
+
+PointMesh::~PointMesh()
+{
+    VulkanUtility::DestroyBuffer(pointBuffer);
+    VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
+    VulkanUtility::DestroyBuffer(indexBuffer);
+    VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
+}

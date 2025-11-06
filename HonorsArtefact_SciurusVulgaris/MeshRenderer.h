@@ -14,6 +14,7 @@ public:
 		CreateDescriptorLayout();
 		CreatePipeline();
 	}
+	void Shutdown();
 
 	void CreateImages();
 	void CreateSampler();

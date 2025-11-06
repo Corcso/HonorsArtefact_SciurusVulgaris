@@ -89,3 +89,11 @@ void TriListMesh::LoadFile(std::string path)
 
     // Scene deleted from heap when importer leaves scope
 }
+
+TriListMesh::~TriListMesh()
+{
+    VulkanUtility::DestroyBuffer(vertexBuffer);
+    VulkanUtility::FreeGPUMemoryBlock(vertexBufferMemory);
+    VulkanUtility::DestroyBuffer(indexBuffer);
+    VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
+}

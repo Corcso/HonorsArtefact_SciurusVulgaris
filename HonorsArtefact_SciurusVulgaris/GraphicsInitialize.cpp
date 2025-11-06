@@ -326,9 +326,71 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-    instance.myMesh.LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");
-    instance.myMesh.CopyPointsToVRAM();
+    instance.myMesh = new TriListMesh();
+    instance.myMesh->LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");
+    instance.myMesh->CopyPointsToVRAM();
 
     return ;
+}
+
+void Graphics::WaitUntilGPUIdle()
+{
+    // Wait until all processes complete, this doesn't work for present, need an extension for that
+    vkDeviceWaitIdle(instance.vkDevice);
+}
+
+void Graphics::Shutdown()
+{
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
+    instance.meshRenderer.Shutdown();
+    delete instance.myMesh;
+
+    // Destroy Sync Objects
+    for (auto& thisSemaphore : instance.vkRenderFinishedSemaphores) vkDestroySemaphore(instance.vkDevice, thisSemaphore, nullptr);
+    for (auto& thisSemaphore : instance.vkImageAvailableSemaphores) vkDestroySemaphore(instance.vkDevice, thisSemaphore, nullptr);
+    for (auto& thisFence : instance.vkInFlightFences) vkDestroyFence(instance.vkDevice, thisFence, nullptr);
+
+    // Destroy Command pool & buffers
+    vkDestroyCommandPool(instance.vkDevice, instance.vkCommandPool, nullptr);
+
+    // Destroy Pipeline
+    vkDestroyPipeline(instance.vkDevice, instance.vkMainPipeline, nullptr);
+    vkDestroyPipelineLayout(instance.vkDevice, instance.vkMainPipelineLayout, nullptr);
+
+    // Destroy Frame Buffers
+    for(auto& thisFrameBuffer : instance.vkSwapChainFrameBuffers) vkDestroyFramebuffer(instance.vkDevice, thisFrameBuffer, nullptr);
+
+    // Destroy Render Pass
+    vkDestroyRenderPass(instance.vkDevice, instance.vkRenderPass, nullptr);
+
+    // Destroy Images & Swap Chain
+    for (auto& thisImageView : instance.vkSwapChainImageViews) vkDestroyImageView(instance.vkDevice, thisImageView, nullptr);
+    vkDestroySwapchainKHR(instance.vkDevice, instance.vkSwapChain, nullptr);
+    vkDestroyImageView(instance.vkDevice, instance.vkDepthImageView, nullptr);
+    vkDestroyImage(instance.vkDevice, instance.vkDepthImage, nullptr);
+    vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
+
+    // Destroy descriptors
+    for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
+        for (auto& descriptor : descriptorArray) {
+            descriptor.CleanupDescriptor();
+        }
+    }
+    instance.perFramePerObjectDescriptors.clear();
+    vkDestroyDescriptorSetLayout(instance.vkDevice, instance.vkDescriptorSetLayout, nullptr);
+    vkDestroyDescriptorPool(instance.vkDevice, instance.vkDescriptorPool, nullptr);
+
+    // Destroy surface
+    vkDestroySurfaceKHR(instance.vkInstance, instance.vkSurface, nullptr);
+
+    // Destroy devices
+    instance.VRAMAllocator.FreeAllPools(&instance.vkDevice);
+    vkDestroyDevice(instance.vkDevice, nullptr);
+
+    // Destroy instance
+    vkDestroyInstance(instance.vkInstance, nullptr);
 }
 

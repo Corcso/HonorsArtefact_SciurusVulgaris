@@ -21,5 +21,7 @@ public:
 	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock pointBufferMemory;
 	VulkanMemoryAllocator::VulkanMemoryBlock indexBufferMemory;
+
+	~PointMesh();
 };
 

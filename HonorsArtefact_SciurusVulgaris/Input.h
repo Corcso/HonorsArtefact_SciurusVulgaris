@@ -51,10 +51,13 @@ public:
 	static void SetMousePositionDifference(HMM_Vec2 mousePositionDifference);
 
 	static void Update();
-	static void ProcessEvents();
+	static bool ProcessEvents();
+	static void QuitMainLoop();
 
 private:
 	static Input instance;
+	
+	bool quitCalled;
 
 	InputState keys[256];
 	InputState mouseButtons[(unsigned long long)MouseButton::TOTAL_MOUSE_BUTTONS];

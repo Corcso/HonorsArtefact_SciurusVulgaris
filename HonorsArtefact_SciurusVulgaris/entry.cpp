@@ -10,25 +10,27 @@ int main() {
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"test");
 
-	PointMesh myPoints;
+	PointMesh* myPoints = new PointMesh();
 
 	//AddPCData(&myPoints);
-	myPoints.LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
+	myPoints->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
 
-	myPoints.CopyPointsToVRAM();
+	myPoints->CopyPointsToVRAM();
 
 	while (true) {
 		Input::Update();
-		Input::ProcessEvents();
+		if(Input::ProcessEvents()) break;
 		if (Input::IsKeyDown('K')) {
 			std::cout << "WOAH";
 		}
 
 		// Render logic
 		Graphics::BeginRender();
-		Graphics::Render(&myPoints);
+		Graphics::Render(myPoints);
 		Graphics::EndRender();
 	}
-
+	Graphics::WaitUntilGPUIdle();
+	delete myPoints;
+	Graphics::Shutdown();
 	return 0;
 }
