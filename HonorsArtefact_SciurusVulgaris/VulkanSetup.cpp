@@ -317,8 +317,8 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
 {
     // Get shader code
     
-    auto vertShaderCode = VulkanUtility::ReadFile("./VULKAN_COMPILED_vertex.spv");
-    auto fragShaderCode = VulkanUtility::ReadFile("./VULKAN_COMPILED_fragment.spv");
+    auto vertShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_PointVertex.spv");
+    auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_PointFragment.spv");
 
     VkShaderModule vertShaderModule = VulkanUtility::CreateShaderModule(device, vertShaderCode);
     VkShaderModule fragShaderModule = VulkanUtility::CreateShaderModule(device, fragShaderCode);

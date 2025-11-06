@@ -16,6 +16,9 @@
     <Filter Include="ImGui">
       <UniqueIdentifier>{a0440ce9-4ab9-487d-a76c-3b3ed2692dd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{1266826f-ff0e-433e-9bcb-20c2dcae5e38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Input.h">
@@ -136,18 +139,20 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="VULKAN_CompileAllShaders.bat">
-      <Filter>Header Files</Filter>
+    <None Include="CompileAllShaders.bat">
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="VULKAN_fragment.frag">
-      <Filter>Header Files</Filter>
+    <None Include="PointFragment.frag">
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="VULKAN_vertex.vert">
-      <Filter>Header Files</Filter>
+    <None Include="MeshVertex.vert">
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="VULKAN_meshVertex.vert">
-      <Filter>Header Files</Filter>
+    <None Include="PointVertex.vert">
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="MeshFragment.frag" />
+    <None Include="MeshFragment.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

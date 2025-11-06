@@ -254,7 +254,7 @@ void MeshRenderer::CreatePipeline()
 {
     // Get shader code
 
-    auto vertShaderCode = VulkanUtility::ReadFile("./VULKAN_COMPILED_vertex.spv");
+    auto vertShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_MeshVertex.spv");
     auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_MeshFragment.spv");
 
     VkShaderModule vertShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), vertShaderCode);

@@ -116,6 +116,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)/lib;C:\VulkanSDK\1.4.328.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)CompileAllShaders.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,6 +141,9 @@
       <AdditionalLibraryDirectories>$(SolutionDir)/lib;C:\VulkanSDK\1.4.328.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)CompileAllShaders.bat"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Graphics.h" />
@@ -207,10 +213,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MeshFragment.frag" />
-    <None Include="VULKAN_CompileAllShaders.bat" />
-    <None Include="VULKAN_fragment.frag" />
-    <None Include="VULKAN_meshVertex.vert" />
-    <None Include="VULKAN_vertex.vert" />
+    <None Include="CompileAllShaders.bat" />
+    <None Include="PointFragment.frag" />
+    <None Include="MeshVertex.vert" />
+    <None Include="PointVertex.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
