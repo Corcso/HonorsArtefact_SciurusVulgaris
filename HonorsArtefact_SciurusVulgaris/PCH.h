@@ -18,6 +18,7 @@
 
 // Other
 #include "HandmadeMath.h"
+#include <stb/stb_image.h>
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"

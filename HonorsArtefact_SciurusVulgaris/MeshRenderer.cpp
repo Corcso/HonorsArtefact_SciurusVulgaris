@@ -23,6 +23,7 @@ void MeshRenderer::Shutdown()
     colorImage.Destroy();
     positionImage.Destroy();
     depthImage.Destroy();
+    testImage.Destroy();
 
     // Destroy descriptors
     for (auto& descriptor : perObjectDescriptors) {
@@ -43,6 +44,9 @@ void MeshRenderer::CreateImages()
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 512, 512, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
+
+    testImage.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/leaf_color.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    testImage.CreateImageView();
 }
 
 void MeshRenderer::CreateSampler()
@@ -172,12 +176,18 @@ void MeshRenderer::CreateFrameBuffer()
 
 void MeshRenderer::CreateDescriptorLayout()
 {
-    std::vector<VkDescriptorSetLayoutBinding> uboLayoutBindings(1);
+    std::vector<VkDescriptorSetLayoutBinding> uboLayoutBindings(2);
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].descriptorCount = 1;
+    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    uboLayoutBindings[1].pImmutableSamplers = nullptr;
+    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -428,11 +438,13 @@ void MeshRenderer::Render(TriListMesh* mesh)
     // TODO MAKE descriptors better
     if (thisFramesDrawCall >= perObjectDescriptors.size())
     {
-        std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
+        std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
 
         int newSetIndex = perObjectDescriptors.size();
         perObjectDescriptors.push_back(VulkanDescriptor());
-        perObjectDescriptors[newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size());
+        Image* imagesOnSet[2] = { nullptr, &testImage };
+        VkSampler samplersOnSet[2] = { VK_NULL_HANDLE, vkSampler };
+        perObjectDescriptors[newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size(), imagesOnSet, samplersOnSet);
         perObjectDescriptors[newSetIndex].CreateDescriptorSet(Graphics::GetVkDevice(), vkDescriptorSetLayout, Graphics::GetDescriptorPool()); // Should i use the same one
     }
 

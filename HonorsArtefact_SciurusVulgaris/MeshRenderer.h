@@ -40,6 +40,7 @@ private:
 	Image colorImage;
 	Image positionImage;
 	Image depthImage;
+	Image testImage;
 
 	VkFramebuffer vkFrameBuffer;
 	VkSampler vkSampler;
