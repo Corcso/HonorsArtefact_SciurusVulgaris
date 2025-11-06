@@ -20,12 +20,9 @@ void MeshRenderer::Shutdown()
     vkDestroySampler(Graphics::GetVkDevice(), vkSampler, nullptr);
 
     // Destroy Images & Swap Chain
-    Graphics::GetMemoryAllocator().FreeMemory(Graphics::GetVkDevice(), vkColorImageMemory);
-    vkDestroyImageView(Graphics::GetVkDevice(), vkColorImageView, nullptr);
-    vkDestroyImage(Graphics::GetVkDevice(), vkColorImage, nullptr);
-    Graphics::GetMemoryAllocator().FreeMemory(Graphics::GetVkDevice(), vkDepthImageMemory);
-    vkDestroyImageView(Graphics::GetVkDevice(), vkDepthImageView, nullptr);
-    vkDestroyImage(Graphics::GetVkDevice(), vkDepthImage, nullptr);
+    colorImage.Destroy();
+    positionImage.Destroy();
+    depthImage.Destroy();
 
     // Destroy descriptors
     for (auto& descriptor : perObjectDescriptors) {
@@ -38,72 +35,14 @@ void MeshRenderer::Shutdown()
 
 void MeshRenderer::CreateImages()
 {
-    // Create local image for color
-    vkColorImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    vkColorImageExtent.width = 512;
-    vkColorImageExtent.height = 512;
+    colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    colorImage.CreateImageView();
 
+    positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    positionImage.CreateImageView();
 
-    VulkanUtility::CreateImageAndAssignMemory(vkColorImageExtent.width, vkColorImageExtent.height, vkColorImageFormat,
-        VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkColorImage, &vkColorImageMemory);
-
-    VkImageViewCreateInfo imageViewCreateInfo = {};
-    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCreateInfo.image = vkColorImage;
-    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCreateInfo.format = vkColorImageFormat;
-    imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-    imageViewCreateInfo.subresourceRange.levelCount = 1;
-    imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-    vkCreateImageView(Graphics::GetVkDevice(), &imageViewCreateInfo, nullptr, &vkColorImageView);
-
-    // Same for depth
-    VulkanUtility::CreateImageAndAssignMemory(vkColorImageExtent.width, vkColorImageExtent.height, VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()),
-        VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkDepthImage, &vkDepthImageMemory);
-
-    // Make tweaks
-    imageViewCreateInfo.image = vkDepthImage;
-    imageViewCreateInfo.format = VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice());
-    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
-    vkCreateImageView(Graphics::GetVkDevice(), &imageViewCreateInfo, nullptr, &vkDepthImageView);
-
-
-    // Attempt position
-    vkPositionImageFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
-    vkPositionImageExtent.width = 512;
-    vkPositionImageExtent.height = 512;
-
-
-    VulkanUtility::CreateImageAndAssignMemory(vkPositionImageExtent.width, vkPositionImageExtent.height, vkPositionImageFormat,
-        VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkPositionImage, &vkPositionImageMemory);
-
-    imageViewCreateInfo = {};
-    imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    imageViewCreateInfo.image = vkPositionImage;
-    imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewCreateInfo.format = vkPositionImageFormat;
-    imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-    imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-    imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-    imageViewCreateInfo.subresourceRange.levelCount = 1;
-    imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-    vkCreateImageView(Graphics::GetVkDevice(), &imageViewCreateInfo, nullptr, &vkPositionImageView);
+    depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 512, 512, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    depthImage.CreateImageView(true);
 }
 
 void MeshRenderer::CreateSampler()
@@ -134,7 +73,7 @@ void MeshRenderer::CreateSampler()
 void MeshRenderer::CreateRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = vkColorImageFormat;
+    colorAttachment.format = colorImage.GetImageFormat();
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     // Load and store for colour and depth data.
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -167,7 +106,7 @@ void MeshRenderer::CreateRenderPass()
 
     // Position buffer attachment image
     VkAttachmentDescription positionAttachment{};
-    positionAttachment.format = vkPositionImageFormat;
+    positionAttachment.format = positionImage.GetImageFormat();
     positionAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     positionAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     positionAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -215,12 +154,12 @@ void MeshRenderer::CreateRenderPass()
 
 void MeshRenderer::CreateFrameBuffer()
 {
-    VkImageView imageViewList[]{ vkColorImageView,vkPositionImageView, vkDepthImageView  };
+    VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), depthImage.GetImageView() };
 
     VkFramebufferCreateInfo frameBufferCreateInfo{};
     frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    frameBufferCreateInfo.width = vkColorImageExtent.width;
-    frameBufferCreateInfo.height = vkColorImageExtent.height;
+    frameBufferCreateInfo.width = colorImage.GetImageExtent().width;
+    frameBufferCreateInfo.height = colorImage.GetImageExtent().height;
     frameBufferCreateInfo.attachmentCount = 3;
     frameBufferCreateInfo.pAttachments = imageViewList;
     frameBufferCreateInfo.renderPass = vkRenderPass;
@@ -324,14 +263,14 @@ void MeshRenderer::CreatePipeline()
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)vkColorImageExtent.width;
-    viewport.height = (float)vkColorImageExtent.height;
+    viewport.width = (float)colorImage.GetImageExtent().width;
+    viewport.height = (float)colorImage.GetImageExtent().height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     // Scissor rectangle is the area which isnt discarded by the rasterizer, we want whole viewport for now
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
-    scissor.extent = vkColorImageExtent;
+    scissor.extent = colorImage.GetImageExtent();
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -451,7 +390,7 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
     renderPassInfo.renderPass = vkRenderPass;
     renderPassInfo.framebuffer = vkFrameBuffer;
     renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = vkColorImageExtent;
+    renderPassInfo.renderArea.extent = colorImage.GetImageExtent();
 
     std::vector<VkClearValue> clearColors = { {{clearColor.R, clearColor.G, clearColor.B, clearColor.A}}, {{0, 0, 0, 0}}, {1.0f, 0}};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
@@ -464,15 +403,15 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(vkColorImageExtent.width);
-    viewport.height = static_cast<float>(vkColorImageExtent.height);
+    viewport.width = static_cast<float>(colorImage.GetImageExtent().width);
+    viewport.height = static_cast<float>(colorImage.GetImageExtent().height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(Graphics::GetThisFramesCommandBuffer(), 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
-    scissor.extent = vkColorImageExtent;
+    scissor.extent = colorImage.GetImageExtent();
     vkCmdSetScissor(Graphics::GetThisFramesCommandBuffer(), 0, 1, &scissor);
 
     thisFramesDrawCall = 0;

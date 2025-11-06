@@ -2,6 +2,7 @@
 #include "VulkanMemoryAllocator.h"
 #include "TriListMesh.h"
 #include "VulkanDescriptor.h"
+#include "Image.h"
 
 class MeshRenderer
 {
@@ -27,7 +28,7 @@ public:
 	void Render(TriListMesh* mesh);
 	void EndRender();
 
-	VkImageView GetImageView() { return vkColorImageView; }
+	VkImageView GetImageView() { return colorImage.GetImageView(); }
 	VkSampler GetSampler() { return vkSampler; }
 private:
 	VkRenderPass vkRenderPass;
@@ -36,23 +37,13 @@ private:
 	VkPipelineLayout vkMainPipelineLayout;
 	VkPipeline vkMainPipeline;
 
-	VkImage vkColorImage;
-	VkImageView vkColorImageView;
-	VkFormat vkColorImageFormat;
-	VkExtent2D vkColorImageExtent;
+	Image colorImage;
+	Image positionImage;
+	Image depthImage;
+
 	VkFramebuffer vkFrameBuffer;
-	VulkanMemoryAllocator::VulkanMemoryBlock vkColorImageMemory;
-
-	VkImage vkPositionImage;
-	VkImageView vkPositionImageView;
-	VkFormat vkPositionImageFormat;
-	VkExtent2D vkPositionImageExtent;
-	VulkanMemoryAllocator::VulkanMemoryBlock vkPositionImageMemory;
-
-	VkImage vkDepthImage;
-	VkImageView vkDepthImageView;
 	VkSampler vkSampler;
-	VulkanMemoryAllocator::VulkanMemoryBlock vkDepthImageMemory;
+
 
 	// TODO REMOVE AND TIDY
 	int frameinc;
