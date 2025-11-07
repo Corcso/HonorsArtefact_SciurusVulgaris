@@ -464,7 +464,7 @@ void MeshRenderer::Render(TriListMesh* mesh)
 
     frameinc++;
     WCP_Matrices dataForUBO{
-        HMM_Rotate_LH(frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(50, 1, 0.001, 30)
+        HMM_M4D(1), HMM_LookAt_LH(HMM_V3(5 * sin(frameinc / 1000.0f), 0, 5 * cos(frameinc / 1000.0f)), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
     };
 
     //memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
