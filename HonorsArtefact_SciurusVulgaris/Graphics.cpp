@@ -84,18 +84,23 @@ void Graphics::Render(PointMesh* points)
 
     vkCmdBindIndexBuffer(instance.vkCommandBuffers[instance.currentFrame], points->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    if (instance.thisFramesDrawCall >= instance.perFramePerObjectDescriptors[instance.currentFrame].size())
-        AddAdditionalDescriptorSet(instance.perFramePerObjectDescriptors, instance.vkDescriptorSetLayout);
+    //if (instance.thisFramesDrawCall >= instance.perFramePerObjectDescriptors[instance.currentFrame].size())
+    //    AddAdditionalDescriptorSet(instance.perFramePerObjectDescriptors, instance.vkDescriptorSetLayout);
 
     instance.frameinc++;
     WCP_Matrices dataForUBO{
         HMM_Rotate_LH(instance.frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(140, 1, 0.001, 30)
     };
 
-    memcpy(instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
+    points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+
+    //memcpy(instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
+
+    //vkCmdBindDescriptorSets(instance.vkCommandBuffers[instance.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, instance.vkMainPipelineLayout, 0, 1,
+    //    instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetDescriptorSet(), 0, nullptr);
 
     vkCmdBindDescriptorSets(instance.vkCommandBuffers[instance.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, instance.vkMainPipelineLayout, 0, 1,
-        instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetDescriptorSet(), 0, nullptr);
+        points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
     vkCmdDrawIndexed(instance.vkCommandBuffers[instance.currentFrame], static_cast<uint32_t>(points->indices.size()), 1, 0, 0, 0);
 
@@ -108,6 +113,7 @@ void Graphics::EndRender()
 
     ImGui::Begin("Mesh");
     ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
+    ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
     ImGui::End();
 
     instance.VRAMAllocator.RenderMemoryUsageStat();
@@ -171,14 +177,14 @@ void Graphics::EndRender()
     instance.currentFrame = (instance.currentFrame + 1) % VULKAN_MAX_FRAMES_IN_FLIGHT;
 }
 
-void Graphics::AddAdditionalDescriptorSet(std::vector<std::vector<VulkanDescriptor>>& descriptorSetList, const VkDescriptorSetLayout& setLayout)
-{
-    std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
-
-    for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
-        int newSetIndex = descriptorSetList[i].size();
-        descriptorSetList[i].push_back(VulkanDescriptor());
-        descriptorSetList[i][newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size());
-        descriptorSetList[i][newSetIndex].CreateDescriptorSet(instance.vkDevice, instance.vkDescriptorSetLayout, instance.vkDescriptorPool);
-    }
-}
+//void Graphics::AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout)
+//{
+//    std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
+//
+//    for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+//        int newSetIndex = descriptorSetList[i].size();
+//        descriptorSetList[i].push_back(VulkanObjectDescriptorSet());
+//        descriptorSetList[i][newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size());
+//        descriptorSetList[i][newSetIndex].CreateDescriptorSet(instance.vkDevice, instance.vkDescriptorSetLayout, instance.vkDescriptorPool);
+//    }
+//}

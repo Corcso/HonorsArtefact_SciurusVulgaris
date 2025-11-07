@@ -1,6 +1,7 @@
 #include "PCH.h"
 #include "TriListMesh.h"
 #include "VulkanUtility.h"
+#include "Graphics.h"
 
 // Include ASSIMP headers, (Kulling and assimp team, 2025) v6.0.2
 #include <assimp/Importer.hpp>    // C++ importer interface
@@ -90,8 +91,14 @@ void TriListMesh::LoadFile(std::string path)
     // Scene deleted from heap when importer leaves scope
 }
 
+void TriListMesh::CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes)
+{
+    descriptor.Create(layout, layoutInformation, sizes);
+}
+
 TriListMesh::~TriListMesh()
 {
+    descriptor.CleanupDescriptor();
     VulkanUtility::DestroyBuffer(vertexBuffer);
     VulkanUtility::FreeGPUMemoryBlock(vertexBufferMemory);
     VulkanUtility::DestroyBuffer(indexBuffer);

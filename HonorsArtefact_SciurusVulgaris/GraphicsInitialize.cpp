@@ -252,7 +252,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     // Setup descriptor pool
     VulkanSetup::CreateDescriptorPool(instance.vkDevice, 1, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
 
-    std::vector<VkDescriptorSetLayoutBinding> uboLayoutBindings(1);
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1];
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -261,18 +261,17 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     // Not used for images
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = uboLayoutBindings.size();
-    layoutInfo.pBindings = uboLayoutBindings.data();
+    instance.vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    instance.vkDescriptorSetLayoutInfo.bindingCount = 1;
+    instance.vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
-    if (vkCreateDescriptorSetLayout(instance.vkDevice, &layoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(instance.vkDevice, &instance.vkDescriptorSetLayoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
         throw - 1;
     }
 
-    for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+    /*for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
         instance.perFramePerObjectDescriptors.push_back(std::vector<VulkanDescriptor>());
-    }
+    }*/
 
     // Setup pipeline
     std::vector<VkDescriptorSetLayout> allDescriptorSetLayouts = {
@@ -325,11 +324,19 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.meshRenderer.CreateAll();
 
     instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    instance.meshRenderOutput2 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView2(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
     instance.myMesh = new TriListMesh();
     instance.myMesh->LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");
     instance.myMesh->CopyPointsToVRAM();
 
+    instance.myMeshImage.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/leaf_color.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    instance.myMeshImage.CreateImageView();
+
+    std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
+
+    instance.myMesh->CreateDescriptorSet(instance.meshRenderer.GetDescriptorSetLayout(), instance.meshRenderer.GetDescriptorSetLayoutInfo(), sizes.data());
+    instance.myMesh->GetDescriptorSet()->UpdateImageSampler(1, &instance.myMeshImage, instance.meshRenderer.GetSampler());
     return ;
 }
 
@@ -347,6 +354,7 @@ void Graphics::Shutdown()
 
     instance.meshRenderer.Shutdown();
     delete instance.myMesh;
+    instance.myMeshImage.Destroy();
 
     // Destroy Sync Objects
     for (auto& thisSemaphore : instance.vkRenderFinishedSemaphores) vkDestroySemaphore(instance.vkDevice, thisSemaphore, nullptr);
@@ -374,13 +382,14 @@ void Graphics::Shutdown()
     vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
 
     // Destroy descriptors
-    for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
+    /*for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
         for (auto& descriptor : descriptorArray) {
             descriptor.CleanupDescriptor();
         }
     }
-    instance.perFramePerObjectDescriptors.clear();
+    instance.perFramePerObjectDescriptors.clear();*/
     vkDestroyDescriptorSetLayout(instance.vkDevice, instance.vkDescriptorSetLayout, nullptr);
+    delete instance.vkDescriptorSetLayoutInfo.pBindings;
     vkDestroyDescriptorPool(instance.vkDevice, instance.vkDescriptorPool, nullptr);
 
     // Destroy surface

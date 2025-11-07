@@ -23,15 +23,9 @@ void MeshRenderer::Shutdown()
     colorImage.Destroy();
     positionImage.Destroy();
     depthImage.Destroy();
-    testImage.Destroy();
 
-    // Destroy descriptors
-    for (auto& descriptor : perObjectDescriptors) {
-        descriptor.CleanupDescriptor();
-    }
-    
-    perObjectDescriptors.clear();
     vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkDescriptorSetLayout, nullptr);
+    delete vkDescriptorSetLayoutInfo.pBindings;
 }
 
 void MeshRenderer::CreateImages()
@@ -44,9 +38,6 @@ void MeshRenderer::CreateImages()
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 512, 512, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
-
-    testImage.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/leaf_color.png", VK_IMAGE_USAGE_SAMPLED_BIT);
-    testImage.CreateImageView();
 }
 
 void MeshRenderer::CreateSampler()
@@ -176,7 +167,7 @@ void MeshRenderer::CreateFrameBuffer()
 
 void MeshRenderer::CreateDescriptorLayout()
 {
-    std::vector<VkDescriptorSetLayoutBinding> uboLayoutBindings(2);
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Will be freed in shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -189,12 +180,12 @@ void MeshRenderer::CreateDescriptorLayout()
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = uboLayoutBindings.size();
-    layoutInfo.pBindings = uboLayoutBindings.data();
+    vkDescriptorSetLayoutInfo = {};
+    vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    vkDescriptorSetLayoutInfo.bindingCount = 2;
+    vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
-    if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &layoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
         throw - 1;
     }
 }
@@ -436,27 +427,29 @@ void MeshRenderer::Render(TriListMesh* mesh)
     vkCmdBindIndexBuffer(Graphics::GetThisFramesCommandBuffer(), mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // TODO MAKE descriptors better
-    if (thisFramesDrawCall >= perObjectDescriptors.size())
-    {
-        std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
+    //if (thisFramesDrawCall >= perObjectDescriptors.size())
+    //{
+    //    std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
 
-        int newSetIndex = perObjectDescriptors.size();
-        perObjectDescriptors.push_back(VulkanDescriptor());
-        Image* imagesOnSet[2] = { nullptr, &testImage };
-        VkSampler samplersOnSet[2] = { VK_NULL_HANDLE, vkSampler };
-        perObjectDescriptors[newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size(), imagesOnSet, samplersOnSet);
-        perObjectDescriptors[newSetIndex].CreateDescriptorSet(Graphics::GetVkDevice(), vkDescriptorSetLayout, Graphics::GetDescriptorPool()); // Should i use the same one
-    }
+    //    int newSetIndex = perObjectDescriptors.size();
+    //    perObjectDescriptors.push_back(VulkanObjectDescriptorSet());
+    //    Image* imagesOnSet[2] = { nullptr, &testImage };
+    //    VkSampler samplersOnSet[2] = { VK_NULL_HANDLE, vkSampler };
+    //    perObjectDescriptors[newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size(), imagesOnSet, samplersOnSet);
+    //    perObjectDescriptors[newSetIndex].CreateDescriptorSet(Graphics::GetVkDevice(), vkDescriptorSetLayout, Graphics::GetDescriptorPool()); // Should i use the same one
+    //}
 
     frameinc++;
     WCP_Matrices dataForUBO{
         HMM_Rotate_LH(frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(50, 1, 0.001, 30)
     };
 
-    memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
+    //memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
+
+    mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
 
     vkCmdBindDescriptorSets(Graphics::GetThisFramesCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
-        perObjectDescriptors[thisFramesDrawCall].GetDescriptorSet(), 0, nullptr);
+        mesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
     vkCmdDrawIndexed(Graphics::GetThisFramesCommandBuffer(), static_cast<uint32_t>(mesh->indices.size()), 1, 0, 0, 0);
 

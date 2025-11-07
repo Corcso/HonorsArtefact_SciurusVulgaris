@@ -1,5 +1,6 @@
 #pragma once
 #include "VulkanMemoryAllocator.h"
+#include "VulkanDescriptor.h"
 
 class PointMesh
 {
@@ -16,11 +17,17 @@ public:
 	void LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL);
 	void LoadFromFile(std::string path);
 
+	void CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes);
+
+	VulkanObjectDescriptorSet* GetDescriptorSet() { return &descriptor; };
+
 	// Vulkan Buffers
 	VkBuffer pointBuffer;
 	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock pointBufferMemory;
 	VulkanMemoryAllocator::VulkanMemoryBlock indexBufferMemory;
+
+	VulkanObjectDescriptorSet descriptor;
 
 	~PointMesh();
 };

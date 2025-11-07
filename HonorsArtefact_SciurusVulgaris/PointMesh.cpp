@@ -1,6 +1,7 @@
 #include "PCH.h"
 #include "PointMesh.h"
 #include "VulkanUtility.h"
+#include "Graphics.h"
 
 // Include ASSIMP headers, (Kulling and assimp team, 2025) v6.0.2
 #include <assimp/Importer.hpp>    // C++ importer interface
@@ -167,8 +168,14 @@ void PointMesh::LoadFromFile(std::string path)
     // Scene deleted from heap when importer leaves scope
 }
 
+void PointMesh::CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes)
+{
+    descriptor.Create(layout, layoutInformation, sizes);
+}
+
 PointMesh::~PointMesh()
 {
+    descriptor.CleanupDescriptor();
     VulkanUtility::DestroyBuffer(pointBuffer);
     VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
     VulkanUtility::DestroyBuffer(indexBuffer);

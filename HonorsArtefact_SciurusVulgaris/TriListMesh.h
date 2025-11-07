@@ -1,5 +1,7 @@
 #pragma once
 #include "VulkanMemoryAllocator.h"
+#include "VulkanDescriptor.h"
+#include "BufferStructs.h"
 
 class TriListMesh
 {
@@ -15,11 +17,16 @@ public:
 
 	void LoadFile(std::string path);
 
+	void CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes);
+	VulkanObjectDescriptorSet* GetDescriptorSet() { return &descriptor; };
+
 	// Vulkan Buffers
 	VkBuffer vertexBuffer;
 	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock vertexBufferMemory;
 	VulkanMemoryAllocator::VulkanMemoryBlock indexBufferMemory;
+
+	VulkanObjectDescriptorSet descriptor;
 
 	~TriListMesh();
 };

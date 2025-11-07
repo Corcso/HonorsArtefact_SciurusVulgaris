@@ -14,7 +14,8 @@ int main() {
 
 	//AddPCData(&myPoints);
 	myPoints->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
-
+	size_t uboBufferSize = sizeof(WCP_Matrices);
+	myPoints->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), &uboBufferSize);
 	myPoints->CopyPointsToVRAM();
 
 	while (true) {

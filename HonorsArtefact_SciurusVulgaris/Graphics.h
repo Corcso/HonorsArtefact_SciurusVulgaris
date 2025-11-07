@@ -35,8 +35,10 @@ public:
 	static VkExtent2D GetSwapChainExtent() { return instance.vkSwapChainExtent; }
 	static VkCommandBuffer GetThisFramesCommandBuffer() { return instance.vkCommandBuffers[instance.currentFrame]; }
 	static VkDescriptorPool GetDescriptorPool() { return instance.vkDescriptorPool; }
+	static VkDescriptorSetLayout GetDescriptorSetLayout() { return instance.vkDescriptorSetLayout; }
+	static VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return instance.vkDescriptorSetLayoutInfo; }
 
-	static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanDescriptor>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
+	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
 	static void CheckVulkanResult(VkResult res)
 	{
@@ -46,20 +48,16 @@ public:
 	}
 
 private:
-	struct WCP_Matrices {
-		HMM_Mat4 world;
-		HMM_Mat4 camera;
-		HMM_Mat4 projection;
-	};
-
 	static Graphics instance;
 
 	const LPCWSTR WINDOW_CLASS_NAME = L"2200592-SciurusVulgaris";
 
 	int frameinc; // TODO REMOVE
 	ImTextureID meshRenderOutput;
+	ImTextureID meshRenderOutput2;
 	MeshRenderer meshRenderer;
 	TriListMesh* myMesh;
+	Image myMeshImage;
 
 	HWND window;
 
@@ -83,7 +81,8 @@ private:
 	// Descriptors
 	VkDescriptorPool vkDescriptorPool;
 	VkDescriptorSetLayout vkDescriptorSetLayout;
-	std::vector<std::vector<VulkanDescriptor>> perFramePerObjectDescriptors;
+	VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
+	//std::vector<std::vector<VulkanDescriptor>> perFramePerObjectDescriptors;
 
 	VkPipelineLayout vkMainPipelineLayout;
 	VkPipeline vkMainPipeline;

@@ -146,6 +146,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="HandmadeMath.h" />
     <ClInclude Include="Image.h" />

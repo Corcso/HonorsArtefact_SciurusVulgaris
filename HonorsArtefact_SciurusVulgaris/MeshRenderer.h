@@ -29,10 +29,14 @@ public:
 	void EndRender();
 
 	VkImageView GetImageView() { return colorImage.GetImageView(); }
+	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }
+	VkImageView GetImageView2() { return positionImage.GetImageView(); }
 	VkSampler GetSampler() { return vkSampler; }
 private:
 	VkRenderPass vkRenderPass;
 	VkDescriptorSetLayout vkDescriptorSetLayout;
+	VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 
 	VkPipelineLayout vkMainPipelineLayout;
 	VkPipeline vkMainPipeline;
@@ -40,7 +44,6 @@ private:
 	Image colorImage;
 	Image positionImage;
 	Image depthImage;
-	Image testImage;
 
 	VkFramebuffer vkFrameBuffer;
 	VkSampler vkSampler;
@@ -54,7 +57,6 @@ private:
 		HMM_Mat4 camera;
 		HMM_Mat4 projection;
 	};
-	std::vector<VulkanDescriptor> perObjectDescriptors;
 	uint64_t thisFramesDrawCall;
 };
 
