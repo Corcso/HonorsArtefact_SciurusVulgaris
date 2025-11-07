@@ -75,7 +75,8 @@ void TriListMesh::LoadFile(std::string path)
                 vertices.push_back(
                     {
                         HMM_V3(scene->mMeshes[mesh]->mVertices[v].x, scene->mMeshes[mesh]->mVertices[v].y, scene->mMeshes[mesh]->mVertices[v].z),
-                        HMM_V3(1, 1, 1)
+                        HMM_V3(scene->mMeshes[mesh]->mNormals[v].x, scene->mMeshes[mesh]->mNormals[v].y, scene->mMeshes[mesh]->mNormals[v].z),
+                        HMM_V2(scene->mMeshes[mesh]->mTextureCoords[0][v].x, scene->mMeshes[mesh]->mTextureCoords[0][v].y)
                     });
             }
         }

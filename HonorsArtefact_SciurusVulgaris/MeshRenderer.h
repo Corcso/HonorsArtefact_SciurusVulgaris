@@ -32,6 +32,7 @@ public:
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }
 	VkImageView GetImageView2() { return positionImage.GetImageView(); }
+	VkImageView GetImageView3() { return normalImage.GetImageView(); }
 	VkSampler GetSampler() { return vkSampler; }
 private:
 	VkRenderPass vkRenderPass;
@@ -43,6 +44,7 @@ private:
 
 	Image colorImage;
 	Image positionImage;
+	Image normalImage;
 	Image depthImage;
 
 	VkFramebuffer vkFrameBuffer;

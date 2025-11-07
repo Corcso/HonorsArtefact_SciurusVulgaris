@@ -8,7 +8,8 @@ class TriListMesh
 public:
 	struct Vertex {
 		HMM_Vec3 position;
-		HMM_Vec3 color;
+		HMM_Vec3 normal;
+		HMM_Vec2 textureCoordinate;
 	};
 
 	std::vector<Vertex> vertices;

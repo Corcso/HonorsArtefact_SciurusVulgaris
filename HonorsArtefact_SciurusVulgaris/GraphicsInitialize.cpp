@@ -325,6 +325,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
     instance.meshRenderOutput2 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView2(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    instance.meshRenderOutput3 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView3(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
     instance.myMesh = new TriListMesh();
     instance.myMesh->LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");

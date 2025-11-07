@@ -55,6 +55,7 @@ private:
 	int frameinc; // TODO REMOVE
 	ImTextureID meshRenderOutput;
 	ImTextureID meshRenderOutput2;
+	ImTextureID meshRenderOutput3;
 	MeshRenderer meshRenderer;
 	TriListMesh* myMesh;
 	Image myMeshImage;

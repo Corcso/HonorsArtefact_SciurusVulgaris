@@ -22,6 +22,7 @@ void MeshRenderer::Shutdown()
     // Destroy Images & Swap Chain
     colorImage.Destroy();
     positionImage.Destroy();
+    normalImage.Destroy();
     depthImage.Destroy();
 
     vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkDescriptorSetLayout, nullptr);
@@ -35,6 +36,9 @@ void MeshRenderer::CreateImages()
 
     positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     positionImage.CreateImageView();
+
+    normalImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    normalImage.CreateImageView();
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 512, 512, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
@@ -96,7 +100,7 @@ void MeshRenderer::CreateRenderPass()
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 2;
+    depthAttachmentRef.attachment = 3;
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     // Position buffer attachment image
@@ -113,11 +117,25 @@ void MeshRenderer::CreateRenderPass()
     positionAttachmentRef.attachment = 1;
     positionAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentReference colorAttachments[2]{colorAttachmentRef, positionAttachmentRef};
+    // Normal buffer attachment image
+    VkAttachmentDescription normalAttachment{};
+    normalAttachment.format = normalImage.GetImageFormat();
+    normalAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    normalAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    VkAttachmentReference normalAttachmentRef{};
+    normalAttachmentRef.attachment = 2;
+    normalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference colorAttachments[3]{colorAttachmentRef, positionAttachmentRef, normalAttachmentRef};
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 2;
+    subpass.colorAttachmentCount = 3;
     subpass.pColorAttachments = colorAttachments;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
@@ -132,7 +150,7 @@ void MeshRenderer::CreateRenderPass()
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
     // Create render pass
-    std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment, depthAttachment };
+    std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment,normalAttachment, depthAttachment };
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -149,13 +167,13 @@ void MeshRenderer::CreateRenderPass()
 
 void MeshRenderer::CreateFrameBuffer()
 {
-    VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), depthImage.GetImageView() };
+    VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), normalImage.GetImageView(), depthImage.GetImageView() };
 
     VkFramebufferCreateInfo frameBufferCreateInfo{};
     frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     frameBufferCreateInfo.width = colorImage.GetImageExtent().width;
     frameBufferCreateInfo.height = colorImage.GetImageExtent().height;
-    frameBufferCreateInfo.attachmentCount = 3;
+    frameBufferCreateInfo.attachmentCount = 4;
     frameBufferCreateInfo.pAttachments = imageViewList;
     frameBufferCreateInfo.renderPass = vkRenderPass;
     frameBufferCreateInfo.layers = 1;
@@ -228,22 +246,27 @@ void MeshRenderer::CreatePipeline()
     dynamicState.pDynamicStates = dynamicStates.data();
 
     // Vertex imput  stage setup // TODO when can i dealloc this
-    VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[2];
-    uint32_t vertexAttributeDescriptionCount = 2;
+    VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[3];
+    uint32_t vertexAttributeDescriptionCount = 3;
 
     vertexAttributeDescriptions[0].binding = 0;
     vertexAttributeDescriptions[0].location = 0;
     vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-    vertexAttributeDescriptions[0].offset = offsetof(PointMesh::Point, position);
+    vertexAttributeDescriptions[0].offset = offsetof(TriListMesh::Vertex, position);
 
     vertexAttributeDescriptions[1].binding = 0;
     vertexAttributeDescriptions[1].location = 1;
     vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-    vertexAttributeDescriptions[1].offset = offsetof(PointMesh::Point, color);
+    vertexAttributeDescriptions[1].offset = offsetof(TriListMesh::Vertex, normal);
+
+    vertexAttributeDescriptions[2].binding = 0;
+    vertexAttributeDescriptions[2].location = 2;
+    vertexAttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    vertexAttributeDescriptions[2].offset = offsetof(TriListMesh::Vertex, textureCoordinate);
 
     VkVertexInputBindingDescription vertexBindingDescription = {};
     vertexBindingDescription.binding = 0;
-    vertexBindingDescription.stride = sizeof(PointMesh::Point);
+    vertexBindingDescription.stride = sizeof(TriListMesh::Vertex);
     vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
@@ -328,13 +351,13 @@ void MeshRenderer::CreatePipeline()
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
-    VkPipelineColorBlendAttachmentState colorBlendAttachments[2]{ colorBlendAttachment, colorBlendAttachment };
+    VkPipelineColorBlendAttachmentState colorBlendAttachments[3]{ colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 2;
+    colorBlending.attachmentCount = 3;
     colorBlending.pAttachments = colorBlendAttachments;
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
@@ -393,7 +416,7 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
     renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = colorImage.GetImageExtent();
 
-    std::vector<VkClearValue> clearColors = { {{clearColor.R, clearColor.G, clearColor.B, clearColor.A}}, {{0, 0, 0, 0}}, {1.0f, 0}};
+    std::vector<VkClearValue> clearColors = { {{clearColor.R, clearColor.G, clearColor.B, clearColor.A}}, {{0, 0, 0, 0}},{{0, 0, 0, 0}}, {1.0f, 0}};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
     renderPassInfo.pClearValues = clearColors.data();
 

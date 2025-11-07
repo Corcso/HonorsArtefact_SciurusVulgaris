@@ -114,6 +114,7 @@ void Graphics::EndRender()
     ImGui::Begin("Mesh");
     ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
     ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
+    ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
     ImGui::End();
 
     instance.VRAMAllocator.RenderMemoryUsageStat();

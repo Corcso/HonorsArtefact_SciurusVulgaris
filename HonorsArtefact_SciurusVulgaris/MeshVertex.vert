@@ -1,10 +1,12 @@
 #version 450
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inColor;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 inTex;
 
 layout(location = 0) out vec3 outWorldPos;
-layout(location = 1) out vec4 outColor;
+layout(location = 1) out vec3 outNormal;
+layout(location = 2) out vec2 outTex;
 
 layout(binding = 0) uniform UniformBufferObject {
     mat4 world;
@@ -21,5 +23,6 @@ void main() {
     gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0);
    
     outWorldPos = (ubo.world * vec4(inPosition, 1.0)).xyz;
-    outColor = vec4(inColor, 1.0);
+    outNormal = (ubo.world * vec4(inNormal, 1.0)).xyz;
+    outTex = inTex;
 }
