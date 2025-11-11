@@ -21,10 +21,12 @@
 
         static void CopyBufferData(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         static void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+        static void CopyImageToBuffer(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
         static void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
         static void MapCopyToGPU(VkDeviceMemory memory, void* data, size_t size, VkDeviceSize offset = 0, VkMemoryMapFlags flags = 0);
         static void MapCopyBlockToGPU(VulkanMemoryAllocator::VulkanMemoryBlock memory, void* data, size_t size, VkMemoryMapFlags flags = 0);
+        static void MapCopyBlockFromGPU(VulkanMemoryAllocator::VulkanMemoryBlock memory, void* data, size_t size, VkMemoryMapFlags flags = 0);
         static void* OpenMemoryMap(VkDeviceMemory memory, size_t size, VkDeviceSize offset = 0, VkMemoryMapFlags flags = 0);
         static void* OpenMemoryBlockMap(VulkanMemoryAllocator::VulkanMemoryBlock memory, size_t size, VkMemoryMapFlags flags = 0);
 

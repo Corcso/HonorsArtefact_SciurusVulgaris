@@ -46,9 +46,10 @@ public:
 			return;
 		throw - 1;
 	}
-
-private:
+	MeshRenderer meshRenderer;
 	static Graphics instance;
+private:
+	
 
 	const LPCWSTR WINDOW_CLASS_NAME = L"2200592-SciurusVulgaris";
 
@@ -56,7 +57,7 @@ private:
 	ImTextureID meshRenderOutput;
 	ImTextureID meshRenderOutput2;
 	ImTextureID meshRenderOutput3;
-	MeshRenderer meshRenderer;
+	
 	TriListMesh* myMesh;
 	Image myMeshImage;
 

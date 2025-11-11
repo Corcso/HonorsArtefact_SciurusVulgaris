@@ -23,6 +23,10 @@ void Image::CreateImage(VkFormat format, uint32_t width, uint32_t height, VkImag
     VulkanUtility::CreateImageAndAssignMemory(width, height, format,
         VK_IMAGE_TILING_OPTIMAL, usage,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &vkImage, &imageMemory);
+
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(Graphics::GetVkDevice(), vkImage, &memRequirements);
+    imageSize = memRequirements.size;
 }
 
 void Image::CreateImageView(bool isDepth)
@@ -53,7 +57,7 @@ bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage
     // Load image
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    imageSize = texWidth * texHeight * 4;
 
     VkBuffer stagingBuffer;
     VulkanMemoryAllocator::VulkanMemoryBlock stagingBufferMemory;
@@ -90,6 +94,30 @@ bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage
 bool Image::LoadImageFromFile(std::string path)
 {
     return false;
+}
+
+std::unique_ptr<std::vector<uint8_t>> Image::ExtractImageData()
+{
+    VkBuffer stagingBuffer;
+    VulkanMemoryAllocator::VulkanMemoryBlock stagingBufferMemory;
+
+    VulkanUtility::CreateBufferAndAssignMemory(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &stagingBuffer, &stagingBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
+
+    VulkanUtility::TransitionImageLayout(vkImage, vkFormat, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+    VulkanUtility::CopyImageToBuffer(stagingBuffer, vkImage, vkExtent.width, vkExtent.height);
+
+    VulkanUtility::TransitionImageLayout(vkImage, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    std::unique_ptr<std::vector<uint8_t>> data = std::make_unique<std::vector<uint8_t>>(imageSize);
+    VulkanUtility::MapCopyBlockFromGPU(stagingBufferMemory, data->data(), data->size());
+
+    // Cleanup
+    vkDestroyBuffer(Graphics::GetVkDevice(), stagingBuffer, nullptr);
+    VulkanUtility::FreeGPUMemoryBlock(stagingBufferMemory);
+
+    return std::move(data);
 }
 
 void Image::Destroy()

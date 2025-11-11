@@ -18,10 +18,13 @@ public:
 	VkFormat GetImageFormat() const { if (hasImage) return vkFormat; return VK_FORMAT_UNDEFINED; }
 	VkExtent2D GetImageExtent() const { if (hasImage) return vkExtent; return {0, 0}; }
 
+	std::unique_ptr<std::vector<uint8_t>> ExtractImageData();
+
 	void Destroy();
 	~Image();
 private:
 	bool hasImage;
+	VkDeviceSize imageSize;
 	VkFormat vkFormat;
 	VkExtent2D vkExtent;
 	VkImage vkImage;

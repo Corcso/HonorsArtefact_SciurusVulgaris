@@ -223,6 +223,66 @@ void VulkanUtility::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
     vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
+void VulkanUtility::CopyImageToBuffer(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = Graphics::GetCommandPool();
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(Graphics::GetVkDevice(), &allocInfo, &commandBuffer);
+
+    // Start recording now
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    // Do stuff
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = {
+        width,
+        height,
+        1
+    };
+
+    vkCmdCopyImageToBuffer(
+        commandBuffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        buffer,
+        1,
+        &region
+    );
+
+    // Over
+    vkEndCommandBuffer(commandBuffer);
+
+    // Execute commands
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
+
+    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
+}
+
 void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     
@@ -277,6 +337,20 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
         sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
     else {
         throw -1; // Unsupported layout transition
     }
@@ -324,6 +398,18 @@ void VulkanUtility::MapCopyBlockToGPU(VulkanMemoryAllocator::VulkanMemoryBlock m
     vkMapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &mappedMemory);
     // Copy Data
     memcpy(mappedMemory, data, size);
+    // Unmap Data
+    vkUnmapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory));
+}
+
+void VulkanUtility::MapCopyBlockFromGPU(VulkanMemoryAllocator::VulkanMemoryBlock memory, void* data, size_t size, VkMemoryMapFlags flags)
+{
+
+    if (memory.poolID.mapUsage == VulkanMemoryAllocator::VulkanMemoryMapUsage::OPEN) return;
+    void* mappedMemory;
+    vkMapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &mappedMemory);
+    // Copy Data
+    memcpy(data, mappedMemory, size);
     // Unmap Data
     vkUnmapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory));
 }

@@ -28,6 +28,8 @@ public:
 	void Render(TriListMesh* mesh);
 	void EndRender();
 
+	void TEMP_TestImageData();
+
 	VkImageView GetImageView() { return colorImage.GetImageView(); }
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }

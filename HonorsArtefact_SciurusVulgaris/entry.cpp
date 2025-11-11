@@ -29,6 +29,10 @@ int main() {
 		Graphics::BeginRender();
 		Graphics::Render(myPoints);
 		Graphics::EndRender();
+
+		if (Input::IsKeyPressed('I')) {
+			Graphics::instance.meshRenderer.TEMP_TestImageData();
+		}
 	}
 	Graphics::WaitUntilGPUIdle();
 	delete myPoints;

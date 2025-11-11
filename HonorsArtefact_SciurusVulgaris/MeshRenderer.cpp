@@ -34,7 +34,7 @@ void MeshRenderer::CreateImages()
     colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     colorImage.CreateImageView();
 
-    positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     positionImage.CreateImageView();
 
     normalImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
@@ -510,4 +510,19 @@ void MeshRenderer::EndRender()
     //    0, nullptr,
     //    1, &barrier
     //);
+}
+
+void MeshRenderer::TEMP_TestImageData()
+{
+    std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
+    std::vector<HMM_Vec4> formattedData(data->size() / sizeof(HMM_Vec4));
+    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
+        formattedData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+    }
+    data.release();
+
+    for (int p = 0; p < formattedData.size(); p++) {
+        if(formattedData[p].R != 0) std::cout << formattedData[p].R;
+        if (p % 512 == 0) std::cout << "\n";
+    }
 }
