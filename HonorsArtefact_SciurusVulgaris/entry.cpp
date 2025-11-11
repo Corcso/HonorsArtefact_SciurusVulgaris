@@ -10,20 +10,20 @@ int main() {
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"test");
 
-	PointMesh* myPoints = new PointMesh();
+	//PointMesh* myPoints = new PointMesh();
 
 	//AddPCData(&myPoints);
-	myPoints->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
-	size_t uboBufferSize = sizeof(WCP_Matrices);
-	myPoints->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), &uboBufferSize);
-	myPoints->CopyPointsToVRAM();
+	//myPoints->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
+	//size_t uboBufferSize = sizeof(WCP_Matrices);
+	//myPoints->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), &uboBufferSize);
+	//myPoints->CopyPointsToVRAM();
 
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, -5));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, 5));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(5, 0, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(-5, 0, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, -2, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 2, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
 	Graphics::instance.meshRenderer.GetPointMeshOutput()->CopyPointsToVRAM();
 	std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
 	Graphics::instance.meshRenderer.GetPointMeshOutput()->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), sizes.data());
@@ -45,7 +45,7 @@ int main() {
 		}
 	}
 	Graphics::WaitUntilGPUIdle();
-	delete myPoints;
+	//delete myPoints;
 	Graphics::Shutdown();
 	return 0;
 }

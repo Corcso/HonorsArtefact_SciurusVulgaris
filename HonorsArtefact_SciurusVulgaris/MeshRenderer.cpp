@@ -27,17 +27,18 @@ void MeshRenderer::Shutdown()
 
     vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkDescriptorSetLayout, nullptr);
     delete vkDescriptorSetLayoutInfo.pBindings;
+    output.~PointMesh(); // Deconstruct now!
 }
 
 void MeshRenderer::CreateImages()
 {
-    colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     colorImage.CreateImageView();
 
     positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     positionImage.CreateImageView();
 
-    normalImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    normalImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, 512, 512, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     normalImage.CreateImageView();
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 512, 512, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
@@ -527,7 +528,7 @@ void MeshRenderer::EndRender(VkCommandBuffer commandBuffer)
     //);
 }
 
-void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom)
+void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection)
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -555,7 +556,7 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom)
     }
 
     WCP_Matrices dataForUBO{
-        HMM_M4D(1), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
+        HMM_M4D(1), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), upDirection), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.5, 0.001, 10)
     };
     mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
 
@@ -593,14 +594,21 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom)
     vkResetFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence);
 
     std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
-    std::vector<HMM_Vec4> formattedData(data->size() / sizeof(HMM_Vec4));
+    std::vector<HMM_Vec4> formattedPositionData(data->size() / sizeof(HMM_Vec4));
     for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
-        formattedData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+        formattedPositionData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
     }
     data.release();
-    for (int p = 0; p < formattedData.size(); p++) {
-        if (formattedData[p].A != 0) {
-            output.points.push_back({ formattedData[p].RGB , HMM_V3(1, 1, 1) });
+    data = colorImage.ExtractImageData();
+    struct UNORMColor { uint8_t r, g, b, a; };
+    std::vector<UNORMColor> formattedColorData(data->size() / sizeof(UNORMColor));
+    for (int p = 0; p < data->size() / sizeof(UNORMColor); p++) {
+        formattedColorData[p] = *reinterpret_cast<UNORMColor*>(&(*data)[p * sizeof(UNORMColor)]);
+    }
+    data.release();
+    for (int p = 0; p < formattedPositionData.size(); p++) {
+        if (formattedPositionData[p].A != 0) {
+            output.points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f )});
             output.indices.push_back(output.indices.size());
         }
     }

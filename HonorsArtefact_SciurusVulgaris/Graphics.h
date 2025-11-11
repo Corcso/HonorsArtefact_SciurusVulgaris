@@ -103,7 +103,7 @@ private:
 	std::vector<VkSemaphore> vkRenderFinishedSemaphores;
 
 	// Variables
-	HMM_Vec4 clearColor{ 0, 0, 0, 0 };
+	HMM_Vec4 clearColor{ 0.3f, 0.6f, 0.8f, 1.0f };
 
 	int currentWidth, currentHeight;
 	uint8_t currentFrame;
