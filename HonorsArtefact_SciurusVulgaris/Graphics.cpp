@@ -89,7 +89,7 @@ void Graphics::Render(PointMesh* points)
 
     instance.frameinc++;
     WCP_Matrices dataForUBO{
-        HMM_Rotate_LH(instance.frameinc / 1000.0f, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(140, 1, 0.001, 30)
+        HMM_Rotate_LH(instance.frameinc / 1000.0f, HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(5, -5, 5)) * HMM_Translate(HMM_V3(0, -0.8, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(70, 1, 0.001, 30)
     };
 
     points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);

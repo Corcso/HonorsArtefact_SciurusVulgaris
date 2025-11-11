@@ -1,6 +1,7 @@
 #pragma once
 #include "VulkanMemoryAllocator.h"
 #include "TriListMesh.h"
+#include "PointMesh.h"
 #include "VulkanDescriptor.h"
 #include "Image.h"
 
@@ -14,6 +15,7 @@ public:
 		CreateFrameBuffer();
 		CreateDescriptorLayout();
 		CreatePipeline();
+		CreateSyncObjects();
 	}
 	void Shutdown();
 
@@ -23,10 +25,13 @@ public:
 	void CreateFrameBuffer();
 	void CreateDescriptorLayout();
 	void CreatePipeline();
+	void CreateSyncObjects();
 
-	void BeginRender(HMM_Vec4 clearColor);
-	void Render(TriListMesh* mesh);
-	void EndRender();
+	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void Render(TriListMesh* mesh, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	void ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom);
 
 	void TEMP_TestImageData();
 
@@ -36,6 +41,7 @@ public:
 	VkImageView GetImageView2() { return positionImage.GetImageView(); }
 	VkImageView GetImageView3() { return normalImage.GetImageView(); }
 	VkSampler GetSampler() { return vkSampler; }
+	PointMesh* GetPointMeshOutput() { return &output; }
 private:
 	VkRenderPass vkRenderPass;
 	VkDescriptorSetLayout vkDescriptorSetLayout;
@@ -52,6 +58,8 @@ private:
 	VkFramebuffer vkFrameBuffer;
 	VkSampler vkSampler;
 
+	VkFence vkIsLastExtractionFinishedFence;
+	PointMesh output;
 
 	// TODO REMOVE AND TIDY
 	int frameinc;

@@ -406,8 +406,19 @@ void MeshRenderer::CreatePipeline()
     vkDestroyShaderModule(Graphics::GetVkDevice(), vertShaderModule, nullptr);
 }
 
-void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
+void MeshRenderer::CreateSyncObjects()
 {
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = 0;
+
+    vkCreateFence(Graphics::GetVkDevice(), &fenceInfo, nullptr, &vkIsLastExtractionFinishedFence);
+}
+
+void MeshRenderer::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
     // Assume command buffer is ready and open
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -420,9 +431,9 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
     renderPassInfo.pClearValues = clearColors.data();
 
-    vkCmdBeginRenderPass(Graphics::GetThisFramesCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(Graphics::GetThisFramesCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipeline);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -431,23 +442,25 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor)
     viewport.height = static_cast<float>(colorImage.GetImageExtent().height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(Graphics::GetThisFramesCommandBuffer(), 0, 1, &viewport);
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
     scissor.extent = colorImage.GetImageExtent();
-    vkCmdSetScissor(Graphics::GetThisFramesCommandBuffer(), 0, 1, &scissor);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     thisFramesDrawCall = 0;
 }
 
-void MeshRenderer::Render(TriListMesh* mesh)
+void MeshRenderer::Render(TriListMesh* mesh, VkCommandBuffer commandBuffer)
 {
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
     VkBuffer vertexBuffers[] = { mesh->vertexBuffer };
     VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(Graphics::GetThisFramesCommandBuffer(), 0, 1, vertexBuffers, offsets);
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-    vkCmdBindIndexBuffer(Graphics::GetThisFramesCommandBuffer(), mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
     // TODO MAKE descriptors better
     //if (thisFramesDrawCall >= perObjectDescriptors.size())
@@ -463,25 +476,27 @@ void MeshRenderer::Render(TriListMesh* mesh)
     //}
 
     frameinc++;
-    WCP_Matrices dataForUBO{
-        HMM_M4D(1), HMM_LookAt_LH(HMM_V3(5 * sin(frameinc / 1000.0f), 0, 5 * cos(frameinc / 1000.0f)), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
-    };
+    //WCP_Matrices dataForUBO{
+    //    HMM_M4D(1), HMM_LookAt_LH(HMM_V3(5 * sin(frameinc / 1000.0f), 0, 5 * cos(frameinc / 1000.0f)), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
+    //};
 
     //memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
 
-    mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+    //mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
 
-    vkCmdBindDescriptorSets(Graphics::GetThisFramesCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         mesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDrawIndexed(Graphics::GetThisFramesCommandBuffer(), static_cast<uint32_t>(mesh->indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(mesh->indices.size()), 1, 0, 0, 0);
 
     thisFramesDrawCall++;
 }
 
-void MeshRenderer::EndRender()
+void MeshRenderer::EndRender(VkCommandBuffer commandBuffer)
 {
-    vkCmdEndRenderPass(Graphics::GetThisFramesCommandBuffer());
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    vkCmdEndRenderPass(commandBuffer);
 
     // I think I can get away with the below as I instruct the render pass to finish with the attachment in shader state
 
@@ -510,6 +525,85 @@ void MeshRenderer::EndRender()
     //    0, nullptr,
     //    1, &barrier
     //);
+}
+
+void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom)
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = Graphics::GetCommandPool();
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer thisExtractionCommandBuffer;
+
+    if (vkAllocateCommandBuffers(Graphics::GetVkDevice(), &allocInfo, &thisExtractionCommandBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Reset command buffer
+    vkResetCommandBuffer(thisExtractionCommandBuffer, 0);
+
+    // Record command buffer setup
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = 0; // Optional
+    beginInfo.pInheritanceInfo = nullptr; // Optional
+
+    if (vkBeginCommandBuffer(thisExtractionCommandBuffer, &beginInfo) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    WCP_Matrices dataForUBO{
+        HMM_M4D(1), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
+    };
+    mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+
+    BeginRender(HMM_V4(0, 0, 0, 0), thisExtractionCommandBuffer);
+    Render(mesh, thisExtractionCommandBuffer);
+    EndRender(thisExtractionCommandBuffer);
+
+    if (vkEndCommandBuffer(thisExtractionCommandBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Now we need to submit it
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT }; // We only care about colour writing, this allows pre rasteriser to get head start
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &thisExtractionCommandBuffer;
+
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
+
+    if (vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, vkIsLastExtractionFinishedFence) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Wait until above is finished. 
+    vkWaitForFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence, VK_TRUE, UINT64_MAX);
+
+    // Reset it 
+    vkResetFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence);
+
+    std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
+    std::vector<HMM_Vec4> formattedData(data->size() / sizeof(HMM_Vec4));
+    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
+        formattedData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+    }
+    data.release();
+    for (int p = 0; p < formattedData.size(); p++) {
+        if (formattedData[p].A != 0) {
+            output.points.push_back({ formattedData[p].RGB , HMM_V3(1, 1, 1) });
+            output.indices.push_back(output.indices.size());
+        }
+    }
 }
 
 void MeshRenderer::TEMP_TestImageData()

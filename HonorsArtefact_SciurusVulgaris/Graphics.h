@@ -47,6 +47,7 @@ public:
 		throw - 1;
 	}
 	MeshRenderer meshRenderer;
+	TriListMesh* myMesh;
 	static Graphics instance;
 private:
 	
@@ -58,7 +59,7 @@ private:
 	ImTextureID meshRenderOutput2;
 	ImTextureID meshRenderOutput3;
 	
-	TriListMesh* myMesh;
+	
 	Image myMeshImage;
 
 	HWND window;

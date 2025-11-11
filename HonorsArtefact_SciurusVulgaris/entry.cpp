@@ -18,6 +18,16 @@ int main() {
 	myPoints->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), &uboBufferSize);
 	myPoints->CopyPointsToVRAM();
 
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, -5));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, 5));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(5, 0, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(-5, 0, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, -2, 0));
+	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 2, 0));
+	Graphics::instance.meshRenderer.GetPointMeshOutput()->CopyPointsToVRAM();
+	std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
+	Graphics::instance.meshRenderer.GetPointMeshOutput()->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), sizes.data());
+
 	while (true) {
 		Input::Update();
 		if(Input::ProcessEvents()) break;
@@ -27,7 +37,7 @@ int main() {
 
 		// Render logic
 		Graphics::BeginRender();
-		Graphics::Render(myPoints);
+		Graphics::Render(Graphics::instance.meshRenderer.GetPointMeshOutput());
 		Graphics::EndRender();
 
 		if (Input::IsKeyPressed('I')) {
