@@ -99,6 +99,7 @@ void VulkanUtility::DestroyBuffer(VkBuffer buffer)
 
     vkDestroyBuffer(Graphics::GetVkDevice(), buffer, nullptr);
     
+
 }
 
 void VulkanUtility::DestroyImage(VkImage image)

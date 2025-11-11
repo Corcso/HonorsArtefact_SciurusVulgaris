@@ -32,6 +32,7 @@ public:
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	void ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection);
+	void CollapsePoints();
 
 	void TEMP_TestImageData();
 

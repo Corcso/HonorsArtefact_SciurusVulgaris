@@ -614,6 +614,33 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Ve
     }
 }
 
+// THIS is too slow, dont use
+void MeshRenderer::CollapsePoints()
+{
+    std::cout << "We had " << std::to_string(output.points.size()) << " points.\n";
+    float twentieth = output.points.size() / 20.0f;
+    float computed = 0;
+    for (int i = 0; i < output.points.size(); i++) {
+        uint32_t pointsRemoved = 0;
+        for (int j = 0; j < output.points.size(); j++) {
+            if (i == j) continue;
+            if (HMM_LenSqrV3(output.points[i].position - output.points[j].position) < 0.00001f) {
+                output.points.erase(output.points.begin() + j);
+                j--;
+            }
+        }
+        i -= pointsRemoved;
+        computed++;
+        if (computed > twentieth) {
+            twentieth = output.points.size() / 20.0f;
+            std::cout << "X";
+            computed = 0;
+        }
+    }
+    output.indices.resize(output.points.size());
+    std::cout << "Now have " << std::to_string(output.points.size()) << " points.\n";
+}
+
 void MeshRenderer::TEMP_TestImageData()
 {
     std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
