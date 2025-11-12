@@ -351,8 +351,8 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
     dynamicState.pDynamicStates = dynamicStates.data();
 
     // Vertex imput  stage setup // TODO when can i dealloc this
-    VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[2];
-    uint32_t vertexAttributeDescriptionCount = 2;
+    VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[3];
+    uint32_t vertexAttributeDescriptionCount = 3;
 
     vertexAttributeDescriptions[0].binding = 0;
     vertexAttributeDescriptions[0].location = 0;
@@ -363,6 +363,11 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
     vertexAttributeDescriptions[1].location = 1;
     vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
     vertexAttributeDescriptions[1].offset = offsetof(PointMesh::Point, color);
+
+    vertexAttributeDescriptions[2].binding = 0;
+    vertexAttributeDescriptions[2].location = 2;
+    vertexAttributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+    vertexAttributeDescriptions[2].offset = offsetof(PointMesh::Point, normal);
 
     VkVertexInputBindingDescription vertexBindingDescription = {};
     vertexBindingDescription.binding = 0;

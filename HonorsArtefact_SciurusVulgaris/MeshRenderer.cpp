@@ -606,9 +606,15 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Ve
         formattedColorData[p] = *reinterpret_cast<UNORMColor*>(&(*data)[p * sizeof(UNORMColor)]);
     }
     data.release();
+    data = normalImage.ExtractImageData();
+    std::vector<HMM_Vec4> formattedNormalData(data->size() / sizeof(HMM_Vec4));
+    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
+        formattedNormalData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+    }
+    data.release();
     for (int p = 0; p < formattedPositionData.size(); p++) {
         if (formattedPositionData[p].A != 0) {
-            output.points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f )});
+            output.points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f ), formattedNormalData[p].RGB });
             output.indices.push_back(output.indices.size());
         }
     }
