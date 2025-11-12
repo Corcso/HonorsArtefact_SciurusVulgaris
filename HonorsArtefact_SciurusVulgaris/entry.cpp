@@ -24,7 +24,7 @@ int main() {
 	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
 	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
 	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
-	Graphics::instance.meshRenderer.CollapsePoints();
+	//Graphics::instance.meshRenderer.CollapsePoints();
 	Graphics::instance.meshRenderer.GetPointMeshOutput()->CopyPointsToVRAM();
 	std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
 	Graphics::instance.meshRenderer.GetPointMeshOutput()->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), sizes.data());
