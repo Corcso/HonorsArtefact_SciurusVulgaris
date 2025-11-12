@@ -73,14 +73,14 @@ bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage
     VulkanUtility::MapCopyBlockToGPU(stagingBufferMemory, pixels, imageSize);
 
     // Create image, with implicit transfer destination usage
-    CreateImage(VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    CreateImage(VK_FORMAT_R8G8B8A8_UNORM, texWidth, texHeight, usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
 
     // Transition image layout
-    VulkanUtility::TransitionImageLayout(vkImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    VulkanUtility::TransitionImageLayout(vkImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     // Copy data
     VulkanUtility::CopyBufferToImage(stagingBuffer, vkImage, texWidth, texHeight);
     // Transition to shader read (how to make more generic)
-    VulkanUtility::TransitionImageLayout(vkImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    VulkanUtility::TransitionImageLayout(vkImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     // Cleanup
     vkDestroyBuffer(Graphics::GetVkDevice(), stagingBuffer, nullptr);
