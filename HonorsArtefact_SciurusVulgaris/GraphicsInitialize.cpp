@@ -252,33 +252,33 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     // Setup descriptor pool
     VulkanSetup::CreateDescriptorPool(instance.vkDevice, 1, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
 
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1];
-    uboLayoutBindings[0].binding = 0;
-    uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    uboLayoutBindings[0].descriptorCount = 1;
-    // Only using this in vertex shader
-    uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
-    uboLayoutBindings[0].pImmutableSamplers = nullptr;
+    //VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1];
+    //uboLayoutBindings[0].binding = 0;
+    //uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    //uboLayoutBindings[0].descriptorCount = 1;
+    //// Only using this in vertex shader
+    //uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    //// Not used for images
+    //uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    instance.vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    instance.vkDescriptorSetLayoutInfo.bindingCount = 1;
-    instance.vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
+    //instance.vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    //instance.vkDescriptorSetLayoutInfo.bindingCount = 1;
+    //instance.vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
-    if (vkCreateDescriptorSetLayout(instance.vkDevice, &instance.vkDescriptorSetLayoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
-        throw - 1;
-    }
+    //if (vkCreateDescriptorSetLayout(instance.vkDevice, &instance.vkDescriptorSetLayoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
+    //    throw - 1;
+    //}
 
     /*for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
         instance.perFramePerObjectDescriptors.push_back(std::vector<VulkanDescriptor>());
     }*/
 
     // Setup pipeline
-    std::vector<VkDescriptorSetLayout> allDescriptorSetLayouts = {
-        instance.vkDescriptorSetLayout
-    };
-    VulkanSetup::CreateGraphicsPipeline(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent,
-        allDescriptorSetLayouts, &instance.vkMainPipelineLayout, &instance.vkMainPipeline);
+    //std::vector<VkDescriptorSetLayout> allDescriptorSetLayouts = {
+    //    instance.vkDescriptorSetLayout
+    //};
+   // VulkanSetup::CreateGraphicsPipeline(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent,
+     //   allDescriptorSetLayouts, &instance.vkMainPipelineLayout, &instance.vkMainPipeline);
 
     // Setup depth buffer
     VulkanSetup::CreateDepthBuffer(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSwapChainExtent, &instance.vkDepthImage,
@@ -321,23 +321,23 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 //
 //    editorViewportDescriptorSet = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(editorViewportSampler, editorViewportImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-    instance.meshRenderer.CreateAll();
+    //instance.meshRenderer.CreateAll();
 
-    instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-    instance.meshRenderOutput2 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView2(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-    instance.meshRenderOutput3 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView3(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    //instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    //instance.meshRenderOutput2 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView2(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    //instance.meshRenderOutput3 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView3(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-    instance.myMesh = new TriListMesh();
-    instance.myMesh->LoadFile("./models/SpeedTrees/SpeedTree.obj");
-    instance.myMesh->CopyPointsToVRAM();
+    //instance.myMesh = new TriListMesh();
+    //instance.myMesh->LoadFile("./models/SpeedTrees/SpeedTree.obj");
+    //instance.myMesh->CopyPointsToVRAM();
 
-    instance.myMeshImage.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
-    instance.myMeshImage.CreateImageView();
+    //instance.myMeshImage.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    //instance.myMeshImage.CreateImageView();
 
-    std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
+    //std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
 
-    instance.myMesh->CreateDescriptorSet(instance.meshRenderer.GetDescriptorSetLayout(), instance.meshRenderer.GetDescriptorSetLayoutInfo(), sizes.data());
-    instance.myMesh->GetDescriptorSet()->UpdateImageSampler(1, &instance.myMeshImage, instance.meshRenderer.GetSampler());
+    /*instance.myMesh->CreateDescriptorSet(instance.meshRenderer.GetDescriptorSetLayout(), instance.meshRenderer.GetDescriptorSetLayoutInfo(), sizes.data());
+    instance.myMesh->GetDescriptorSet()->UpdateImageSampler(1, &instance.myMeshImage, instance.meshRenderer.GetSampler());*/
     return ;
 }
 
@@ -353,9 +353,9 @@ void Graphics::Shutdown()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    instance.meshRenderer.Shutdown();
-    delete instance.myMesh;
-    instance.myMeshImage.Destroy();
+    //instance.meshRenderer.Shutdown();
+    //delete instance.myMesh;
+    //instance.myMeshImage.Destroy();
 
     // Destroy Sync Objects
     for (auto& thisSemaphore : instance.vkRenderFinishedSemaphores) vkDestroySemaphore(instance.vkDevice, thisSemaphore, nullptr);
@@ -366,8 +366,8 @@ void Graphics::Shutdown()
     vkDestroyCommandPool(instance.vkDevice, instance.vkCommandPool, nullptr);
 
     // Destroy Pipeline
-    vkDestroyPipeline(instance.vkDevice, instance.vkMainPipeline, nullptr);
-    vkDestroyPipelineLayout(instance.vkDevice, instance.vkMainPipelineLayout, nullptr);
+    //vkDestroyPipeline(instance.vkDevice, instance.vkMainPipeline, nullptr);
+    //vkDestroyPipelineLayout(instance.vkDevice, instance.vkMainPipelineLayout, nullptr);
 
     // Destroy Frame Buffers
     for(auto& thisFrameBuffer : instance.vkSwapChainFrameBuffers) vkDestroyFramebuffer(instance.vkDevice, thisFrameBuffer, nullptr);
@@ -389,8 +389,8 @@ void Graphics::Shutdown()
         }
     }
     instance.perFramePerObjectDescriptors.clear();*/
-    vkDestroyDescriptorSetLayout(instance.vkDevice, instance.vkDescriptorSetLayout, nullptr);
-    delete instance.vkDescriptorSetLayoutInfo.pBindings;
+   // vkDestroyDescriptorSetLayout(instance.vkDevice, instance.vkDescriptorSetLayout, nullptr);
+    //delete instance.vkDescriptorSetLayoutInfo.pBindings;
     vkDestroyDescriptorPool(instance.vkDevice, instance.vkDescriptorPool, nullptr);
 
     // Destroy surface

@@ -20,7 +20,7 @@ public:
 	static void Shutdown();
 
 	static void BeginRender();
-	static void Render(PointMesh* points);
+	static void FinishImGuiRender();
 	static void EndRender();
 
 	static VkInstance GetVkInstance() { return instance.vkInstance; }
@@ -35,8 +35,10 @@ public:
 	static VkExtent2D GetSwapChainExtent() { return instance.vkSwapChainExtent; }
 	static VkCommandBuffer GetThisFramesCommandBuffer() { return instance.vkCommandBuffers[instance.currentFrame]; }
 	static VkDescriptorPool GetDescriptorPool() { return instance.vkDescriptorPool; }
-	static VkDescriptorSetLayout GetDescriptorSetLayout() { return instance.vkDescriptorSetLayout; }
-	static VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return instance.vkDescriptorSetLayoutInfo; }
+	//static VkDescriptorSetLayout GetDescriptorSetLayout() { return instance.vkDescriptorSetLayout; }
+	//static VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return instance.vkDescriptorSetLayoutInfo; }
+	static VkRenderPass GetSwapChainRenderPass() { return instance.vkRenderPass; }
+	static VkFramebuffer GetThisFramesFrameBuffer() { return instance.vkSwapChainFrameBuffers[instance.thisRenderImageIndex]; }
 
 	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
@@ -46,21 +48,10 @@ public:
 			return;
 		throw - 1;
 	}
-	MeshRenderer meshRenderer;
-	TriListMesh* myMesh;
+
 	static Graphics instance;
 private:
-	
-
 	const LPCWSTR WINDOW_CLASS_NAME = L"2200592-SciurusVulgaris";
-
-	int frameinc; // TODO REMOVE
-	ImTextureID meshRenderOutput;
-	ImTextureID meshRenderOutput2;
-	ImTextureID meshRenderOutput3;
-	
-	
-	Image myMeshImage;
 
 	HWND window;
 
@@ -83,12 +74,12 @@ private:
 
 	// Descriptors
 	VkDescriptorPool vkDescriptorPool;
-	VkDescriptorSetLayout vkDescriptorSetLayout;
-	VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
+	//VkDescriptorSetLayout vkDescriptorSetLayout;
+	//VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 	//std::vector<std::vector<VulkanDescriptor>> perFramePerObjectDescriptors;
 
-	VkPipelineLayout vkMainPipelineLayout;
-	VkPipeline vkMainPipeline;
+	//VkPipelineLayout vkMainPipelineLayout;
+	//VkPipeline vkMainPipeline;
 
 	VkImage vkDepthImage;
 	VkImageView vkDepthImageView;

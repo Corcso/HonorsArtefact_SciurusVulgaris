@@ -40,11 +40,11 @@ void Graphics::BeginRender()
         throw - 1;
     }
     // Do mesh render
-    instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
+    /*instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
     instance.meshRenderer.Render(instance.myMesh);
-    instance.meshRenderer.EndRender();
+    instance.meshRenderer.EndRender();*/
 
-    VkRenderPassBeginInfo renderPassInfo{};
+    /*VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = instance.vkRenderPass;
     renderPassInfo.framebuffer = instance.vkSwapChainFrameBuffers[instance.thisRenderImageIndex];
@@ -71,58 +71,43 @@ void Graphics::BeginRender()
     VkRect2D scissor{};
     scissor.offset = { 0, 0 };
     scissor.extent = instance.vkSwapChainExtent;
-    vkCmdSetScissor(instance.vkCommandBuffers[instance.currentFrame], 0, 1, &scissor);
+    vkCmdSetScissor(instance.vkCommandBuffers[instance.currentFrame], 0, 1, &scissor);*/
 
     instance.thisFramesDrawCall = 0;
 }
 
-void Graphics::Render(PointMesh* points)
-{
-    VkBuffer vertexBuffers[] = { points->pointBuffer };
-    VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(instance.vkCommandBuffers[instance.currentFrame], 0, 1, vertexBuffers, offsets);
-
-    vkCmdBindIndexBuffer(instance.vkCommandBuffers[instance.currentFrame], points->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-    //if (instance.thisFramesDrawCall >= instance.perFramePerObjectDescriptors[instance.currentFrame].size())
-    //    AddAdditionalDescriptorSet(instance.perFramePerObjectDescriptors, instance.vkDescriptorSetLayout);
-
-    instance.frameinc++;
-    WCP_Matrices dataForUBO{
-        HMM_Rotate_LH(instance.frameinc / 1000.0f, HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(5, -5, 5)) * HMM_Translate(HMM_V3(0, -0.8, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Perspective_LH_ZO(70, 1, 0.001, 30)
-    };
-
-    points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
-
-    //memcpy(instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
-
-    //vkCmdBindDescriptorSets(instance.vkCommandBuffers[instance.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, instance.vkMainPipelineLayout, 0, 1,
-    //    instance.perFramePerObjectDescriptors[instance.currentFrame][instance.thisFramesDrawCall].GetDescriptorSet(), 0, nullptr);
-
-    vkCmdBindDescriptorSets(instance.vkCommandBuffers[instance.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, instance.vkMainPipelineLayout, 0, 1,
-        points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
-
-    vkCmdDrawIndexed(instance.vkCommandBuffers[instance.currentFrame], static_cast<uint32_t>(points->indices.size()), 1, 0, 0, 0);
-
-    instance.thisFramesDrawCall++;
-}
-
-void Graphics::EndRender()
+void Graphics::FinishImGuiRender()
 {
     ImGui::ShowDemoWindow();
 
-    ImGui::Begin("Mesh");
+    /*ImGui::Begin("Mesh");
     ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
     ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
     ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
-    ImGui::End();
+    ImGui::End();*/
 
     instance.VRAMAllocator.RenderMemoryUsageStat();
 
     ImGui::Render();
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
-    // Finish recording command buffer
-    vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
+}
+
+void Graphics::EndRender()
+{
+    //ImGui::ShowDemoWindow();
+
+    //ImGui::Begin("Mesh");
+    //ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
+    //ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
+    //ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
+    //ImGui::End();
+
+    //instance.VRAMAllocator.RenderMemoryUsageStat();
+
+    //ImGui::Render();
+    //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
+    //// Finish recording command buffer
+    //vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
 
     if (vkEndCommandBuffer(instance.vkCommandBuffers[instance.currentFrame]) != VK_SUCCESS) {
         throw - 1;

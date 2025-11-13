@@ -162,6 +162,7 @@
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
+    <ClInclude Include="PointRenderPipeline.h" />
     <ClInclude Include="TriListMesh.h" />
     <ClInclude Include="VulkanDescriptor.h" />
     <ClInclude Include="VulkanMemoryAllocator.h" />
@@ -208,6 +209,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PointMesh.cpp" />
+    <ClCompile Include="PointRenderPipeline.cpp" />
     <ClCompile Include="TriListMesh.cpp" />
     <ClCompile Include="VulkanDescriptor.cpp" />
     <ClCompile Include="VulkanMemoryAllocator.cpp" />

@@ -1,33 +1,42 @@
 #include "PCH.h"
 #include "Input.h"
 #include "Graphics.h"
-
-void AddPCData(PointMesh* add);
+#include "MeshRenderer.h"
+#include "PointRenderPipeline.h"
 
 int main() {
 	std::cout << "I'm Alive";
 
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"test");
+	MeshRenderer meshRenderingPipeline;
+	PointRenderPipeline pointRenderingPipeline;
+	meshRenderingPipeline.CreateAll();
+	pointRenderingPipeline.CreateAll();
 
-	//PointMesh* myPoints = new PointMesh();
+	TriListMesh* myTree = new TriListMesh();
+	myTree->LoadFile("./models/SpeedTrees/SpeedTree.obj");
+	myTree->CopyPointsToVRAM();
 
-	//AddPCData(&myPoints);
-	//myPoints->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
-	//size_t uboBufferSize = sizeof(WCP_Matrices);
-	//myPoints->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), &uboBufferSize);
-	//myPoints->CopyPointsToVRAM();
+	Image myTreeTexture;
+	myTreeTexture.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+	myTreeTexture.CreateImageView();
 
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
-	Graphics::instance.meshRenderer.ExtractPoints(Graphics::instance.myMesh, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
+	std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
+
+	myTree->CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
+	myTree->GetDescriptorSet()->UpdateImageSampler(1, &myTreeTexture, meshRenderingPipeline.GetSampler());
+
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
+	meshRenderingPipeline.ExtractPoints(myTree, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
 	//Graphics::instance.meshRenderer.CollapsePoints();
-	Graphics::instance.meshRenderer.GetPointMeshOutput()->CopyPointsToVRAM();
-	std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
-	Graphics::instance.meshRenderer.GetPointMeshOutput()->CreateDescriptorSet(Graphics::GetDescriptorSetLayout(), Graphics::GetDescriptorSetLayoutInfo(), sizes.data());
+	meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
+	sizes = { sizeof(WCP_Matrices) };
+	meshRenderingPipeline.GetPointMeshOutput()->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
 
 	while (true) {
 		Input::Update();
@@ -38,12 +47,13 @@ int main() {
 
 		// Render logic
 		Graphics::BeginRender();
-		Graphics::Render(Graphics::instance.meshRenderer.GetPointMeshOutput());
-		Graphics::EndRender();
+		//Graphics::Render(Graphics::instance.meshRenderer.GetPointMeshOutput());
+		pointRenderingPipeline.BeginRender(HMM_V4(0, 0, 0, 1));
 
-		if (Input::IsKeyPressed('I')) {
-			Graphics::instance.meshRenderer.TEMP_TestImageData();
-		}
+		pointRenderingPipeline.Render(meshRenderingPipeline.GetPointMeshOutput());
+		Graphics::FinishImGuiRender();
+		pointRenderingPipeline.EndRender();
+		Graphics::EndRender();
 	}
 	Graphics::WaitUntilGPUIdle();
 	//delete myPoints;
