@@ -16,6 +16,6 @@ void main() {
     float diffuseStrength = max(diffuseStrengthFront, diffuseStrengthBack);
 
     // Return ambient + diffuse + specular
-    outColor = inColor * diffuseStrength;
+    outColor = inColor * max(diffuseStrength, 0.15);
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
 }

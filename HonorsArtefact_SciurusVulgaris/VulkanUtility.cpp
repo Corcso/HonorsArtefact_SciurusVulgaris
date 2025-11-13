@@ -96,7 +96,7 @@ void VulkanUtility::CreateImageAndAssignMemory(uint32_t width, uint32_t height, 
 void VulkanUtility::DestroyBuffer(VkBuffer buffer)
 {
     
-
+    
     vkDestroyBuffer(Graphics::GetVkDevice(), buffer, nullptr);
     
 

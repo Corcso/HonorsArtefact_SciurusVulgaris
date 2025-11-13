@@ -556,7 +556,7 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Ve
     }
 
     WCP_Matrices dataForUBO{
-        HMM_M4D(1), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), upDirection), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.5, 0.001, 10)
+        HMM_Rotate_LH(3.141 /2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), upDirection), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.5, 0.001, 10)
     };
     mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
 

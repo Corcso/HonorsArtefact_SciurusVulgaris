@@ -328,10 +328,10 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.meshRenderOutput3 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView3(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
     instance.myMesh = new TriListMesh();
-    instance.myMesh->LoadFile("./models/Low Poly Trees Free - Nicholas-3D/TreeOne.obj");
+    instance.myMesh->LoadFile("./models/SpeedTrees/SpeedTree.obj");
     instance.myMesh->CopyPointsToVRAM();
 
-    instance.myMeshImage.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/leaf_color.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    instance.myMeshImage.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
     instance.myMeshImage.CreateImageView();
 
     std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };

@@ -1,0 +1,19 @@
+# Wavefront Object Material File
+# Generated using SpeedTree tools
+
+newmtl Material_2_Mat
+map_Kd Material_2.png
+map_d 
+map_bump 
+bump  -bm 1
+Ns 128
+illum 2
+
+
+newmtl Material_Mat
+map_Kd Material.png
+map_d Material_Opacity.png
+Ns 128
+illum 2
+
+
