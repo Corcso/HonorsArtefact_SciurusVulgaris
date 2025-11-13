@@ -17,6 +17,7 @@ public:
 
 	void LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL);
 	void LoadFromFile(std::string path);
+	void SaveToFile(std::string path);
 
 	void CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes);
 

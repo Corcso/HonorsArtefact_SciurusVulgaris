@@ -14,6 +14,12 @@ int main() {
 	meshRenderingPipeline.CreateAll();
 	pointRenderingPipeline.CreateAll();
 
+	// DELME
+	/*PointMesh* vase = new PointMesh();
+	vase->LoadFromFile("./models/Flower Point Cloud Photogrammetry - Moshe Caine/flowerPoints.ply");
+	delete vase;*/
+	// END
+
 	std::vector<TriListMesh> myTreeModel = TriListMesh::LoadMultiMeshFile("./models/SpeedTrees/SpeedTree.obj");
 
 	Image myTreeTexture;
@@ -44,6 +50,12 @@ int main() {
 	meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
 	sizes = { sizeof(WCP_Matrices) };
 	meshRenderingPipeline.GetPointMeshOutput()->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
+	meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/SpeedTrees/output.fbx");
+
+	PointMesh* testLoaded = new PointMesh();
+	testLoaded->LoadFromFile("./models/SpeedTrees/output.fbx");
+	testLoaded->CopyPointsToVRAM();
+	testLoaded->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
 
 	while (true) {
 		Input::Update();
@@ -57,7 +69,7 @@ int main() {
 		//Graphics::Render(Graphics::instance.meshRenderer.GetPointMeshOutput());
 		pointRenderingPipeline.BeginRender(HMM_V4(0, 0, 0, 1));
 
-		pointRenderingPipeline.Render(meshRenderingPipeline.GetPointMeshOutput());
+		pointRenderingPipeline.Render(testLoaded);
 		Graphics::FinishImGuiRender();
 		pointRenderingPipeline.EndRender();
 		Graphics::EndRender();
@@ -66,6 +78,7 @@ int main() {
 	myTreeModel.clear();
 	myTreeTexture.Destroy();
 	myBarkTexture.Destroy();
+	delete testLoaded;
 	meshRenderingPipeline.Shutdown();
 	pointRenderingPipeline.Shutdown();
 	Graphics::Shutdown();

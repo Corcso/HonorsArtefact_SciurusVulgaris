@@ -4,9 +4,10 @@
 #include "Graphics.h"
 
 // Include ASSIMP headers, (Kulling and assimp team, 2025) v6.0.2
-#include <assimp/Importer.hpp>    // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>     // Post processing flags
+#include <assimp/Importer.hpp>   
+#include <assimp/Exporter.hpp>    
+#include <assimp/scene.h>         
+#include <assimp/postprocess.h>    
 
 void PointMesh::CopyPointsToVRAM()
 {
@@ -154,7 +155,8 @@ void PointMesh::LoadFromFile(std::string path)
                 points.push_back(
                     {
                         HMM_V3(scene->mMeshes[mesh]->mVertices[v].x, scene->mMeshes[mesh]->mVertices[v].y, scene->mMeshes[mesh]->mVertices[v].z),
-                        color
+                        color,
+                        HMM_V3(scene->mMeshes[mesh]->mNormals[v].x, scene->mMeshes[mesh]->mNormals[v].y, scene->mMeshes[mesh]->mNormals[v].z)
                     });
 
                 // Points have no faces just push back 0 -> numVertices
@@ -166,6 +168,46 @@ void PointMesh::LoadFromFile(std::string path)
     }
 
     // Scene deleted from heap when importer leaves scope
+}
+
+void PointMesh::SaveToFile(std::string path)
+{
+    Assimp::Exporter exporter;
+
+    aiScene sceneData;
+    sceneData.mNumMaterials = 1;
+    sceneData.mMaterials = new aiMaterial * [1] { new aiMaterial }; // deleted: Version.cpp:158
+    sceneData.mNumMeshes = 1;
+    sceneData.mMeshes = new aiMesh*[1];
+    sceneData.mMeshes[0] = new aiMesh;
+    sceneData.mMeshes[0]->mPrimitiveTypes = aiPrimitiveType_POINT;
+    sceneData.mMeshes[0]->mNumVertices = points.size();
+    sceneData.mMeshes[0]->mNumFaces = indices.size();
+    sceneData.mMeshes[0]->mFaces = new aiFace[indices.size()];
+    sceneData.mMeshes[0]->mVertices = new aiVector3D[points.size()];
+    sceneData.mMeshes[0]->mNormals = new aiVector3D[points.size()];
+    sceneData.mMeshes[0]->mTangents = new aiVector3D[points.size()];
+    sceneData.mMeshes[0]->mBitangents = new aiVector3D[points.size()];
+    sceneData.mMeshes[0]->mColors[0] = new aiColor4D[points.size()];
+    sceneData.mRootNode = new aiNode;
+    sceneData.mRootNode->mNumMeshes = 1;
+    sceneData.mRootNode->mMeshes = new unsigned int[1] {0};
+
+    for (int p = 0; p < points.size(); p++) {
+        sceneData.mMeshes[0]->mVertices[p].Set(points[p].position.X, points[p].position.Y, points[p].position.Z);
+        sceneData.mMeshes[0]->mNormals[p].Set(points[p].normal.X, points[p].normal.Y, points[p].normal.Z);
+        sceneData.mMeshes[0]->mColors[0][p].r = points[p].color.R;
+        sceneData.mMeshes[0]->mColors[0][p].b = points[p].color.B;
+        sceneData.mMeshes[0]->mColors[0][p].g = points[p].color.G;
+        sceneData.mMeshes[0]->mColors[0][p].a = 1;
+    }
+    for (int i = 0; i < indices.size(); i++) {
+        sceneData.mMeshes[0]->mFaces[i].mNumIndices = 1;
+        sceneData.mMeshes[0]->mFaces[i].mIndices = new unsigned int [1] {indices[i]};
+    }
+    exporter.Export(&sceneData, "fbx", path);
+
+    // Cleanup happens within aiScene
 }
 
 void PointMesh::CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes)
