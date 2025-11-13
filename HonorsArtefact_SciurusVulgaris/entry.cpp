@@ -56,7 +56,10 @@ int main() {
 		Graphics::EndRender();
 	}
 	Graphics::WaitUntilGPUIdle();
-	//delete myPoints;
+	delete myTree;
+	myTreeTexture.Destroy();
+	meshRenderingPipeline.Shutdown();
+	pointRenderingPipeline.Shutdown();
 	Graphics::Shutdown();
 	return 0;
 }

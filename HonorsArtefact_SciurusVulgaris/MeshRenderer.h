@@ -16,6 +16,7 @@ public:
 		CreateDescriptorLayout();
 		CreatePipeline();
 		CreateSyncObjects();
+		output = new PointMesh();
 	}
 	void Shutdown();
 
@@ -42,7 +43,7 @@ public:
 	VkImageView GetImageView2() { return positionImage.GetImageView(); }
 	VkImageView GetImageView3() { return normalImage.GetImageView(); }
 	VkSampler GetSampler() { return vkSampler; }
-	PointMesh* GetPointMeshOutput() { return &output; }
+	PointMesh* GetPointMeshOutput() { return output; }
 private:
 	VkRenderPass vkRenderPass;
 	VkDescriptorSetLayout vkDescriptorSetLayout;
@@ -60,7 +61,7 @@ private:
 	VkSampler vkSampler;
 
 	VkFence vkIsLastExtractionFinishedFence;
-	PointMesh output;
+	PointMesh* output;
 
 	// TODO REMOVE AND TIDY
 	int frameinc;
