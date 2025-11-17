@@ -38,14 +38,14 @@ int main() {
 	myTreeModel[1].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
 	myTreeModel[1].GetDescriptorSet()->UpdateImageSampler(1, &myBarkTexture, meshRenderingPipeline.GetSampler());
 
-	for (int mesh = 0; mesh < myTreeModel.size(); mesh++) {
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
-		meshRenderingPipeline.ExtractPoints(&myTreeModel[mesh], HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
-	}
+	TriListMesh* referenceArray[2]{ &myTreeModel[0] , &myTreeModel[1] };
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
+	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
+	
 	//Graphics::instance.meshRenderer.CollapsePoints();
 	meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
 	sizes = { sizeof(WCP_Matrices) };

@@ -530,7 +530,7 @@ void MeshRenderer::EndRender(VkCommandBuffer commandBuffer)
     //);
 }
 
-void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection)
+void MeshRenderer::ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection)
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -556,14 +556,14 @@ void MeshRenderer::ExtractPoints(TriListMesh* mesh, HMM_Vec3 viewingFrom, HMM_Ve
     if (vkBeginCommandBuffer(thisExtractionCommandBuffer, &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
-
-    WCP_Matrices dataForUBO{
-        HMM_Rotate_LH(3.141 /2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), upDirection), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.5, 0.001, 10)
-    };
-    mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
-
+    for (int meshIndex = 0; meshIndex < meshCount; meshIndex++) {
+        WCP_Matrices dataForUBO{
+            HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)), HMM_LookAt_LH(viewingFrom, HMM_V3(0, 0, 0), upDirection), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.5, 0.001, 10)
+        };
+        meshes[meshIndex]->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+    }
     BeginRender(HMM_V4(0, 0, 0, 0), thisExtractionCommandBuffer);
-    Render(mesh, thisExtractionCommandBuffer);
+    for (int meshIndex = 0; meshIndex < meshCount; meshIndex++) Render(meshes[meshIndex], thisExtractionCommandBuffer);
     EndRender(thisExtractionCommandBuffer);
 
     if (vkEndCommandBuffer(thisExtractionCommandBuffer) != VK_SUCCESS) {
