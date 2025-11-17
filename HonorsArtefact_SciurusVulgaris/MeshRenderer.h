@@ -37,12 +37,12 @@ public:
 
 	void TEMP_TestImageData();
 
-	VkImageView GetImageView() { return colorImage.GetImageView(); }
-	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
-	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }
-	VkImageView GetImageView2() { return positionImage.GetImageView(); }
-	VkImageView GetImageView3() { return normalImage.GetImageView(); }
-	VkSampler GetSampler() { return vkSampler; }
+	VkImageView GetColorImageView() const { return colorImage.GetImageView(); }
+	VkDescriptorSetLayout GetDescriptorSetLayout() const { return vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() const { return vkDescriptorSetLayoutInfo; }
+	VkImageView GetPositionImageView() const { return positionImage.GetImageView(); }
+	VkImageView GetNormalImageView() const { return normalImage.GetImageView(); }
+	VkSampler GetSampler() const { return vkSampler; }
 	PointMesh* GetPointMeshOutput() { return output; }
 private:
 	VkRenderPass vkRenderPass;

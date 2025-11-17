@@ -3,12 +3,20 @@
 #include "Graphics.h"
 #include "MeshRenderer.h"
 #include "PointRenderPipeline.h"
+#include "ImGuiBlankRenderPass.h"
+void GeneratorApp();
 
 int main() {
 	std::cout << "I'm Alive";
 
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"test");
+
+	GeneratorApp();
+
+	Graphics::Shutdown();
+	return 0;
+
 	MeshRenderer meshRenderingPipeline;
 	PointRenderPipeline pointRenderingPipeline;
 	meshRenderingPipeline.CreateAll();
@@ -20,43 +28,43 @@ int main() {
 	delete vase;*/
 	// END
 
-	std::vector<TriListMesh> myTreeModel = TriListMesh::LoadMultiMeshFile("./models/SpeedTrees/SpeedTree.obj");
+	//std::vector<TriListMesh> myTreeModel = TriListMesh::LoadMultiMeshFile("./models/SpeedTrees/SpeedTree.obj");
 
-	Image myTreeTexture;
-	myTreeTexture.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
-	myTreeTexture.CreateImageView();
+	//Image myTreeTexture;
+	//myTreeTexture.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+	//myTreeTexture.CreateImageView();
 
-	Image myBarkTexture;
-	myBarkTexture.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", VK_IMAGE_USAGE_SAMPLED_BIT);
-	myBarkTexture.CreateImageView();
+	//Image myBarkTexture;
+	//myBarkTexture.CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", VK_IMAGE_USAGE_SAMPLED_BIT);
+	//myBarkTexture.CreateImageView();
 
 	std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
 
-	myTreeModel[0].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
-	myTreeModel[0].GetDescriptorSet()->UpdateImageSampler(1, &myTreeTexture, meshRenderingPipeline.GetSampler());
+	//myTreeModel[0].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
+	//myTreeModel[0].GetDescriptorSet()->UpdateImageSampler(1, &myTreeTexture, meshRenderingPipeline.GetSampler());
 
-	myTreeModel[1].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
-	myTreeModel[1].GetDescriptorSet()->UpdateImageSampler(1, &myBarkTexture, meshRenderingPipeline.GetSampler());
+	//myTreeModel[1].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
+	//myTreeModel[1].GetDescriptorSet()->UpdateImageSampler(1, &myBarkTexture, meshRenderingPipeline.GetSampler());
 
-	TriListMesh* referenceArray[2]{ &myTreeModel[0] , &myTreeModel[1] };
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
-	meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
-	
-	//Graphics::instance.meshRenderer.CollapsePoints();
-	meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
+	//TriListMesh* referenceArray[2]{ &myTreeModel[0] , &myTreeModel[1] };
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, -5), HMM_V3(0, 1, 0));
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 0, 5), HMM_V3(0, 1, 0));
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(5, 0, 0), HMM_V3(0, 1, 0));
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(-5, 0, 0), HMM_V3(0, 1, 0));
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, -5, 0), HMM_V3(0, 0, 1));
+	//meshRenderingPipeline.ExtractPoints(referenceArray, 2, HMM_V3(0, 5, 0), HMM_V3(0, 0, 1));
+	//
+	////Graphics::instance.meshRenderer.CollapsePoints();
+	//meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
 	sizes = { sizeof(WCP_Matrices) };
-	meshRenderingPipeline.GetPointMeshOutput()->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
-	meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/SpeedTrees/output.fbx");
-
+	//meshRenderingPipeline.GetPointMeshOutput()->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
+	//meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/SpeedTrees/output.fbx");
+	
 	PointMesh* testLoaded = new PointMesh();
 	testLoaded->LoadFromFile("./models/SpeedTrees/output.fbx");
 	testLoaded->CopyPointsToVRAM();
 	testLoaded->CreateDescriptorSet(pointRenderingPipeline.GetDescriptorSetLayout(), pointRenderingPipeline.GetDescriptorSetLayoutInfo(), sizes.data());
-
+	
 	while (true) {
 		Input::Update();
 		if(Input::ProcessEvents()) break;
@@ -75,12 +83,108 @@ int main() {
 		Graphics::EndRender();
 	}
 	Graphics::WaitUntilGPUIdle();
-	myTreeModel.clear();
-	myTreeTexture.Destroy();
-	myBarkTexture.Destroy();
+	//myTreeModel.clear();
+	//myTreeTexture.Destroy();
+	//myBarkTexture.Destroy();
 	delete testLoaded;
 	meshRenderingPipeline.Shutdown();
 	pointRenderingPipeline.Shutdown();
 	Graphics::Shutdown();
 	return 0;
+}
+
+void LoadThreadWorker(std::string* status, char* modelPath, bool* imageActive, char** texturePaths) {
+}
+
+void GeneratorApp() {
+	MeshRenderer meshRenderingPipeline;
+	ImGuiBlankRenderPass imguiRenderPass;
+	meshRenderingPipeline.CreateAll();
+	imguiRenderPass.CreateAll(); // Not needed but just incase stuff is added later
+	std::vector<size_t> descriptorSizes = { sizeof(WCP_Matrices), 0 };
+	ImTextureID liveColorOut = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(meshRenderingPipeline.GetSampler(), meshRenderingPipeline.GetColorImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+
+	std::vector<TriListMesh> loadedModel;
+	std::vector<Image> loadedImages;
+
+
+	std::string loadStatus;
+	char modelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
+	bool imageActive[8]{ true, true, false, false, false, false, false, false };
+	char texturePaths[8][256]{"./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", };
+	bool isTopView = false;
+
+	while (true) {
+		Input::Update();
+		if (Input::ProcessEvents()) break;
+
+		// Render logic
+		Graphics::BeginRender();
+		meshRenderingPipeline.BeginRender(HMM_V4(0, 0, 0, 1));
+		for (auto& mesh : loadedModel) {
+			WCP_Matrices dataForUBO;
+			if (isTopView) {
+				dataForUBO = {
+					HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+				};
+			}
+			else {
+				dataForUBO = {
+					HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+				};
+			}
+			mesh.GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+			meshRenderingPipeline.Render(&mesh);
+		}
+		meshRenderingPipeline.EndRender();
+
+		// ImGui
+		imguiRenderPass.BeginRender(HMM_V4(0, 0, 0, 1));
+		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+		ImGui::Begin("Model Selection");
+		ImGui::InputText("Model Path", modelPath, 256);
+		ImGui::Text("Textures");
+		for (int i = 0; i < 8; i++) {
+			ImGui::PushID(i);
+			ImGui::PushID(1);
+			ImGui::Checkbox("", &imageActive[i]);
+			ImGui::PopID();
+			ImGui::SameLine();
+			ImGui::PushID(2);
+			ImGui::InputText("", texturePaths[i], 256);
+			ImGui::PopID();
+			ImGui::PopID();
+		}
+		if (ImGui::Button("Load")) {
+			loadedModel.clear();
+			loadedImages.clear();
+			loadedImages.resize(8);
+
+			for (int i = 0; i < 8; i++) {
+				if (imageActive[i]) {
+					loadedImages[i].CreateAndLoadImageFromFile(texturePaths[i], VK_IMAGE_USAGE_SAMPLED_BIT);
+					loadedImages[i].CreateImageView();
+				}
+			}
+
+			loadedModel = TriListMesh::LoadMultiMeshFile(modelPath);
+			for (int i = 0; i < loadedModel.size(); i++) {
+				loadedModel[i].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
+				loadedModel[i].GetDescriptorSet()->UpdateImageSampler(1, &loadedImages[i], meshRenderingPipeline.GetSampler());
+			}
+		}
+		ImGui::End();
+
+		ImGui::Begin("Live Screen");
+		ImGui::Checkbox("Top View", &isTopView);
+		ImGui::Image(liveColorOut, ImVec2(512, 512));
+		ImGui::End();
+
+		Graphics::FinishImGuiRender();
+		imguiRenderPass.EndRender();
+		Graphics::EndRender();
+	}
+
+	meshRenderingPipeline.Shutdown();
 }
