@@ -23,6 +23,6 @@ void main() {
     gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0);
    
     outWorldPos = (ubo.world * vec4(inPosition, 1.0)).xyz;
-    outNormal = (ubo.world * vec4(inNormal, 1.0)).xyz;
+    outNormal = normalize((ubo.world * vec4(inNormal, 0.0)).xyz);
     outTex = inTex;
 }

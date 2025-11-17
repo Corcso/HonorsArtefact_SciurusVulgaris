@@ -15,5 +15,5 @@ void main() {
     outColor = texture(texSampler, inTex);
     if(outColor.w <= 0) discard;
     outPosition = vec4(inWorldPosition, 1);
-    outNormal = vec4(inNormal, 1);
+    outNormal = vec4(normalize(inNormal), 1);
 }
