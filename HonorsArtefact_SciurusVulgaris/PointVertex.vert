@@ -26,5 +26,5 @@ void main() {
     outNormal = (ubo.world * vec4(inNormal, 0.0)).xyz;
     outColor = vec4(inColor, 1.0);
 
-    gl_PointSize = (1.0 - (gl_Position.z / gl_Position.w)) * 50000.0;
+    gl_PointSize = (1.0 - (gl_Position.z / gl_Position.w)) * 40000.0;
 }

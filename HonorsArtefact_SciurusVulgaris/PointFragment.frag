@@ -11,11 +11,11 @@ void main() {
     vec3 diffuseDirection = vec3(-0.707, -0.707, 0);
 
     float diffuseStrengthFront = dot(normalize(inNormal), normalize(-diffuseDirection));
-    float diffuseStrengthBack = dot(normalize(-inNormal), normalize(-diffuseDirection)) * 0.7;
-
+    float diffuseStrengthBack = dot(normalize(-inNormal), normalize(-diffuseDirection)) * 0.5;
+    if(inColor.y < 0.5) diffuseStrengthBack = 0;
     float diffuseStrength = max(diffuseStrengthFront, diffuseStrengthBack);
 
     // Return ambient + diffuse + specular
-    outColor = inColor * max(diffuseStrength, 0.0);
+    outColor = vec4(inColor.rgb * max(diffuseStrength, 0.0), 1.0);
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
 }
