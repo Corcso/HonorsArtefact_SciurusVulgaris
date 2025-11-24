@@ -16,4 +16,5 @@ void main() {
     if(outColor.w <= 0) discard;
     outPosition = vec4(inWorldPosition, 1);
     outNormal = vec4(normalize(inNormal), 1);
+    if(!gl_FrontFacing) outNormal = vec4(normalize(-inNormal), 1);
 }

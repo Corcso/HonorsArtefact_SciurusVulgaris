@@ -166,6 +166,7 @@ void GeneratorApp() {
 	bool isTopView = false;
 
 	bool extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 
+	bool extractPointsConstantly = false; // Extracts and saves points every frame, just used for easy render doc capture
 	bool exitAtThisFrameEnd = false;
 	while (!exitAtThisFrameEnd) {
 		Input::Update();
@@ -230,6 +231,7 @@ void GeneratorApp() {
 		if (ImGui::Button("Execute Point Generation")) {
 			extractPointsAtEndOfThisFrame = true;
 		}
+		ImGui::Checkbox("Debug : Constant Extraction", &extractPointsConstantly);
 		if (ImGui::Button("Exit to Point Renderer")) {
 			exitAtThisFrameEnd = true;
 		}
@@ -244,7 +246,7 @@ void GeneratorApp() {
 		imguiRenderPass.EndRender();
 		Graphics::EndRender();
 
-		if(extractPointsAtEndOfThisFrame){
+		if(extractPointsAtEndOfThisFrame || extractPointsConstantly){
 			WCP_Matrices dataForUBO;
 			dataForUBO = {
 					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
