@@ -293,11 +293,11 @@ void PointRenderPipeline::Render(PointMesh* points, VkCommandBuffer commandBuffe
 
     vkCmdBindIndexBuffer(commandBuffer, points->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    WCP_Matrices dataForUBO{
-        HMM_Scale(HMM_V3(5, 5, 5)) * HMM_Translate(HMM_V3(0, -0.8, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, -20), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 30)
-    };
+    //WCP_Matrices dataForUBO{
+    //    HMM_Scale(HMM_V3(5, 5, 5)) * HMM_Translate(HMM_V3(0, -0.8, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, -20), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 30)
+    //};
 
-    points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+    //points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);

@@ -62,6 +62,8 @@ void PointMesh::CopyPointsToVRAM()
     VulkanUtility::DestroyBuffer(stagingIndexBuffer);
     VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
     //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
+
+    isDataOnGPU = true;
 }
 
 void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
@@ -218,8 +220,10 @@ void PointMesh::CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSe
 PointMesh::~PointMesh()
 {
     descriptor.CleanupDescriptor();
-    VulkanUtility::DestroyBuffer(pointBuffer);
-    VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
-    VulkanUtility::DestroyBuffer(indexBuffer);
-    VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
+    if (isDataOnGPU) {
+        VulkanUtility::DestroyBuffer(pointBuffer);
+        VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
+        VulkanUtility::DestroyBuffer(indexBuffer);
+        VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
+    }
 }

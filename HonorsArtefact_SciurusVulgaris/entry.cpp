@@ -5,6 +5,7 @@
 #include "PointRenderPipeline.h"
 #include "ImGuiBlankRenderPass.h"
 void GeneratorApp();
+void DisplayApp();
 
 int main() {
 	std::cout << "I'm Alive";
@@ -13,6 +14,7 @@ int main() {
 	Graphics::Initialize(800, 800, L"test");
 
 	GeneratorApp();
+	DisplayApp();
 
 	Graphics::WaitUntilGPUIdle();
 	Graphics::Shutdown();
@@ -94,7 +96,55 @@ int main() {
 	return 0;
 }
 
-void LoadThreadWorker(std::string* status, char* modelPath, bool* imageActive, char** texturePaths) {
+void DisplayApp() {
+	PointRenderPipeline pointRenderingPass;
+	pointRenderingPass.CreateAll();
+	std::vector<size_t> descriptorSizes = { sizeof(WCP_Matrices) };
+
+	PointMesh* myModel = nullptr;
+	char modelPath[256] = "./models/output.fbx";
+	float angle = 0;
+
+	while (true) {
+		Input::Update();
+		if (Input::ProcessEvents()) break;
+
+		// Render logic
+		Graphics::BeginRender();
+		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
+
+		if (myModel != nullptr) {
+			WCP_Matrices dataForUBO;
+
+			dataForUBO = {
+				HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
+			};
+			
+			myModel->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
+			pointRenderingPass.Render(myModel);
+		}
+
+		ImGui::Begin("Point Model Selection");
+		ImGui::InputText("Model Path", modelPath, 256);
+		if (ImGui::Button("Load")) {
+			if (myModel != nullptr) delete myModel;
+
+			myModel = new PointMesh();
+
+			myModel->LoadFromFile(modelPath);
+			myModel->CopyPointsToVRAM();
+			myModel->CreateDescriptorSet(pointRenderingPass.GetDescriptorSetLayout(), pointRenderingPass.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
+		}
+		ImGui::SliderAngle("Angle", &angle);
+		ImGui::End();
+
+		Graphics::FinishImGuiRender();
+		pointRenderingPass.EndRender();
+		Graphics::EndRender();
+	}
+	Graphics::WaitUntilGPUIdle();
+	if (myModel != nullptr) delete myModel;
+	pointRenderingPass.Shutdown();
 }
 
 void GeneratorApp() {
@@ -115,7 +165,9 @@ void GeneratorApp() {
 	char texturePaths[8][256]{"./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", };
 	bool isTopView = false;
 
-	while (true) {
+	bool extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 
+	bool exitAtThisFrameEnd = false;
+	while (!exitAtThisFrameEnd) {
 		Input::Update();
 		if (Input::ProcessEvents()) break;
 
@@ -175,6 +227,12 @@ void GeneratorApp() {
 				loadedModel[i].GetDescriptorSet()->UpdateImageSampler(1, &loadedImages[i], meshRenderingPipeline.GetSampler());
 			}
 		}
+		if (ImGui::Button("Execute Point Generation")) {
+			extractPointsAtEndOfThisFrame = true;
+		}
+		if (ImGui::Button("Exit to Point Renderer")) {
+			exitAtThisFrameEnd = true;
+		}
 		ImGui::End();
 
 		ImGui::Begin("Live Screen");
@@ -185,6 +243,37 @@ void GeneratorApp() {
 		Graphics::FinishImGuiRender();
 		imguiRenderPass.EndRender();
 		Graphics::EndRender();
+
+		if(extractPointsAtEndOfThisFrame){
+			WCP_Matrices dataForUBO;
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, 5), HMM_V3(0, 0, 10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(-5, 0, 0), HMM_V3(-10, 0, 0), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(5, 0, 0), HMM_V3(10, 0, 0), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			dataForUBO = {
+					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, -5, 0), HMM_V3(0, -10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+			};
+			meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+			meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
+
+			extractPointsAtEndOfThisFrame = false;
+		}
 	}
 	Graphics::WaitUntilGPUIdle();
 	meshRenderingPipeline.Shutdown();

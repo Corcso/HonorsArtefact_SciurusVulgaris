@@ -1,13 +1,16 @@
 #pragma once
+#include "PCH.h"
 #include "VulkanMemoryAllocator.h"
 #include "TriListMesh.h"
 #include "PointMesh.h"
 #include "VulkanDescriptor.h"
 #include "Image.h"
+#include "BufferStructs.h"
 
 class MeshRenderer
 {
 public:
+
 	void CreateAll() {
 		CreateImages();
 		CreateSampler();
@@ -33,6 +36,7 @@ public:
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	void ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection);
+	void ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matrices transformation);
 	void CollapsePoints();
 
 	void TEMP_TestImageData();
@@ -66,11 +70,7 @@ private:
 	// TODO REMOVE AND TIDY
 	int frameinc;
 
-	struct WCP_Matrices {
-		HMM_Mat4 world;
-		HMM_Mat4 camera;
-		HMM_Mat4 projection;
-	};
+	
 	uint64_t thisFramesDrawCall;
 };
 

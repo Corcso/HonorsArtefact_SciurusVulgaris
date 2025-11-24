@@ -24,6 +24,7 @@ public:
 	VulkanObjectDescriptorSet* GetDescriptorSet() { return &descriptor; };
 
 	// Vulkan Buffers
+	bool isDataOnGPU = false;
 	VkBuffer pointBuffer;
 	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock pointBufferMemory;

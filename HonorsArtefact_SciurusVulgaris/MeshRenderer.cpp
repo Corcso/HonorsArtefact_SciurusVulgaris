@@ -622,6 +622,95 @@ void MeshRenderer::ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_V
     }
 }
 
+void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matrices transformation)
+{
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = Graphics::GetCommandPool();
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer thisExtractionCommandBuffer;
+
+    if (vkAllocateCommandBuffers(Graphics::GetVkDevice(), &allocInfo, &thisExtractionCommandBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Reset command buffer
+    vkResetCommandBuffer(thisExtractionCommandBuffer, 0);
+
+    // Record command buffer setup
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = 0; // Optional
+    beginInfo.pInheritanceInfo = nullptr; // Optional
+
+    if (vkBeginCommandBuffer(thisExtractionCommandBuffer, &beginInfo) != VK_SUCCESS) {
+        throw - 1;
+    }
+    for (int meshIndex = 0; meshIndex < meshes->size(); meshIndex++) {
+        (*meshes)[meshIndex].GetDescriptorSet()->UpdateUniformBufferData(0, &transformation);
+    }
+    BeginRender(HMM_V4(0, 0, 0, 0), thisExtractionCommandBuffer);
+    for (int meshIndex = 0; meshIndex < meshes->size(); meshIndex++) Render(&(*meshes)[meshIndex], thisExtractionCommandBuffer);
+    EndRender(thisExtractionCommandBuffer);
+
+    if (vkEndCommandBuffer(thisExtractionCommandBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Now we need to submit it
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT }; // We only care about colour writing, this allows pre rasteriser to get head start
+    submitInfo.waitSemaphoreCount = 0;
+    submitInfo.pWaitSemaphores = nullptr;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &thisExtractionCommandBuffer;
+
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
+
+    if (vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, vkIsLastExtractionFinishedFence) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Wait until above is finished. 
+    vkWaitForFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence, VK_TRUE, UINT64_MAX);
+
+    // Reset it 
+    vkResetFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence);
+
+    std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
+    std::vector<HMM_Vec4> formattedPositionData(data->size() / sizeof(HMM_Vec4));
+    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
+        formattedPositionData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+    }
+    data.release();
+    data = colorImage.ExtractImageData();
+    struct UNORMColor { uint8_t r, g, b, a; };
+    std::vector<UNORMColor> formattedColorData(data->size() / sizeof(UNORMColor));
+    for (int p = 0; p < data->size() / sizeof(UNORMColor); p++) {
+        formattedColorData[p] = *reinterpret_cast<UNORMColor*>(&(*data)[p * sizeof(UNORMColor)]);
+    }
+    data.release();
+    data = normalImage.ExtractImageData();
+    std::vector<HMM_Vec4> formattedNormalData(data->size() / sizeof(HMM_Vec4));
+    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
+        formattedNormalData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
+    }
+    data.release();
+    for (int p = 0; p < formattedPositionData.size(); p++) {
+        if (formattedPositionData[p].A != 0) {
+            output->points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f), formattedNormalData[p].RGB });
+            output->indices.push_back(output->indices.size());
+        }
+    }
+}
+
 // THIS is too slow, dont use
 void MeshRenderer::CollapsePoints()
 {
