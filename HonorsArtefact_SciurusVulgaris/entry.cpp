@@ -4,6 +4,7 @@
 #include "MeshRenderer.h"
 #include "PointRenderPipeline.h"
 #include "ImGuiBlankRenderPass.h"
+#include "Transform.h"
 void GeneratorApp();
 void DisplayApp();
 
@@ -157,6 +158,10 @@ void GeneratorApp() {
 
 	std::vector<TriListMesh> loadedModel;
 	std::vector<Image> loadedImages;
+	Transform loadedModelTransform;
+	loadedModelTransform.position = HMM_V3(0, -9.5, 0);
+	loadedModelTransform.euler = HMM_V3(0, 90, 0);
+	loadedModelTransform.scale = HMM_V3(0.3, 0.3, 0.3);
 
 
 	std::string loadStatus;
@@ -179,12 +184,14 @@ void GeneratorApp() {
 			WCP_Matrices dataForUBO;
 			if (isTopView) {
 				dataForUBO = {
-					HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+					//HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+					loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 				};
 			}
 			else {
 				dataForUBO = {
-					HMM_Translate(HMM_V3(0, -9.5, 0))* HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+					//HMM_Translate(HMM_V3(0, -9.5, 0))* HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
+					loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 				};
 			}
 			mesh.GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
@@ -235,6 +242,7 @@ void GeneratorApp() {
 		if (ImGui::Button("Exit to Point Renderer")) {
 			exitAtThisFrameEnd = true;
 		}
+		loadedModelTransform.DisplayController();
 		ImGui::End();
 
 		ImGui::Begin("Live Screen");
