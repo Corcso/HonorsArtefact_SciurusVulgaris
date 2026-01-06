@@ -106,9 +106,14 @@ void DisplayApp() {
 	char modelPath[256] = "./models/output.fbx";
 	float angle = 0;
 
+	CameraTransform cameraTransform;
+	cameraTransform.position = HMM_V3(0, 0, -5);
+
 	while (true) {
 		Input::Update();
 		if (Input::ProcessEvents()) break;
+
+		cameraTransform.CaptureControls();
 
 		// Render logic
 		Graphics::BeginRender();
@@ -118,7 +123,8 @@ void DisplayApp() {
 			WCP_Matrices dataForUBO;
 
 			dataForUBO = {
-				HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
+				//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
+				HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
 			};
 			
 			myModel->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
