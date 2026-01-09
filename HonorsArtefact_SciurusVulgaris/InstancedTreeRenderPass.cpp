@@ -253,7 +253,7 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void InstancedTreeRenderPass::Render(PointMesh* points, VkCommandBuffer commandBuffer) {
+void InstancedTreeRenderPass::Render(PointMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     VkBuffer vertexBuffers[] = { points->pointBuffer };
@@ -271,7 +271,7 @@ void InstancedTreeRenderPass::Render(PointMesh* points, VkCommandBuffer commandB
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDraw(commandBuffer, points->points.size(), 40000, 0, 0);
+    vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 400, 0, 0);
 }
 
 void InstancedTreeRenderPass::EndRender(VkCommandBuffer commandBuffer) {
