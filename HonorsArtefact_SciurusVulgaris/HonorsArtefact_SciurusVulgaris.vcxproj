@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BufferStructs.h" />
+    <ClInclude Include="Clock.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="HandmadeMath.h" />
     <ClInclude Include="Image.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="VulkanUtility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Clock.cpp" />
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsInitialize.cpp" />

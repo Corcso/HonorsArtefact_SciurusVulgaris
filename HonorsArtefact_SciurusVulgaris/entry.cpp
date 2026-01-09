@@ -6,6 +6,7 @@
 #include "InstancedTreeRenderPass.h"
 #include "ImGuiBlankRenderPass.h"
 #include "Transform.h"
+#include "Clock.h"
 void GeneratorApp();
 void DisplayApp();
 void InstancedDisplayApp();
@@ -311,6 +312,7 @@ void InstancedDisplayApp() {
 	cameraTransform.position = HMM_V3(0, 0, -5);
 
 	while (true) {
+		Clock::Frame();
 		Input::Update();
 		if (Input::ProcessEvents()) break;
 
@@ -350,6 +352,7 @@ void InstancedDisplayApp() {
 			myModel->CreateDescriptorSet(pointRenderingPass.GetDescriptorSetLayout(), pointRenderingPass.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
 		}
 		ImGui::SliderAngle("Angle", &angle);
+		ImGui::Text("FPS %i", Clock::GetFPS());
 		ImGui::End();
 
 		Graphics::FinishImGuiRender();

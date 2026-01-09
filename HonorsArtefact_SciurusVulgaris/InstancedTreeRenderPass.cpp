@@ -271,7 +271,7 @@ void InstancedTreeRenderPass::Render(PointMesh* points, VkCommandBuffer commandB
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(15/*points->indices.size()*/), 40000, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(5000/*points->indices.size()*/), 40000, 0, 0, 0);
 }
 
 void InstancedTreeRenderPass::EndRender(VkCommandBuffer commandBuffer) {
