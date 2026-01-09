@@ -300,13 +300,14 @@ void GeneratorApp() {
 void InstancedDisplayApp() {
 	InstancedTreeRenderPass pointRenderingPass;
 	pointRenderingPass.CreateAll();
-	std::vector<size_t> descriptorSizes = { sizeof(WCP_Matrices) * 100 };
+	std::vector<size_t> descriptorSizes = { sizeof(WCP_Matrices) * 40000 };
 
 	PointMesh* myModel = nullptr;
 	char modelPath[256] = "./models/output.fbx";
 	float angle = 0;
 
 	CameraTransform cameraTransform;
+	cameraTransform.speed = 0.5f;
 	cameraTransform.position = HMM_V3(0, 0, -5);
 
 	while (true) {
@@ -320,20 +321,20 @@ void InstancedDisplayApp() {
 		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
 		if (myModel != nullptr) {
-			std::vector<WCP_Matrices> dataForUBO(400);
+			std::vector<WCP_Matrices> dataForUBO(40000);
 
-			for (int x = 0; x < 20; x++) {
-				for (int y = 0; y < 20; y++) {
-					dataForUBO[x * 10 + y] = {
+			for (int x = 0; x < 200; x++) {
+				for (int y = 0; y < 200; y++) {
+					dataForUBO[x * 200 + y] = {
 						//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
-						HMM_Translate(HMM_V3(x * 5.1f, 0, y * 5.1f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
+						HMM_Translate(HMM_V3(x * 1.1f, 0, y * 1.1f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
 						cameraTransform.viewMatrix, 
 						HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
 					};
 				}
 			}	
 
-			myModel->GetDescriptorSet()->UpdateUniformBufferData(0, dataForUBO.data());
+			myModel->GetDescriptorSet()->UpdateStorageBufferData(0, dataForUBO.data());
 			pointRenderingPass.Render(myModel);
 		}
 

@@ -33,6 +33,15 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 
 			descriptors[descriptorIndex].openMapMemoryLocation = descriptors[descriptorIndex].bufferMemory.location.openMap;
 		}
+		else if (binding.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+			descriptors[descriptorIndex].bufferSize = sizes[descriptorIndex];
+
+			VulkanUtility::CreateBufferAndAssignMemory(sizes[descriptorIndex], VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				&(descriptors[descriptorIndex].buffer), &(descriptors[descriptorIndex].bufferMemory), VulkanMemoryAllocator::VulkanMemoryMapUsage::OPEN);
+
+			descriptors[descriptorIndex].openMapMemoryLocation = descriptors[descriptorIndex].bufferMemory.location.openMap;
+		}
 		else if (binding.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
 			descriptors[descriptorIndex].image = nullptr;
 			descriptors[descriptorIndex].sampler = VK_NULL_HANDLE;
@@ -65,6 +74,26 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 			descriptorWrite.dstBinding = descriptorIndex;
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = nullptr;
+			descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+			vkUpdateDescriptorSets(Graphics::GetVkDevice(), 1, &descriptorWrite, 0, nullptr);
+		}
+		else if (descriptors[descriptorIndex].type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = descriptors[descriptorIndex].buffer;
+			bufferInfo.offset = 0;
+			bufferInfo.range = descriptors[descriptorIndex].bufferSize;
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = descriptorSet;
+			descriptorWrite.dstBinding = descriptorIndex;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			descriptorWrite.descriptorCount = 1;
 
 			descriptorWrite.pBufferInfo = &bufferInfo;
@@ -166,6 +195,14 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 		memcpy(descriptors[bindingIndex].openMapMemoryLocation, data, descriptors[bindingIndex].bufferSize);
 	}
 
+	void VulkanObjectDescriptorSet::UpdateStorageBufferData(uint32_t bindingIndex, void* data)
+	{
+		if (data == nullptr) return;
+		if (bindingIndex >= descriptors.size()) return;
+		if (descriptors[bindingIndex].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) return;
+		memcpy(descriptors[bindingIndex].openMapMemoryLocation, data, descriptors[bindingIndex].bufferSize);
+	}
+
 	void VulkanObjectDescriptorSet::UpdateImageSampler(uint32_t bindingIndex, Image* image, VkSampler sampler)
 	{
 		if (bindingIndex >= descriptors.size()) return;
@@ -198,7 +235,7 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 		// TODO
 		// and free memory
 		for (int i = 0; i < descriptors.size(); i++) {
-			if (descriptors[i].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) continue;
+			if (descriptors[i].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER || descriptors[i].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) continue;
 			VulkanUtility::DestroyBuffer(descriptors[i].buffer);
 			VulkanUtility::FreeGPUMemoryBlock(descriptors[i].bufferMemory);
 		}

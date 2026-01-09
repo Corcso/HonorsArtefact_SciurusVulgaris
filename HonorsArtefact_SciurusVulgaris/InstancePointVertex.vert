@@ -14,8 +14,8 @@ struct WCPMatrices{
     mat4 proj;
 };
 
-layout(binding = 0) uniform UniformBufferObject {
-    WCPMatrices matrices[100];
+layout(binding = 0) readonly buffer UniformBufferObject {
+    WCPMatrices matrices[40000];
 } ubo;
 
 void main() {

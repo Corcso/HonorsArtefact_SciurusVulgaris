@@ -6,7 +6,7 @@
 void InstancedTreeRenderPass::CreateDescriptorLayout() {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
-    uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     // Only using this in vertex shader
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -271,7 +271,7 @@ void InstancedTreeRenderPass::Render(PointMesh* points, VkCommandBuffer commandB
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(points->indices.size()), 400, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(15/*points->indices.size()*/), 40000, 0, 0, 0);
 }
 
 void InstancedTreeRenderPass::EndRender(VkCommandBuffer commandBuffer) {

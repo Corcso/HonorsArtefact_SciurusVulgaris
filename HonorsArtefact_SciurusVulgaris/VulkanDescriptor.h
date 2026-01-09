@@ -26,6 +26,7 @@
 		//size_t GetBindingSize(uint32_t bindingIndex) { return bufferSizes[bindingIndex]; }
 
 		void UpdateUniformBufferData(uint32_t bindingIndex, void* data);
+		void UpdateStorageBufferData(uint32_t bindingIndex, void* data);
 		void UpdateImageSampler(uint32_t bindingIndex, Image* image, VkSampler sampler);
 
 		void CleanupDescriptor();

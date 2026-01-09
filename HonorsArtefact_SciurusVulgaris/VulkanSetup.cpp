@@ -654,11 +654,15 @@ void VulkanSetup::CreateDescriptorPool(VkDevice device, uint32_t descriptorCount
     poolSizeSampler.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     poolSizeSampler.descriptorCount = descriptorCount;
 
-    VkDescriptorPoolSize poolSizes[]{ poolSizeSampler, poolSizeUniforms };
+    VkDescriptorPoolSize poolSizeStorage{};
+    poolSizeStorage.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    poolSizeStorage.descriptorCount = descriptorCount;
+
+    VkDescriptorPoolSize poolSizes[]{ poolSizeSampler, poolSizeUniforms, poolSizeStorage };
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 2;
+    poolInfo.poolSizeCount = 3;
     poolInfo.pPoolSizes = poolSizes;
     poolInfo.maxSets = maxSets;
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
