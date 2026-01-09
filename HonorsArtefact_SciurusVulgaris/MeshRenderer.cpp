@@ -617,7 +617,7 @@ void MeshRenderer::ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_V
     for (int p = 0; p < formattedPositionData.size(); p++) {
         if (formattedPositionData[p].A != 0) {
             output->points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f ), formattedNormalData[p].RGB });
-            output->indices.push_back(output->indices.size());
+            //output->indices.push_back(output->indices.size());
         }
     }
 }
@@ -706,7 +706,7 @@ void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matric
     for (int p = 0; p < formattedPositionData.size(); p++) {
         if (formattedPositionData[p].A != 0) {
             output->points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f), formattedNormalData[p].RGB });
-            output->indices.push_back(output->indices.size());
+            //output->indices.push_back(output->indices.size());
         }
     }
 }
@@ -734,7 +734,7 @@ void MeshRenderer::CollapsePoints()
             computed = 0;
         }
     }
-    output->indices.resize(output->points.size());
+    //output->indices.resize(output->points.size());
     std::cout << "Now have " << std::to_string(output->points.size()) << " points.\n";
 }
 

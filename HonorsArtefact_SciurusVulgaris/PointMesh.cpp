@@ -41,26 +41,26 @@ void PointMesh::CopyPointsToVRAM()
     VulkanUtility::FreeGPUMemoryBlock(stagingVertexBufferMemory);
 
     // INDEX BUFFER
-    bufferSize = sizeof(indices[0]) * indices.size();
+    //bufferSize = sizeof(indices[0]) * indices.size();
 
-    VkBuffer stagingIndexBuffer;
-    VulkanMemoryAllocator::VulkanMemoryBlock stagingIndexBufferMemory;
-    //VkDeviceMemory stagingIndexBufferMemory;
-    VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        &stagingIndexBuffer, &stagingIndexBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
+    //VkBuffer stagingIndexBuffer;
+    //VulkanMemoryAllocator::VulkanMemoryBlock stagingIndexBufferMemory;
+    ////VkDeviceMemory stagingIndexBufferMemory;
+    //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
+    //    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    //    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    //    &stagingIndexBuffer, &stagingIndexBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
 
-    VulkanUtility::MapCopyBlockToGPU(stagingIndexBufferMemory, indices.data(), bufferSize);
+    //VulkanUtility::MapCopyBlockToGPU(stagingIndexBufferMemory, indices.data(), bufferSize);
 
-    VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        &indexBuffer, &indexBufferMemory);
+    //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
+    //    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    //    &indexBuffer, &indexBufferMemory);
 
-    VulkanUtility::CopyBufferData(stagingIndexBuffer, indexBuffer, bufferSize);
+    //VulkanUtility::CopyBufferData(stagingIndexBuffer, indexBuffer, bufferSize);
 
-    VulkanUtility::DestroyBuffer(stagingIndexBuffer);
-    VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
+    //VulkanUtility::DestroyBuffer(stagingIndexBuffer);
+    //VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
     //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
 
     isDataOnGPU = true;
@@ -131,9 +131,9 @@ void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
         }
     }
 
-    for (int i = 0; i < points.size(); ++i) {
+    /*for (int i = 0; i < points.size(); ++i) {
         indices.push_back(i);
-    }
+    }*/
 
     // Close the file
     MTLFile.close();
@@ -144,7 +144,7 @@ void PointMesh::LoadFromFile(std::string path)
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(path, 0);
-    uint64_t currentIndex = 0;
+    //uint64_t currentIndex = 0;
     for (int mesh = 0; mesh < scene->mNumMeshes; mesh++) {
         if (scene->mMeshes[mesh]->mNumVertices > 0) {
             for (int v = 0; v < scene->mMeshes[mesh]->mNumVertices; v++) {
@@ -162,8 +162,8 @@ void PointMesh::LoadFromFile(std::string path)
                     });
 
                 // Points have no faces just push back 0 -> numVertices
-                indices.push_back(currentIndex);
-                currentIndex++;
+                //indices.push_back(currentIndex);
+                //currentIndex++;
             }
         }
        
@@ -184,8 +184,8 @@ void PointMesh::SaveToFile(std::string path)
     sceneData.mMeshes[0] = new aiMesh;
     sceneData.mMeshes[0]->mPrimitiveTypes = aiPrimitiveType_POINT;
     sceneData.mMeshes[0]->mNumVertices = points.size();
-    sceneData.mMeshes[0]->mNumFaces = indices.size();
-    sceneData.mMeshes[0]->mFaces = new aiFace[indices.size()];
+    sceneData.mMeshes[0]->mNumFaces = points.size(); //indices.size();
+    sceneData.mMeshes[0]->mFaces = new aiFace[points.size()];
     sceneData.mMeshes[0]->mVertices = new aiVector3D[points.size()];
     sceneData.mMeshes[0]->mNormals = new aiVector3D[points.size()];
     sceneData.mMeshes[0]->mTangents = new aiVector3D[points.size()];
@@ -203,9 +203,9 @@ void PointMesh::SaveToFile(std::string path)
         sceneData.mMeshes[0]->mColors[0][p].g = points[p].color.G;
         sceneData.mMeshes[0]->mColors[0][p].a = 1;
     }
-    for (int i = 0; i < indices.size(); i++) {
+    for (unsigned int i = 0; i < points.size(); i++) {
         sceneData.mMeshes[0]->mFaces[i].mNumIndices = 1;
-        sceneData.mMeshes[0]->mFaces[i].mIndices = new unsigned int [1] {indices[i]};
+        sceneData.mMeshes[0]->mFaces[i].mIndices = new unsigned int [1] {i};
     }
     exporter.Export(&sceneData, "fbx", path);
 
@@ -223,7 +223,7 @@ PointMesh::~PointMesh()
     if (isDataOnGPU) {
         VulkanUtility::DestroyBuffer(pointBuffer);
         VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
-        VulkanUtility::DestroyBuffer(indexBuffer);
-        VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
+        //VulkanUtility::DestroyBuffer(indexBuffer);
+        //VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
     }
 }

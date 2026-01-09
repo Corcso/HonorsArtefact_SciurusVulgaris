@@ -12,7 +12,6 @@ public:
 	};
 
 	std::vector<Point> points;
-	std::vector<uint32_t> indices;
 	void CopyPointsToVRAM();
 
 	void LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL);
@@ -26,9 +25,7 @@ public:
 	// Vulkan Buffers
 	bool isDataOnGPU = false;
 	VkBuffer pointBuffer;
-	VkBuffer indexBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock pointBufferMemory;
-	VulkanMemoryAllocator::VulkanMemoryBlock indexBufferMemory;
 
 	VulkanObjectDescriptorSet descriptor;
 
