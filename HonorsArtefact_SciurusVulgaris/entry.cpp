@@ -3,10 +3,12 @@
 #include "Graphics.h"
 #include "MeshRenderer.h"
 #include "PointRenderPipeline.h"
+#include "InstancedTreeRenderPass.h"
 #include "ImGuiBlankRenderPass.h"
 #include "Transform.h"
 void GeneratorApp();
 void DisplayApp();
+void InstancedDisplayApp();
 
 int main() {
 	std::cout << "I'm Alive";
@@ -15,7 +17,7 @@ int main() {
 	Graphics::Initialize(800, 800, L"test");
 
 	GeneratorApp();
-	DisplayApp();
+	InstancedDisplayApp();
 
 	Graphics::WaitUntilGPUIdle();
 	Graphics::Shutdown();
@@ -293,4 +295,67 @@ void GeneratorApp() {
 	}
 	Graphics::WaitUntilGPUIdle();
 	meshRenderingPipeline.Shutdown();
+}
+
+void InstancedDisplayApp() {
+	InstancedTreeRenderPass pointRenderingPass;
+	pointRenderingPass.CreateAll();
+	std::vector<size_t> descriptorSizes = { sizeof(WCP_Matrices) * 100 };
+
+	PointMesh* myModel = nullptr;
+	char modelPath[256] = "./models/output.fbx";
+	float angle = 0;
+
+	CameraTransform cameraTransform;
+	cameraTransform.position = HMM_V3(0, 0, -5);
+
+	while (true) {
+		Input::Update();
+		if (Input::ProcessEvents()) break;
+
+		cameraTransform.CaptureControls();
+
+		// Render logic
+		Graphics::BeginRender();
+		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
+
+		if (myModel != nullptr) {
+			std::vector<WCP_Matrices> dataForUBO(400);
+
+			for (int x = 0; x < 20; x++) {
+				for (int y = 0; y < 20; y++) {
+					dataForUBO[x * 10 + y] = {
+						//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
+						HMM_Translate(HMM_V3(x * 5.1f, 0, y * 5.1f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
+						cameraTransform.viewMatrix, 
+						HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
+					};
+				}
+			}	
+
+			myModel->GetDescriptorSet()->UpdateUniformBufferData(0, dataForUBO.data());
+			pointRenderingPass.Render(myModel);
+		}
+
+		ImGui::Begin("Point Model Selection");
+		ImGui::InputText("Model Path", modelPath, 256);
+		if (ImGui::Button("Load")) {
+			if (myModel != nullptr) delete myModel;
+
+			myModel = new PointMesh();
+
+			myModel->LoadFromFile(modelPath);
+			myModel->CopyPointsToVRAM();
+			myModel->CreateDescriptorSet(pointRenderingPass.GetDescriptorSetLayout(), pointRenderingPass.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
+		}
+		ImGui::SliderAngle("Angle", &angle);
+		ImGui::End();
+
+		Graphics::FinishImGuiRender();
+		pointRenderingPass.EndRender();
+		Graphics::EndRender();
+	}
+	Graphics::WaitUntilGPUIdle();
+	if (myModel != nullptr) delete myModel;
+	pointRenderingPass.Shutdown();
 }

@@ -131,7 +131,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     // We are having 2 extensions, windows and surface
     std::vector<const char*> extensionsNames = {
-        "VK_KHR_surface", "VK_KHR_win32_surface"
+        "VK_KHR_surface", "VK_KHR_win32_surface"//, "VK_EXT_debug_utils"
     };
 
     createInfo.enabledExtensionCount = extensionsNames.size();

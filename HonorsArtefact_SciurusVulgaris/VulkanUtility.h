@@ -7,6 +7,8 @@
 	class VulkanUtility
 	{
 	public:
+        //static void DebugNameObject(std::string name, uint64_t handle, VkObjectType type);
+
 		static VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code);
 
         static uint32_t FindMemoryTypeIndex(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties); 
