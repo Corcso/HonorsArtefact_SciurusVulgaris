@@ -3,6 +3,7 @@
 #include "MeshRenderer.h"
 #include "PointRenderPipeline.h"
 #include "ImGuiBlankRenderPass.h"
+#include "DebugPointRenderer.h"
 
 #include "Transform.h"
 
@@ -35,5 +36,11 @@ private:
 
 	bool extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 
 	bool extractPointsConstantly = false; // Extracts and saves points every frame, just used for easy render doc capture
+
+	// LOD View Page
+	DebugPointRenderer debugPointRenderer;
+	void RenderLODPagePrerequisites();
+	void RenderLODPageMenu();
+	std::vector<VulkanObjectDescriptorSet> LODViewDescriptors;
 };
 

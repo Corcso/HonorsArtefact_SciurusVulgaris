@@ -12,6 +12,7 @@
 void GeneratorApp::Initialize(){
 	
 	meshRenderingPipeline.CreateAll();
+	debugPointRenderer.CreateAll();
 	imguiRenderPass.CreateAll(); // Not needed but just incase stuff is added later
 	descriptorSizes = { sizeof(WCP_Matrices), 0 };
 	liveColorOut = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(meshRenderingPipeline.GetSampler(), meshRenderingPipeline.GetColorImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
@@ -30,6 +31,18 @@ void GeneratorApp::Initialize(){
 	extractPointsConstantly = false; // Extracts and saves points every frame, just used for easy render doc capture
 	quitMainLoop = false;
 
+	LODViewDescriptors.resize(16);
+	for (int i = 0; i < 16; i++) {
+		WCP_Matrices newData{
+				HMM_Scale(HMM_V3(0.2, 0.2, 0.2)),
+				HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)),
+				HMM_Perspective_RH_ZO((70 + (i * 5)) * HMM_DegToRad, 1, 0.001, 100)
+		};
+		size_t sizes = sizeof(WCP_Matrices);
+		LODViewDescriptors[i].Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), &sizes);
+
+		LODViewDescriptors[i].UpdateUniformBufferData(0, &newData);
+	}
 }
 
 void GeneratorApp::Frame() {
@@ -54,6 +67,8 @@ void GeneratorApp::Frame() {
 		meshRenderingPipeline.Render(&mesh);
 	}
 	meshRenderingPipeline.EndRender();
+
+	RenderLODPagePrerequisites();
 
 	// ImGui
 	imguiRenderPass.BeginRender(HMM_V4(0, 0, 0, 1));
@@ -106,6 +121,8 @@ void GeneratorApp::Frame() {
 	ImGui::Image(liveColorOut, ImVec2(512, 512));
 	ImGui::End();
 
+	if (meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU)	RenderLODPageMenu();
+
 	Graphics::FinishImGuiRender();
 	imguiRenderPass.EndRender();
 	Graphics::EndRender();
@@ -137,6 +154,9 @@ void GeneratorApp::Frame() {
 		};
 		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
 		meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
+		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
+		//size_t sizes = sizeof(WCP_Matrices);
+		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), &sizes);
 
 		extractPointsAtEndOfThisFrame = false;
 	}
@@ -146,4 +166,26 @@ void GeneratorApp::Frame() {
 void GeneratorApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
 	meshRenderingPipeline.Shutdown();
+	debugPointRenderer.Shutdown();
+}
+
+void GeneratorApp::RenderLODPagePrerequisites()
+{
+	if (!meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU) return;
+	debugPointRenderer.BeginRender(HMM_V4(0, 0, 0, 1));
+	for (int i = 0; i < 16; i++) {
+		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->UpdateUniformBufferData(0, &newData);
+		VkRect2D view{
+			{i % 4 * 256, i / 4 * 256}, {256, 256}
+		};
+		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, &LODViewDescriptors[i]);
+	}
+	debugPointRenderer.EndRender();
+}
+
+void GeneratorApp::RenderLODPageMenu()
+{
+	ImGui::Begin("Level Of Detail");
+	ImGui::Image(debugPointRenderer.GetImGuiOutputTexture(), ImVec2{ 700, 700 });
+	ImGui::End();
 }

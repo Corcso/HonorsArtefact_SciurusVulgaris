@@ -39,7 +39,7 @@ public:
 	//static VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return instance.vkDescriptorSetLayoutInfo; }
 	static VkRenderPass GetSwapChainRenderPass() { return instance.vkRenderPass; }
 	static VkFramebuffer GetThisFramesFrameBuffer() { return instance.vkSwapChainFrameBuffers[instance.thisRenderImageIndex]; }
-
+	static VkSampler GetBasicLinearSampler() { return instance.basicLinearSampler; }
 	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
 	static void CheckVulkanResult(VkResult res)
@@ -92,6 +92,9 @@ private:
 	std::vector<VkFence> vkInFlightFences;
 	std::vector<VkSemaphore> vkImageAvailableSemaphores;
 	std::vector<VkSemaphore> vkRenderFinishedSemaphores;
+
+	// Helpers
+	VkSampler basicLinearSampler;
 
 	// Variables
 	HMM_Vec4 clearColor{ 0.3f, 0.6f, 0.8f, 1.0f };

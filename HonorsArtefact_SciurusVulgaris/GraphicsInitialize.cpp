@@ -316,32 +316,30 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     init_info.Allocator = VK_NULL_HANDLE;
     init_info.CheckVkResultFn = CheckVulkanResult;
     ImGui_ImplVulkan_Init(&init_info);
-//
-//    editorViewportExtent = { 800, 800 };
-//
-//    VulkanSetup::CreateEditorViewport(device, physicalDevice, editorViewportExtent, swapChainImageFormat, renderPass,
-//        &editorViewport, &editorViewportImageView, &editorViewportFrameBuffer, &editorViewportSampler, &editorViewportMemory,
-//        &editorDepthImage, &editorDepthImageView, &editorDepthImageMemory);
-//
-//    editorViewportDescriptorSet = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(editorViewportSampler, editorViewportImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-    //instance.meshRenderer.CreateAll();
+    // Create basic sampler
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.anisotropyEnable = VK_FALSE;
+    samplerInfo.maxAnisotropy = 0;
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
 
-    //instance.meshRenderOutput = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-    //instance.meshRenderOutput2 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView2(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
-    //instance.meshRenderOutput3 = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(instance.meshRenderer.GetSampler() , instance.meshRenderer.GetImageView3(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+    if (vkCreateSampler(Graphics::GetVkDevice(), &samplerInfo, nullptr, &instance.basicLinearSampler) != VK_SUCCESS) {
+        throw - 1;
+    }
 
-    //instance.myMesh = new TriListMesh();
-    //instance.myMesh->LoadFile("./models/SpeedTrees/SpeedTree.obj");
-    //instance.myMesh->CopyPointsToVRAM();
-
-    //instance.myMeshImage.CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
-    //instance.myMeshImage.CreateImageView();
-
-    //std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
-
-    /*instance.myMesh->CreateDescriptorSet(instance.meshRenderer.GetDescriptorSetLayout(), instance.meshRenderer.GetDescriptorSetLayoutInfo(), sizes.data());
-    instance.myMesh->GetDescriptorSet()->UpdateImageSampler(1, &instance.myMeshImage, instance.meshRenderer.GetSampler());*/
     return ;
 }
 

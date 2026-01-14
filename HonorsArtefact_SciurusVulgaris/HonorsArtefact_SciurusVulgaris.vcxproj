@@ -149,6 +149,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="DebugPointRenderer.h" />
     <ClInclude Include="GeneratorApp.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="HandmadeMath.h" />
@@ -179,6 +180,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="Clock.cpp" />
+    <ClCompile Include="DebugPointRenderer.cpp" />
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="OLDentry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
