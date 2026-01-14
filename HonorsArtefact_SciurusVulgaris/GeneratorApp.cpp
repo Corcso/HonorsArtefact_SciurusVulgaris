@@ -166,7 +166,10 @@ void GeneratorApp::Frame() {
 void GeneratorApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
 	meshRenderingPipeline.Shutdown();
-	debugPointRenderer.Shutdown();
+	debugPointRenderer.Shutdown(); 
+	for (int i = 0; i < 16; i++) {
+		LODViewDescriptors[i].CleanupDescriptor();
+	}
 }
 
 void GeneratorApp::RenderLODPagePrerequisites()
