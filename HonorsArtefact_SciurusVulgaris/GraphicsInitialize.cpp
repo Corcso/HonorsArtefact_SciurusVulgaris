@@ -178,14 +178,18 @@ void Graphics::Initialize(int width, int height, std::wstring title)
         bool isSuitable = VulkanSetup::CheckDeviceSuitability(device, instance.vkSurface);
         std::cout << "Device : " << props.deviceName << " Suitable: " << ((isSuitable) ? "YES" : "NO") << "\n";
     }
+    if (deviceCount > 1) {
+        std::cout << "Enter Chosen Index: ";
+        std::string choice;
+        std::cin >> choice;
+        if (std::stoi(choice) >= deviceCount) return; // Fail!
 
-    std::cout << "Enter Chosen Index: ";
-    std::string choice;
-    std::cin >> choice;
-    if (std::stoi(choice) >= deviceCount) return; // Fail!
-
-    instance.vkPhysicalDevice = devices[std::stoi(choice)];
-
+        instance.vkPhysicalDevice = devices[std::stoi(choice)];
+    }
+    else {
+        std::cout << "Choosing Only Device Automatically...\n";
+        if(bool isSuitable = VulkanSetup::CheckDeviceSuitability(devices[0], instance.vkSurface)) instance.vkPhysicalDevice = devices[0];
+    }
     if (instance.vkPhysicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
