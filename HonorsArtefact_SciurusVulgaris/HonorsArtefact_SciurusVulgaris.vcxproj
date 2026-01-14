@@ -146,8 +146,10 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
     <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="GeneratorApp.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="HandmadeMath.h" />
     <ClInclude Include="Image.h" />
@@ -162,6 +164,7 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InstancedTreeRenderPass.h" />
+    <ClInclude Include="MainDisplayApp.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
@@ -174,8 +177,14 @@
     <ClInclude Include="VulkanUtility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="entry.cpp" />
+    <ClCompile Include="OLDentry.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratorApp.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsInitialize.cpp" />
     <ClCompile Include="Image.cpp" />
@@ -210,6 +219,7 @@
     </ClCompile>
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InstancedTreeRenderPass.cpp" />
+    <ClCompile Include="MainDisplayApp.cpp" />
     <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="PCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
