@@ -1,5 +1,6 @@
 #include "PCH.h"
 #include "Input.h"
+#include "Graphics.h"
 
 Input Input::instance;
 
@@ -91,12 +92,13 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;*/
     }
+    break;
     case WM_SIZE:
     {
         HMM_Vec2 newSize;
         newSize.Width = LOWORD(lParam);
         newSize.Height = HIWORD(lParam);
-        //Services::GetGraphics()->RegisterWindowSizeChange(newSize);
+        Graphics::RegisterWindowSizeChange(newSize);
     }
     break;
     case WM_PAINT:

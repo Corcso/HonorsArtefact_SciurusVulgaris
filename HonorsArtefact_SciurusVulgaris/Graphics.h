@@ -23,6 +23,8 @@ public:
 	static void FinishImGuiRender();
 	static void EndRender();
 
+	static void RegisterWindowSizeChange(HMM_Vec2 newSize);
+
 	static VkInstance GetVkInstance() { return instance.vkInstance; }
 	static VkSurfaceKHR GetVkSurface() { return instance.vkSurface; }
 	static VkPhysicalDevice GetVkPhysicalDevice() { return instance.vkPhysicalDevice; }
@@ -67,6 +69,8 @@ private:
 	std::vector<VkImageView> vkSwapChainImageViews;
 	std::vector<VkFramebuffer> vkSwapChainFrameBuffers;
 	VkSwapchainKHR vkSwapChain;
+	static void RecreateSwapChain();
+	bool swapChainNeedsRecreation; VkExtent2D newSwapChainSize;
 	VkRenderPass vkRenderPass;
 
 	// Memory allocator

@@ -1,5 +1,7 @@
 #include "PCH.h"
 #include "Graphics.h"
+#include "VulkanSetup.h"
+#include "Input.h"
 
 Graphics Graphics::instance;
 
@@ -152,15 +154,57 @@ void Graphics::EndRender()
 
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
 
-    /*if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || swapChainNeedsRecreation) {
-        swapChainNeedsRecreation = false;
-        if (!Services::GetTree()->IsGameClosingThisFrame())RecreateSwapChain();
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || instance.swapChainNeedsRecreation) {
+        instance.swapChainNeedsRecreation = false;
+        /*if (!Services::GetTree()->IsGameClosingThisFrame())*/ RecreateSwapChain();
     }
     else if (result != VK_SUCCESS) {
         throw - 1;
-    }*/
+    }
 
     instance.currentFrame = (instance.currentFrame + 1) % VULKAN_MAX_FRAMES_IN_FLIGHT;
+}
+
+void Graphics::RegisterWindowSizeChange(HMM_Vec2 newSize)
+{
+    instance.swapChainNeedsRecreation = true;
+    instance.currentWidth = static_cast<int>(newSize.X);
+    instance.currentHeight = static_cast<int>(newSize.Y);
+}
+
+void Graphics::RecreateSwapChain()
+{
+    // If we are minimised, size is 0, freeze all main thread processing appart from the input loop (as this will see when we unminimise)
+    while (instance.currentWidth == 0 || instance.currentHeight == 0) {
+        Input::ProcessEvents();
+    }
+    // Wait until nothing is going on
+    vkDeviceWaitIdle(instance.vkDevice);
+
+    // Destroy Frame Buffers
+    for (auto& thisFrameBuffer : instance.vkSwapChainFrameBuffers) vkDestroyFramebuffer(instance.vkDevice, thisFrameBuffer, nullptr);
+
+    // Destroy Images & Swap Chain
+    for (auto& thisImageView : instance.vkSwapChainImageViews) vkDestroyImageView(instance.vkDevice, thisImageView, nullptr);
+    vkDestroySwapchainKHR(instance.vkDevice, instance.vkSwapChain, nullptr);
+    vkDestroyImageView(instance.vkDevice, instance.vkDepthImageView, nullptr);
+    vkDestroyImage(instance.vkDevice, instance.vkDepthImage, nullptr);
+    vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
+
+    VulkanSetup::CreateSwapChain(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSurface,
+        instance.currentWidth, instance.currentHeight,
+        &instance.vkSwapChainFormat, &instance.vkSwapChainExtent, &instance.vkSwapChainImages, &instance.vkSwapChain);
+
+    VulkanSetup::CreateImageViewsForSwapChain(instance.vkDevice, instance.vkSwapChainFormat,
+        instance.vkSwapChainImages, &instance.vkSwapChainImageViews);
+
+    VulkanSetup::CreateDepthBuffer(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSwapChainExtent, &instance.vkDepthImage,
+        &instance.vkDepthImageMemory, &instance.vkDepthImageView);
+
+    // Setup frame buffers
+    VulkanSetup::CreateFrameBuffers(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent, instance.vkSwapChainImageViews, instance.vkDepthImageView, &instance.vkSwapChainFrameBuffers);
+
+
 }
 
 //void Graphics::AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout)
