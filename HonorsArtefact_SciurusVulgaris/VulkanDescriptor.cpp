@@ -235,7 +235,7 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 		// TODO
 		// and free memory
 		for (int i = 0; i < descriptors.size(); i++) {
-			if (descriptors[i].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER || descriptors[i].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) continue;
+			if (descriptors[i].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER && descriptors[i].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) continue;
 			VulkanUtility::DestroyBuffer(descriptors[i].buffer);
 			VulkanUtility::FreeGPUMemoryBlock(descriptors[i].bufferMemory);
 		}
