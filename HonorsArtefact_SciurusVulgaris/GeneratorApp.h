@@ -42,5 +42,7 @@ private:
 	void RenderLODPagePrerequisites();
 	void RenderLODPageMenu();
 	std::vector<VulkanObjectDescriptorSet> LODViewDescriptors;
+	float LODViewRotation;
+	std::vector<float> LODViewDistances;
 };
 

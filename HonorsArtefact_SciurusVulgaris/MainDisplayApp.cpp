@@ -20,13 +20,14 @@ void MainDisplayApp::Initialize() {
 }
 
 void MainDisplayApp::Frame() {
-	cameraTransform.CaptureControls();
+	
 
 	// Render logic
 	Graphics::BeginRender();
 	pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
 	if (myModel != nullptr) {
+		cameraTransform.CaptureControls();
 		std::vector<WCP_Matrices> dataForUBO(400);
 
 		for (int x = 0; x < 20; x++) {

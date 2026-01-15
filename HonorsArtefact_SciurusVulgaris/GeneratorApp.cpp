@@ -32,7 +32,9 @@ void GeneratorApp::Initialize(){
 	quitMainLoop = false;
 
 	LODViewDescriptors.resize(16);
+	LODViewDistances.resize(16);
 	for (int i = 0; i < 16; i++) {
+		LODViewDistances[i] = 0;
 		WCP_Matrices newData{
 				HMM_Scale(HMM_V3(0.2, 0.2, 0.2)),
 				HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)),
@@ -153,7 +155,8 @@ void GeneratorApp::Frame() {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, -5, 0), HMM_V3(0, -10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
 		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
-		meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
+		//meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
+		
 		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
 		//size_t sizes = sizeof(WCP_Matrices);
 		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), &sizes);
@@ -188,18 +191,54 @@ void GeneratorApp::RenderLODPagePrerequisites()
 
 void GeneratorApp::RenderLODPageMenu()
 {
-	ImGui::Begin("Level Of Detail");
+	ImGui::Begin("Level Of Detail View");
 	ImGui::Image(debugPointRenderer.GetImGuiOutputTexture(), ImVec2{ 700, 700 });
-	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
-		ImGui::InputScalar(("Point Count LOD " + std::to_string(i)).c_str(), ImGuiDataType_U32, &meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[i]);
+	ImGui::End();
+	ImGui::Begin("Level Of Detail Studio");
+	if (ImGui::Button("Reshuffle Points"))
+	{
+		std::random_device rd;
+		std::mt19937 g(rd());
+
+		std::shuffle(meshRenderingPipeline.GetPointMeshOutput()->points.begin(), meshRenderingPipeline.GetPointMeshOutput()->points.end(), g);
+		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
 	}
 	if (ImGui::Button("-") && meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() > 0) {
 		meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.pop_back();
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("+") && meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() < 16) {
-		meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.push_back(meshRenderingPipeline.GetPointMeshOutput()->points.size());
+		if (meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() < 1) {
+			meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.push_back(
+				meshRenderingPipeline.GetPointMeshOutput()->points.size()
+			);
+		}
+		else {
+			meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.push_back(
+				meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() - 1] / 2
+			);
+		}
+	}
+	ImGui::SliderAngle("Rotation", &LODViewRotation);
+	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
+		ImGui::DragFloat(("Distance " + std::to_string(i)).c_str(), &LODViewDistances[i]);
+		ImGui::SameLine();
+		ImGui::InputScalar(("Point Count LOD " + std::to_string(i)).c_str(), ImGuiDataType_U32, &meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[i]);
+	}
+	if (ImGui::Button("Save Tree File")) {
+		meshRenderingPipeline.GetPointMeshOutput()->SaveToTreeFile("./models/output.tree");
 	}
 	
 	ImGui::End();
+
+
+	for (int i = 0; i < 16; i++) {
+		WCP_Matrices newData{
+				HMM_Translate(HMM_V3(0, 0, LODViewDistances[i])) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(LODViewRotation, HMM_V3(0, 1, 0)),
+				HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)),
+				HMM_Perspective_RH_ZO(70 * HMM_DegToRad, 1, 0.001, 100)
+		};
+
+		LODViewDescriptors[i].UpdateUniformBufferData(0, &newData);
+	}
 }

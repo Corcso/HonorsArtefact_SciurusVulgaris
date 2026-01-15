@@ -26,8 +26,7 @@ void PointTreeMesh::LoadFromTreeFile(std::string path)
 
 void PointTreeMesh::SaveToTreeFile(std::string path)
 {
-	std::string modelPath = path.substr(0, path.length() - 5) + "_MODELDATA.fbx";
-	SaveToFile(modelPath);
+	
 	
 	nlohmann::json output;
 	switch (levelOfDetailType) {
@@ -37,10 +36,18 @@ void PointTreeMesh::SaveToTreeFile(std::string path)
 		for (auto& item : randomLevelsLODPointCount) {
 			output["randomLevelsPointCount"].push_back(item);
 		}
+
+		// Truncate model if needed
+		if (randomLevelsLODPointCount.size() > 0 && randomLevelsLODPointCount[0] < points.size()) {
+			points.resize(randomLevelsLODPointCount[0]);
+		}
 		break;
 	}
 
 	std::ofstream file(path);
 	file << output;
 	file.close();
+
+	std::string modelPath = path.substr(0, path.length() - 5) + "_MODELDATA.fbx";
+	SaveToFile(modelPath);
 }
