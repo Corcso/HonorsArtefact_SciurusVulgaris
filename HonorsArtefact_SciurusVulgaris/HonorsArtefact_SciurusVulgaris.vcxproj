@@ -165,11 +165,13 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InstancedTreeRenderPass.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="MainDisplayApp.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="PointRenderPipeline.h" />
+    <ClInclude Include="PointTreeMesh.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TriListMesh.h" />
     <ClInclude Include="VulkanDescriptor.h" />
@@ -229,6 +231,7 @@
     </ClCompile>
     <ClCompile Include="PointMesh.cpp" />
     <ClCompile Include="PointRenderPipeline.cpp" />
+    <ClCompile Include="PointTreeMesh.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TriListMesh.cpp" />
     <ClCompile Include="VulkanDescriptor.cpp" />

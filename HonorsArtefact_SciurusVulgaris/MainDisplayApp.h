@@ -19,7 +19,7 @@ private:
 	InstancedTreeRenderPass pointRenderingPass;
 	std::vector<size_t> descriptorSizes;
 
-	PointMesh* myModel;
+	PointTreeMesh* myModel;
 	char modelPath[256] = "./models/output.fbx";
 	float angle;
 

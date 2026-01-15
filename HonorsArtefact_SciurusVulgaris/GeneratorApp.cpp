@@ -176,12 +176,12 @@ void GeneratorApp::RenderLODPagePrerequisites()
 {
 	if (!meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU) return;
 	debugPointRenderer.BeginRender(HMM_V4(0, 0, 0, 1));
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
 		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->UpdateUniformBufferData(0, &newData);
 		VkRect2D view{
 			{i % 4 * 256, i / 4 * 256}, {256, 256}
 		};
-		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, &LODViewDescriptors[i]);
+		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, i, &LODViewDescriptors[i]);
 	}
 	debugPointRenderer.EndRender();
 }
@@ -190,5 +190,16 @@ void GeneratorApp::RenderLODPageMenu()
 {
 	ImGui::Begin("Level Of Detail");
 	ImGui::Image(debugPointRenderer.GetImGuiOutputTexture(), ImVec2{ 700, 700 });
+	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
+		ImGui::InputScalar(("Point Count LOD " + std::to_string(i)).c_str(), ImGuiDataType_U32, &meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[i]);
+	}
+	if (ImGui::Button("-") && meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() > 0) {
+		meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.pop_back();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("+") && meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() < 16) {
+		meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.push_back(meshRenderingPipeline.GetPointMeshOutput()->points.size());
+	}
+	
 	ImGui::End();
 }

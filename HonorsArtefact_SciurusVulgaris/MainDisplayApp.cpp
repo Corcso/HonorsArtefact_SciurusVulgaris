@@ -49,7 +49,7 @@ void MainDisplayApp::Frame() {
 	if (ImGui::Button("Load")) {
 		if (myModel != nullptr) delete myModel;
 
-		myModel = new PointMesh();
+		myModel = new PointTreeMesh();
 
 		myModel->LoadFromFile(modelPath);
 		myModel->CopyPointsToVRAM();

@@ -2,7 +2,7 @@
 #include "PCH.h"
 #include "VulkanMemoryAllocator.h"
 #include "TriListMesh.h"
-#include "PointMesh.h"
+#include "PointTreeMesh.h"
 #include "VulkanDescriptor.h"
 #include "Image.h"
 #include "BufferStructs.h"
@@ -19,7 +19,7 @@ public:
 		CreateDescriptorLayout();
 		CreatePipeline();
 		CreateSyncObjects();
-		output = new PointMesh();
+		output = new PointTreeMesh();
 	}
 	void Shutdown();
 
@@ -47,7 +47,7 @@ public:
 	VkImageView GetPositionImageView() const { return positionImage.GetImageView(); }
 	VkImageView GetNormalImageView() const { return normalImage.GetImageView(); }
 	VkSampler GetSampler() const { return vkSampler; }
-	PointMesh* GetPointMeshOutput() { return output; }
+	PointTreeMesh* GetPointMeshOutput() { return output; }
 private:
 	VkRenderPass vkRenderPass;
 	VkDescriptorSetLayout vkDescriptorSetLayout;
@@ -65,7 +65,7 @@ private:
 	VkSampler vkSampler;
 
 	VkFence vkIsLastExtractionFinishedFence;
-	PointMesh* output;
+	PointTreeMesh* output;
 
 	// TODO REMOVE AND TIDY
 	int frameinc;

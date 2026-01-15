@@ -111,6 +111,12 @@
     <ClInclude Include="DebugPointRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PointTreeMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Input.cpp">
@@ -201,6 +207,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DebugPointRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PointTreeMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

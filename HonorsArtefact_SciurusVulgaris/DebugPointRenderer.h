@@ -1,6 +1,6 @@
 #pragma once
 #include "VulkanMemoryAllocator.h"
-#include "PointMesh.h"
+#include "PointTreeMesh.h"
 #include "VulkanDescriptor.h"
 #include "Image.h"
 
@@ -25,7 +25,7 @@ public:
 	//void CreateSyncObjects();
 
 	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void Render(PointMesh* points, VkRect2D view, VulkanObjectDescriptorSet* descriptorSet = nullptr, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void Render(PointTreeMesh* points, VkRect2D view, unsigned int LODLevel = 0, VulkanObjectDescriptorSet* descriptorSet = nullptr, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }

@@ -366,7 +366,7 @@ void DebugPointRenderer::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer comman
     
 }
 
-void DebugPointRenderer::Render(PointMesh* points, VkRect2D view, VulkanObjectDescriptorSet* descriptorSet, VkCommandBuffer commandBuffer)
+void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned int LODLevel, VulkanObjectDescriptorSet* descriptorSet, VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -397,7 +397,12 @@ void DebugPointRenderer::Render(PointMesh* points, VkRect2D view, VulkanObjectDe
             descriptorSet->GetDescriptorSet(), 0, nullptr);
     }
 
-    vkCmdDraw(commandBuffer, points->points.size(), 1, 0, 0);
+    unsigned int pointCount = points->points.size();
+    if(LODLevel < points->randomLevelsLODPointCount.size()){
+        pointCount = points->randomLevelsLODPointCount[LODLevel];
+    }
+
+    vkCmdDraw(commandBuffer, pointCount, 1, 0, 0);
 }
 
 void DebugPointRenderer::EndRender(VkCommandBuffer commandBuffer)

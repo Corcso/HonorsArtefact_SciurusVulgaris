@@ -1,6 +1,6 @@
 #pragma once
 #include "PCH.h"
-#include "PointMesh.h"
+#include "PointTreeMesh.h"
 
 class InstancedTreeRenderPass
 {
@@ -15,7 +15,7 @@ public:
 	void Shutdown();
 
 	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void Render(PointMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void Render(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }

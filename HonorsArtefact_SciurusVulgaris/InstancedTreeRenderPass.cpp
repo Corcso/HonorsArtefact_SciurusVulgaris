@@ -253,7 +253,7 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void InstancedTreeRenderPass::Render(PointMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
+void InstancedTreeRenderPass::Render(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     VkBuffer vertexBuffers[] = { points->pointBuffer };
