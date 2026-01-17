@@ -8,7 +8,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { sizeof(WCP_Matrices) * 400 };
+	descriptorSizes = { sizeof(WCP_Matrices) * 400, sizeof(LODDataBuffer)};
 
 	myModel = nullptr;
 	angle = 0;
@@ -41,7 +41,15 @@ void MainDisplayApp::Frame() {
 			}
 		}
 
+		LODDataBuffer lodData;
+		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+		}
+		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(0, dataForUBO.data());
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
 		pointRenderingPass.Render(myModel, pointToRenderCount);
 	}
 
@@ -52,7 +60,7 @@ void MainDisplayApp::Frame() {
 
 		myModel = new PointTreeMesh();
 
-		myModel->LoadFromFile(modelPath);
+		myModel->LoadFromTreeFile(modelPath);
 		myModel->CopyPointsToVRAM();
 		myModel->CreateDescriptorSet(pointRenderingPass.GetDescriptorSetLayout(), pointRenderingPass.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
 	}

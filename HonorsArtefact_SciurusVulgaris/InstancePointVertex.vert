@@ -15,14 +15,30 @@ struct WCPMatrices{
 };
 
 layout(binding = 0) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[40000];
+    WCPMatrices matrices[400];
 } ubo;
+
+layout(binding = 1) uniform LODDataBuffer {
+    vec4 cameraPosition;
+    int maxVertexLevels[16];
+    int maxLevel;
+} levelOfDetailData;
 
 void main() {
 
-    gl_Position = ubo.matrices[gl_InstanceIndex].proj * ubo.matrices[gl_InstanceIndex].view * ubo.matrices[gl_InstanceIndex].world * vec4(inPosition, 1.0);
-   
+    
+
     outWorldPos = (ubo.matrices[gl_InstanceIndex].world * vec4(inPosition, 1.0)).xyz;
+    
+    int level =  clamp(int(floor(length(outWorldPos - levelOfDetailData.cameraPosition.xyz) / 10.0f)), 0, levelOfDetailData.maxLevel - 1);
+    if(levelOfDetailData.maxVertexLevels[level] < gl_VertexIndex){
+        gl_Position = vec4(0, 0, -2, 1);
+        return;
+    }
+    
+
+    gl_Position = ubo.matrices[gl_InstanceIndex].proj * ubo.matrices[gl_InstanceIndex].view * ubo.matrices[gl_InstanceIndex].world * vec4(inPosition, 1.0);
+
     outNormal = (ubo.matrices[gl_InstanceIndex].world * vec4(inNormal, 0.0)).xyz;
     outColor = vec4(inColor, 1.0);
 

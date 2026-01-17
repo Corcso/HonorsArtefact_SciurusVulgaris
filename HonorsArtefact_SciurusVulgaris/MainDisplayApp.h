@@ -20,7 +20,7 @@ private:
 	std::vector<size_t> descriptorSizes;
 
 	PointTreeMesh* myModel;
-	char modelPath[256] = "./models/output.fbx";
+	char modelPath[256] = "./models/output.tree";
 	float angle;
 
 	CameraTransform cameraTransform;
