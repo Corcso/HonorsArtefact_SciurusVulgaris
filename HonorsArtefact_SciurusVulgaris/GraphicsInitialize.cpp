@@ -254,7 +254,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     VulkanSetup::CreateRenderPass(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSwapChainFormat, &instance.vkRenderPass);
 
     // Setup descriptor pool
-    VulkanSetup::CreateDescriptorPool(instance.vkDevice, 1, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
+    VulkanSetup::CreateDescriptorPool(instance.vkDevice, 100, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
 
     //VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1];
     //uboLayoutBindings[0].binding = 0;
