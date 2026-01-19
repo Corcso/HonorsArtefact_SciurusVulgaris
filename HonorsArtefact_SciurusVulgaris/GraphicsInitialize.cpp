@@ -384,6 +384,9 @@ void Graphics::Shutdown()
     vkDestroyImage(instance.vkDevice, instance.vkDepthImage, nullptr);
     vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
 
+    // Destroy Utility Sampler
+    vkDestroySampler(instance.vkDevice, instance.basicLinearSampler, nullptr);
+
     // Destroy descriptors
     /*for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
         for (auto& descriptor : descriptorArray) {

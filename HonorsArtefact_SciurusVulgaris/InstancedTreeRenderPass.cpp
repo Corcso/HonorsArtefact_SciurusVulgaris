@@ -763,9 +763,29 @@ void InstancedTreeRenderPass::Shutdown() {
     // Destroy Pipeline
     vkDestroyPipeline(Graphics::GetVkDevice(), vkMainPipeline, nullptr);
     vkDestroyPipelineLayout(Graphics::GetVkDevice(), vkMainPipelineLayout, nullptr);
+    vkDestroyPipeline(Graphics::GetVkDevice(), vkSecondPipeline, nullptr);
+    vkDestroyPipelineLayout(Graphics::GetVkDevice(), vkSecondPipelineLayout, nullptr);
+
+    // Destroy Render Pass
+    vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);
+
+    // Destroy Frame Buffer & Images
+    vkDestroyFramebuffer(Graphics::GetVkDevice(), vkFrameBuffer, nullptr);
+    colorImage.Destroy();
+    depthImage.Destroy();
+    positionImage.Destroy();
+    normalImage.Destroy();
+
+    // Destroy Sampler
+    vkDestroySampler(Graphics::GetVkDevice(), vkSampler, nullptr);
+
+    // Destroy mesh
+    delete fullScreenQuad;
 
     // Destroy descriptor set layout
     vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkDescriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(Graphics::GetVkDevice(), vkSecondDescriptorSetLayout, nullptr);
 
     delete[] vkDescriptorSetLayoutInfo.pBindings;
+    delete[] vkSecondDescriptorSetLayoutInfo.pBindings;
 }
