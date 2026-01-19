@@ -240,6 +240,9 @@
     <ClCompile Include="VulkanUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DeferedPoint.frag" />
+    <None Include="DeferedQuad.vert" />
+    <None Include="DeferedTree.frag" />
     <None Include="InstancePointVertex.vert" />
     <None Include="MeshFragment.frag" />
     <None Include="CompileAllShaders.bat" />

@@ -1,0 +1,16 @@
+#version 450 
+
+layout(location = 0) in vec3 inWorldPos;
+layout(location = 1) in vec4 inColor;
+layout(location = 2) in vec3 inNormal;
+
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outPosition;
+layout(location = 2) out vec4 outNormal;
+
+
+void main() {
+    outColor = inColor;
+    outPosition = vec4(inWorldPos, 1);
+    outNormal = vec4(normalize(inNormal), 1);
+}

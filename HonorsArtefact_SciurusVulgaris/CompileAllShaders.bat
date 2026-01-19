@@ -3,4 +3,10 @@ C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointVertex.vert -o ./COMPILEDSHADE
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe PointFragment.frag -o ./COMPILEDSHADER_PointFragment.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshVertex.vert -o ./COMPILEDSHADER_MeshVertex.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshFragment.frag -o ./COMPILEDSHADER_MeshFragment.spv
+
+:: Defered Stuff
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedQuad.vert -o ./COMPILEDSHADER_DeferedQuad.spv
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedTree.frag -o ./COMPILEDSHADER_DeferedTree.spv
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedPoint.frag -o ./COMPILEDSHADER_DeferedPoint.spv
+
 pause

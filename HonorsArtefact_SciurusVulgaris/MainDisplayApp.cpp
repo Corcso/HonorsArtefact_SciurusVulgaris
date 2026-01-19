@@ -79,8 +79,11 @@ void MainDisplayApp::Frame() {
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::End();
 
-	Graphics::FinishImGuiRender();
 	pointRenderingPass.EndRender();
+
+	pointRenderingPass.ExecuteSecondRender();
+	Graphics::FinishImGuiRender();
+	pointRenderingPass.EndSecondRender();
 	Graphics::EndRender();
 }
 

@@ -230,5 +230,14 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="InstancePointVertex.vert" />
+    <None Include="DeferedQuad.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="DeferedPoint.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="DeferedTree.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
