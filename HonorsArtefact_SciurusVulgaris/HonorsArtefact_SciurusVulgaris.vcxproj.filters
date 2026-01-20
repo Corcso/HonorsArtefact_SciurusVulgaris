@@ -19,39 +19,27 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{1266826f-ff0e-433e-9bcb-20c2dcae5e38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Renderers">
+      <UniqueIdentifier>{4967dc17-8c04-4023-97c5-fd7d9bcde20f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{a2c63542-527a-456d-ac06-5db76131c61a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Singletons">
+      <UniqueIdentifier>{7d343816-14b0-4dad-901f-b46890103b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VulkanUtility">
+      <UniqueIdentifier>{961b8fa8-7b82-45b9-9599-a1e83722752e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Apps">
+      <UniqueIdentifier>{645c491d-f7df-4c55-bb2b-a00c2e2d05e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PCH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HandmadeMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanDescriptor.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanMemoryAllocator.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanSetup.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanUtility.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PointMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriListMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="imconfig.h">
@@ -78,84 +66,84 @@
     <ClInclude Include="imstb_truetype.h">
       <Filter>ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BufferStructs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PointRenderPipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiBlankRenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedTreeRenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Clock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratorApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="App.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainDisplayApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugPointRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PointTreeMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PointRenderPipeline.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancedTreeRenderPass.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiBlankRenderPass.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugPointRenderer.h">
+      <Filter>Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="TriListMesh.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
     <ClInclude Include="Light.h">
-      <Filter>Header Files</Filter>
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="PointMesh.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="PointTreeMesh.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Clock.h">
+      <Filter>Singletons</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics.h">
+      <Filter>Singletons</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Singletons</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanUtility.h">
+      <Filter>VulkanUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDescriptor.h">
+      <Filter>VulkanUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMemoryAllocator.h">
+      <Filter>VulkanUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanSetup.h">
+      <Filter>VulkanUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>VulkanUtility</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Apps</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratorApp.h">
+      <Filter>Apps</Filter>
+    </ClInclude>
+    <ClInclude Include="MainDisplayApp.h">
+      <Filter>Apps</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Input.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OLDentry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GraphicsInitialize.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanDescriptor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanMemoryAllocator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanSetup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanUtility.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PointMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TriListMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui.cpp">
@@ -179,44 +167,71 @@
     <ClCompile Include="imgui_widgets.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PointRenderPipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ImGuiBlankRenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedTreeRenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Clock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratorApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="App.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainDisplayApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DebugPointRenderer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="PointRenderPipeline.cpp">
+      <Filter>Renderers</Filter>
     </ClCompile>
-    <ClCompile Include="PointTreeMesh.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancedTreeRenderPass.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiBlankRenderPass.cpp">
+      <Filter>Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugPointRenderer.cpp">
+      <Filter>Renderers</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PointMesh.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="PointTreeMesh.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="TriListMesh.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Singletons</Filter>
+    </ClCompile>
+    <ClCompile Include="Clock.cpp">
+      <Filter>Singletons</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Singletons</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDescriptor.cpp">
+      <Filter>VulkanUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanMemoryAllocator.cpp">
+      <Filter>VulkanUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanSetup.cpp">
+      <Filter>VulkanUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanUtility.cpp">
+      <Filter>VulkanUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>VulkanUtility</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Apps</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratorApp.cpp">
+      <Filter>Apps</Filter>
+    </ClCompile>
+    <ClCompile Include="MainDisplayApp.cpp">
+      <Filter>Apps</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,7 +250,6 @@
     <None Include="MeshFragment.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="InstancePointVertex.vert" />
     <None Include="DeferedQuad.vert">
       <Filter>Shaders</Filter>
     </None>
@@ -243,6 +257,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="DeferedTree.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="InstancePointVertex.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
