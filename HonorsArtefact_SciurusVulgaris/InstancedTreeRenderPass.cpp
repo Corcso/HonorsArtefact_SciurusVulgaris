@@ -3,6 +3,7 @@
 #include "VulkanUtility.h"
 #include "Graphics.h"
 #include "VulkanSetup.h"
+#include "Light.h"
 
 void InstancedTreeRenderPass::CreateDescriptorLayout() {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
@@ -68,8 +69,8 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
     fullScreenQuad->indices = { 0, 2, 1, 2, 3, 1 };
                   
     fullScreenQuad->CopyPointsToVRAM();
-                  
-    fullScreenQuad->CreateDescriptorSet(vkSecondDescriptorSetLayout, vkSecondDescriptorSetLayoutInfo, nullptr);
+    size_t sizes[] = { 0, 0, 0, sizeof(Light::BufferStruct) };
+    fullScreenQuad->CreateDescriptorSet(vkSecondDescriptorSetLayout, vkSecondDescriptorSetLayoutInfo, sizes);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(0, &colorImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(1, &positionImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(2, &normalImage, vkSampler);
@@ -213,34 +214,34 @@ void InstancedTreeRenderPass::CreateRenderPass() {
 
 void InstancedTreeRenderPass::CreateSecondDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[3]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[4]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[0].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    // Not used for images
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
     uboLayoutBindings[1].binding = 1;
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[1].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    // Not used for images
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
     uboLayoutBindings[2].binding = 2;
     uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[2].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    // Not used for images
     uboLayoutBindings[2].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[3].binding = 3;
+    uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[3].descriptorCount = 1;
+    uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBindings[3].pImmutableSamplers = nullptr;
 
     vkSecondDescriptorSetLayoutInfo = {};
     vkSecondDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkSecondDescriptorSetLayoutInfo.bindingCount = 3;
+    vkSecondDescriptorSetLayoutInfo.bindingCount = 4;
     vkSecondDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkSecondDescriptorSetLayoutInfo, nullptr, &vkSecondDescriptorSetLayout) != VK_SUCCESS) {

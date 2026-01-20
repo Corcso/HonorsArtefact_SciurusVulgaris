@@ -4,6 +4,7 @@
 #include "ImGuiBlankRenderPass.h"
 #include "Transform.h"
 #include "BufferStructs.h"
+#include "Light.h"
 
 
 class MainDisplayApp :
@@ -26,5 +27,7 @@ private:
 	CameraTransform cameraTransform;
 
 	int pointToRenderCount;
+
+	Light sun;
 };
 

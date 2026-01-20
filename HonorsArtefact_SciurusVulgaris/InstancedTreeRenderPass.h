@@ -42,6 +42,8 @@ public:
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }
 
+	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
+
 private:
 	// First Pass
 	VkRenderPass vkRenderPass;

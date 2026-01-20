@@ -17,6 +17,8 @@ void MainDisplayApp::Initialize() {
 	cameraTransform.position = HMM_V3(0, 0, -5);
 
 	pointToRenderCount = 0;
+
+	sun.SetName("Sun");
 }
 
 void MainDisplayApp::Frame() {
@@ -80,6 +82,10 @@ void MainDisplayApp::Frame() {
 	ImGui::End();
 
 	pointRenderingPass.EndRender();
+
+	sun.RenderImGuiMenu(true);
+	Light::BufferStruct rawSunData = sun.GetBufferData();
+	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
 	pointRenderingPass.ExecuteSecondRender();
 	Graphics::FinishImGuiRender();
