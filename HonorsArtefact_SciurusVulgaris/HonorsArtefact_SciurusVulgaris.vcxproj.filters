@@ -144,8 +144,11 @@
     <ClInclude Include="InstancedTreeRenderPass.h">
       <Filter>Renderers\Passes</Filter>
     </ClInclude>
-    <ClInclude Include="PointsToGBuffer_RP.h">
+    <ClInclude Include="PointsToGBuffer_GP.h">
       <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="GBufferToOutput_GP.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -245,8 +248,11 @@
     <ClCompile Include="InstancedTreeRenderPass.cpp">
       <Filter>Renderers\Passes</Filter>
     </ClCompile>
-    <ClCompile Include="PointsToGBuffer_RP.cpp">
+    <ClCompile Include="PointsToGBuffer_GP.cpp">
       <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="GBufferToOutput_GP.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

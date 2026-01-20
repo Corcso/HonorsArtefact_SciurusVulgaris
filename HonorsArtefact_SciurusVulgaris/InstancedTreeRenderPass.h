@@ -2,12 +2,15 @@
 #include "PCH.h"
 #include "PointTreeMesh.h"
 #include "TriListMesh.h"
+#include "Graphics.h"
+#include "PointsToGBuffer_GP.h"
+#include "GBufferToOutput_GP.h"
 
 class InstancedTreeRenderPass
 {
 public:
-	void CreateDescriptorLayout();
-	void CreatePipeline();
+	//void CreateDescriptorLayout();
+	//void CreatePipeline();
 
 	void CreateImages();
 	void CreateUniqueMeshData();
@@ -15,19 +18,19 @@ public:
 	void CreateFrameBuffer();
 
 	void CreateRenderPass();
-	void CreateSecondDescriptorLayout();
-	void CreateSecondPipeline();
 
 	void CreateAll() {
-		CreateDescriptorLayout();
+		//CreateDescriptorLayout();
 		CreateImages();
 		CreateSampler();
 		CreateRenderPass();
 		CreateFrameBuffer();
-		CreatePipeline();
-
-		CreateSecondDescriptorLayout();
-		CreateSecondPipeline();
+		//CreatePipeline();
+		pointsToGBuffer_GP.CreateDescriptorLayout();
+		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
+		gBufferToOutput_GP.CreateDescriptorLayout();
+		gBufferToOutput_GP.CreatePipeline(Graphics::GetSwapChainRenderPass());
+		
 		CreateUniqueMeshData();
 	}
 	void Shutdown();
@@ -39,16 +42,18 @@ public:
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
-	VkDescriptorSetLayout GetDescriptorSetLayout() { return vkDescriptorSetLayout; }
-	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return vkDescriptorSetLayoutInfo; }
+	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return pointsToGBuffer_GP.vkDescriptorSetLayoutInfo; }
 
 	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
 private:
 	// First Pass
 	VkRenderPass vkRenderPass;
-	VkDescriptorSetLayout vkDescriptorSetLayout;
-	VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
+	PointsToGBuffer_GP pointsToGBuffer_GP;
+	GBufferToOutput_GP gBufferToOutput_GP;
+	//VkDescriptorSetLayout vkDescriptorSetLayout;
+	//VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 
 	Image colorImage;
 	Image positionImage;
@@ -57,17 +62,12 @@ private:
 	VkFramebuffer vkFrameBuffer;
 	VkSampler vkSampler; // Nearest Sampler (As Should be pixel = pixel) for performance.
 
-	VkPipelineLayout vkMainPipelineLayout;
-	VkPipeline vkMainPipeline;
+	//VkPipelineLayout vkMainPipelineLayout;
+	//VkPipeline vkMainPipeline;
 
 	// Second Pass
 	TriListMesh* fullScreenQuad;
 
 	VkRenderPass vkSecondRenderPass;
-	VkDescriptorSetLayout vkSecondDescriptorSetLayout;
-	VkDescriptorSetLayoutCreateInfo vkSecondDescriptorSetLayoutInfo;
-
-	VkPipelineLayout vkSecondPipelineLayout;
-	VkPipeline vkSecondPipeline;
 };
 

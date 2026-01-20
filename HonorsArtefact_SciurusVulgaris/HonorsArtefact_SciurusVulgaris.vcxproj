@@ -150,6 +150,7 @@
     <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="DebugPointRenderer.h" />
+    <ClInclude Include="GBufferToOutput_GP.h" />
     <ClInclude Include="GeneratorApp.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="HandmadeMath.h" />
@@ -172,7 +173,7 @@
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="PointRenderPipeline.h" />
-    <ClInclude Include="PointsToGBuffer_RP.h" />
+    <ClInclude Include="PointsToGBuffer_GP.h" />
     <ClInclude Include="PointTreeMesh.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TriListMesh.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="DebugPointRenderer.cpp" />
     <ClCompile Include="entry.cpp" />
+    <ClCompile Include="GBufferToOutput_GP.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="OLDentry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -234,7 +236,7 @@
     </ClCompile>
     <ClCompile Include="PointMesh.cpp" />
     <ClCompile Include="PointRenderPipeline.cpp" />
-    <ClCompile Include="PointsToGBuffer_RP.cpp" />
+    <ClCompile Include="PointsToGBuffer_GP.cpp" />
     <ClCompile Include="PointTreeMesh.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TriListMesh.cpp" />
