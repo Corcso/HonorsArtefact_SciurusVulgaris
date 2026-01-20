@@ -5,16 +5,22 @@
 
 void MeshTraditionalToGBuffer_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    uboLayoutBindings[1].descriptorCount = 1;
+    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBindings[1].pImmutableSamplers = nullptr;
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 1;
+    vkDescriptorSetLayoutInfo.bindingCount = 2;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
@@ -26,8 +32,8 @@ void MeshTraditionalToGBuffer_GP::CreatePipeline(const VkRenderPass& vkRenderPas
 {
     // Get shader code
 
-    auto vertShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferedQuad.spv");
-    auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferedTree.spv");
+    auto vertShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_MeshVertex.spv");
+    auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferredMesh.spv");
 
     VkShaderModule vertShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), vertShaderCode);
     VkShaderModule fragShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), fragShaderCode);
@@ -167,12 +173,14 @@ void MeshTraditionalToGBuffer_GP::CreatePipeline(const VkRenderPass& vkRenderPas
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
+    VkPipelineColorBlendAttachmentState blendStateAttachmentList[3] = { colorBlendAttachment , colorBlendAttachment, colorBlendAttachment };
+
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.attachmentCount = 3;
+    colorBlending.pAttachments = blendStateAttachmentList;
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional

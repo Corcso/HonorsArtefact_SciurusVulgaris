@@ -170,6 +170,7 @@
     <ClInclude Include="Light.h" />
     <ClInclude Include="MainDisplayApp.h" />
     <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="MeshTraditionalToGBuffer_GP.h" />
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="PointRenderPipeline.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="MeshTraditionalToGBuffer_GP.cpp" />
     <ClCompile Include="OLDentry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -249,6 +251,7 @@
     <None Include="DeferedPoint.frag" />
     <None Include="DeferedQuad.vert" />
     <None Include="DeferedTree.frag" />
+    <None Include="DeferredMesh.frag" />
     <None Include="InstancePointVertex.vert" />
     <None Include="MeshFragment.frag" />
     <None Include="CompileAllShaders.bat" />

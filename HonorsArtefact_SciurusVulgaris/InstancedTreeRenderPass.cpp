@@ -217,7 +217,7 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void InstancedTreeRenderPass::Render(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
+void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     VkBuffer vertexBuffers[] = { points->pointBuffer };
@@ -236,6 +236,29 @@ void InstancedTreeRenderPass::Render(PointTreeMesh* points, uint32_t pointCountO
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
     vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 400, 0, 0);
+}
+
+void InstancedTreeRenderPass::SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, meshTraditionalToGBuffer_GP.vkPipeline);
+}
+
+void InstancedTreeRenderPass::RenderTraditionalMesh(TriListMesh* mesh, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    VkBuffer vertexBuffers[] = { mesh->vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipelineLayout, 0, 1,
+        mesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
+
+    vkCmdDrawIndexed(commandBuffer, mesh->indices.size(), 1, 0, 0, 0);
 }
 
 void InstancedTreeRenderPass::EndRender(VkCommandBuffer commandBuffer) {
@@ -302,6 +325,7 @@ void InstancedTreeRenderPass::Shutdown() {
     // Destroy Pipeline
     gBufferToOutput_GP.Shutdown();
     pointsToGBuffer_GP.Shutdown();
+    meshTraditionalToGBuffer_GP.Shutdown();
 
     // Destroy Render Pass
     vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);

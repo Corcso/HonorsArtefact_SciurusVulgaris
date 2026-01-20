@@ -5,6 +5,7 @@
 #include "Graphics.h"
 #include "PointsToGBuffer_GP.h"
 #include "GBufferToOutput_GP.h"
+#include "MeshTraditionalToGBuffer_GP.h"
 
 class InstancedTreeRenderPass
 {
@@ -28,6 +29,8 @@ public:
 		//CreatePipeline();
 		pointsToGBuffer_GP.CreateDescriptorLayout();
 		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
+		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
+		meshTraditionalToGBuffer_GP.CreatePipeline(vkRenderPass);
 		gBufferToOutput_GP.CreateDescriptorLayout();
 		gBufferToOutput_GP.CreatePipeline(Graphics::GetSwapChainRenderPass());
 		
@@ -36,7 +39,9 @@ public:
 	void Shutdown();
 
 	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void Render(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void RenderPointTree(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void RenderTraditionalMesh(TriListMesh* mesh, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
@@ -45,6 +50,9 @@ public:
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return pointsToGBuffer_GP.vkDescriptorSetLayoutInfo; }
 
+	VkDescriptorSetLayout GetMeshTraditionalDescriptorSetLayout() { return meshTraditionalToGBuffer_GP.vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetMeshTraditionalDescriptorSetLayoutInfo() { return meshTraditionalToGBuffer_GP.vkDescriptorSetLayoutInfo; }
+
 	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
 private:
@@ -52,6 +60,7 @@ private:
 	VkRenderPass vkRenderPass;
 	PointsToGBuffer_GP pointsToGBuffer_GP;
 	GBufferToOutput_GP gBufferToOutput_GP;
+	MeshTraditionalToGBuffer_GP meshTraditionalToGBuffer_GP;
 	//VkDescriptorSetLayout vkDescriptorSetLayout;
 	//VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 

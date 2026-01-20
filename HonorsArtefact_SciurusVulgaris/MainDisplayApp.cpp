@@ -52,7 +52,7 @@ void MainDisplayApp::Frame() {
 
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(0, dataForUBO.data());
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
-		pointRenderingPass.Render(myModel, pointToRenderCount);
+		pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
 	}
 
 	ImGui::Begin("Point Model Selection");
