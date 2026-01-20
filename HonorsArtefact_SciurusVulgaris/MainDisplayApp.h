@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "BufferStructs.h"
 #include "Light.h"
+#include "InstancedWCPHelper.h"
 
 
 class MainDisplayApp :
@@ -21,8 +22,12 @@ private:
 	std::vector<size_t> descriptorSizes;
 
 	PointTreeMesh* myModel;
+	InstancedWCPHelper treeInstancePositions;
 	char modelPath[256] = "./models/output.tree";
 	float angle;
+	
+	TriListMesh* terrain;
+	Image terrainTexture;
 
 	CameraTransform cameraTransform;
 

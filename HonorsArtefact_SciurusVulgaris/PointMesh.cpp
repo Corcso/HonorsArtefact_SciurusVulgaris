@@ -8,6 +8,7 @@
 #include <assimp/Exporter.hpp>    
 #include <assimp/scene.h>         
 #include <assimp/postprocess.h>    
+#include "InstancedWCPHelper.h"
 
 void PointMesh::CopyPointsToVRAM()
 {

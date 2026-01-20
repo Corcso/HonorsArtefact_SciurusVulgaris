@@ -166,6 +166,7 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InstancedTreeRenderPass.h" />
+    <ClInclude Include="InstancedWCPHelper.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="MainDisplayApp.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="DebugPointRenderer.cpp" />
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
+    <ClCompile Include="InstancedWCPHelper.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="MeshTraditionalToGBuffer_GP.cpp" />
     <ClCompile Include="OLDentry.cpp">

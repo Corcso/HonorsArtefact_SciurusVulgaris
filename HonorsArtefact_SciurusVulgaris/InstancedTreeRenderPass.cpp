@@ -235,7 +235,7 @@ void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, uint32_t po
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 400, 0, 0);
+    vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 4000, 0, 0);
 }
 
 void InstancedTreeRenderPass::SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer)
@@ -255,7 +255,7 @@ void InstancedTreeRenderPass::RenderTraditionalMesh(TriListMesh* mesh, VkCommand
 
     vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipelineLayout, 0, 1,
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, meshTraditionalToGBuffer_GP.vkPipelineLayout, 0, 1,
         mesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
     vkCmdDrawIndexed(commandBuffer, mesh->indices.size(), 1, 0, 0, 0);
