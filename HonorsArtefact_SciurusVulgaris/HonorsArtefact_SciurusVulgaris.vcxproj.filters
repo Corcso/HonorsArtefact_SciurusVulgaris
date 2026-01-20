@@ -19,9 +19,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{1266826f-ff0e-433e-9bcb-20c2dcae5e38}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderers">
-      <UniqueIdentifier>{4967dc17-8c04-4023-97c5-fd7d9bcde20f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Objects">
       <UniqueIdentifier>{a2c63542-527a-456d-ac06-5db76131c61a}</UniqueIdentifier>
     </Filter>
@@ -33,6 +30,18 @@
     </Filter>
     <Filter Include="Apps">
       <UniqueIdentifier>{645c491d-f7df-4c55-bb2b-a00c2e2d05e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OldUnifiedRenderers">
+      <UniqueIdentifier>{4967dc17-8c04-4023-97c5-fd7d9bcde20f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderers">
+      <UniqueIdentifier>{d1ce187f-893b-4372-b48a-80c804d42592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderers\Pipelines">
+      <UniqueIdentifier>{ae40ada1-6957-42e1-a63a-6872efdca02a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderers\Passes">
+      <UniqueIdentifier>{385d94df-0d54-4571-a8e6-f31ca0b3a652}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -73,19 +82,16 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PointRenderPipeline.h">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClInclude>
     <ClInclude Include="MeshRenderer.h">
-      <Filter>Renderers</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedTreeRenderPass.h">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiBlankRenderPass.h">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClInclude>
     <ClInclude Include="DebugPointRenderer.h">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClInclude>
     <ClInclude Include="TriListMesh.h">
       <Filter>Objects</Filter>
@@ -135,6 +141,12 @@
     <ClInclude Include="MainDisplayApp.h">
       <Filter>Apps</Filter>
     </ClInclude>
+    <ClInclude Include="InstancedTreeRenderPass.h">
+      <Filter>Renderers\Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="PointsToGBuffer_RP.h">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -171,19 +183,16 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointRenderPipeline.cpp">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClCompile>
     <ClCompile Include="MeshRenderer.cpp">
-      <Filter>Renderers</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedTreeRenderPass.cpp">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClCompile>
     <ClCompile Include="ImGuiBlankRenderPass.cpp">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClCompile>
     <ClCompile Include="DebugPointRenderer.cpp">
-      <Filter>Renderers</Filter>
+      <Filter>OldUnifiedRenderers</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Objects</Filter>
@@ -232,6 +241,12 @@
     </ClCompile>
     <ClCompile Include="MainDisplayApp.cpp">
       <Filter>Apps</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancedTreeRenderPass.cpp">
+      <Filter>Renderers\Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="PointsToGBuffer_RP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
