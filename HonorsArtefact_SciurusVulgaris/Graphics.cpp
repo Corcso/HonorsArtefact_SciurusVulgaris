@@ -172,6 +172,18 @@ void Graphics::RegisterWindowSizeChange(HMM_Vec2 newSize)
     instance.currentHeight = static_cast<int>(newSize.Y);
 }
 
+HMM_Vec2 Graphics::GetWindowLocation()
+{
+    RECT rect = { NULL };
+    HMM_Vec2 location = HMM_V2(0, 0);
+    if (GetWindowRect(instance.window, &rect)) {
+        location.X = rect.left;
+        location.Y = rect.top;
+    }
+
+    return location;
+}
+
 void Graphics::RecreateSwapChain()
 {
     // If we are minimised, size is 0, freeze all main thread processing appart from the input loop (as this will see when we unminimise)

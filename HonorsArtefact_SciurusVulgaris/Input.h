@@ -45,6 +45,7 @@ public:
 	static void LogMouseRelease(MouseButton mouseCode);
 
 	static HMM_Vec2 GetMousePosition();
+	static HMM_Vec2 GetMousePositionLastFrame();
 	static HMM_Vec2 GetMousePositionDifference();
 
 	static void SetMousePosition(HMM_Vec2 mousePosition);
@@ -54,6 +55,9 @@ public:
 	static bool ProcessEvents();
 	static void QuitMainLoop();
 
+	static void SetMouseLock(bool locked);
+	static bool IsMouseLocked() { return instance.isMouseLocked; }
+
 private:
 	static Input instance;
 	
@@ -62,8 +66,11 @@ private:
 	InputState keys[256];
 	InputState mouseButtons[(unsigned long long)MouseButton::TOTAL_MOUSE_BUTTONS];
 
+	HMM_Vec2 mousePositionLastFrame;
 	HMM_Vec2 mousePosition;
 	HMM_Vec2 mousePositionDifference;
+
+	bool isMouseLocked;
 };
 
 Input::InputState operator&(const Input::InputState& l, const Input::InputState& r);

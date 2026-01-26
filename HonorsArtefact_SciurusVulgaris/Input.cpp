@@ -51,6 +51,7 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         Input::LogMouseRelease(Input::MouseButton::LEFT);
     }
+    break;
     case WM_RBUTTONDOWN:
     {
         Input::LogMousePress(Input::MouseButton::RIGHT);
@@ -66,17 +67,17 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     // https://learn.microsoft.com/en-us/windows/win32/dxtecharts/taking-advantage-of-high-dpi-mouse-movement
     case WM_MOUSEMOVE:
     {
-        /*if (Input::IsMouseLocked()) break;
+        if (Input::IsMouseLocked()) break;
         int xCoord = 0x0000FFFF & lParam;
         int yCoord = (0xFFFF0000 & lParam) >> 16;
-        Input::SetMousePosition(V2(xCoord, yCoord));
-        Input::SetMouseMovement(V2(xCoord, yCoord) - Input::GetMousePositionLastFrame());*/
+        Input::SetMousePosition(HMM_V2(xCoord, yCoord));
+        Input::SetMousePositionDifference(HMM_V2(xCoord, yCoord) - Input::GetMousePositionLastFrame());
 
     }
     break;
     case WM_INPUT:
     {
-        /*if (!Input::IsMouseLocked()) break;
+        if (!Input::IsMouseLocked()) break;
         UINT dwSize = sizeof(RAWINPUT);
         static BYTE lpb[sizeof(RAWINPUT)];
 
@@ -88,9 +89,9 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             int xPosRelative = raw->data.mouse.lLastX;
             int yPosRelative = raw->data.mouse.lLastY;
-            Input::SetMouseMovement(V2(xPosRelative, yPosRelative));
+            Input::SetMousePositionDifference(HMM_V2(xPosRelative, yPosRelative));
         }
-        break;*/
+        break;
     }
     break;
     case WM_SIZE:
@@ -131,12 +132,12 @@ bool Input::IsKeyUp(uint8_t keyCode)
 
 bool Input::IsKeyReleased(uint8_t keyCode)
 {
-    return static_cast<bool>(instance.keys[keyCode] & InputState::RELEASED);
+    return static_cast<bool>((instance.keys[keyCode] & InputState::RELEASED) == InputState::RELEASED);
 }
 
 bool Input::IsKeyPressed(uint8_t keyCode)
 {
-    return static_cast<bool>(instance.keys[keyCode] & InputState::PRESSED);
+    return static_cast<bool>((instance.keys[keyCode] & InputState::PRESSED) == InputState::PRESSED);
 }
 
 void Input::LogKeyPress(uint8_t keyCode)
@@ -192,6 +193,11 @@ HMM_Vec2 Input::GetMousePosition()
     return instance.mousePosition;
 }
 
+HMM_Vec2 Input::GetMousePositionLastFrame()
+{
+    return instance.mousePositionLastFrame;
+}
+
 HMM_Vec2 Input::GetMousePositionDifference()
 {
     return instance.mousePositionDifference;
@@ -223,6 +229,11 @@ void Input::Update()
         else if (instance.mouseButtons[i] == InputState::PRESSED) instance.mouseButtons[i] = InputState::DOWN;
         else if (instance.mouseButtons[i] == InputState::INVALID) instance.mouseButtons[i] = InputState::UP; // Shouldn't be invalid, put up.
     }
+
+    instance.mousePositionLastFrame = instance.mousePosition;
+
+    // If we are locked, set mouse movement to 0 at end of the frame
+    if (instance.isMouseLocked) instance.mousePositionDifference = HMM_V2(0, 0);
 }
 
 bool Input::ProcessEvents()
@@ -236,12 +247,25 @@ bool Input::ProcessEvents()
         DispatchMessage(&msg);
     }
 
+    // If the mouse is locked, set it to the center of the window.
+    if (instance.isMouseLocked) {
+        
+        SetCursorPos(Graphics::GetWindowLocation().X + (Graphics::GetSwapChainExtent().width / 2.0f), Graphics::GetWindowLocation().Y + (Graphics::GetSwapChainExtent().height / 2.0f));
+    }
+
     return instance.quitCalled;
 }
 
 void Input::QuitMainLoop()
 {
     instance.quitCalled = true;
+}
+
+void Input::SetMouseLock(bool locked)
+{
+    // Show cursor and set mouse locked to false
+    if (instance.isMouseLocked != locked) ShowCursor(!locked);// Only do this on a toggle, it works like a counter. https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showcursor
+    instance.isMouseLocked = locked;
 }
 
 Input::InputState operator&(const Input::InputState& l, const Input::InputState& r)

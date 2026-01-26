@@ -29,6 +29,7 @@ public:
 
 	void UpdateMatrix() override;
 	void CaptureControls();
+	bool mouseLocked;
 private:
 	const static float ANGLE_SPEED_MULTIPLIER;
 };

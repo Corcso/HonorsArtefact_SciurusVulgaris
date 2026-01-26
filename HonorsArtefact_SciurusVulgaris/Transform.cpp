@@ -13,7 +13,7 @@ void Transform::UpdateMatrix()
 {
 	// Calculate Matrix
 	// TODO Figure out the right order here.
-	HMM_Mat4 combinedRotation = HMM_Rotate_LH(euler.Z * HMM_DegToRad, HMM_V3(0, 0, 1)) * HMM_Rotate_LH(euler.Y * HMM_DegToRad, HMM_V3(1, 0, 0)) * HMM_Rotate_LH(euler.X * HMM_DegToRad, HMM_V3(0, 0, 1));
+	HMM_Mat4 combinedRotation = HMM_Rotate_LH(euler.Y * HMM_DegToRad, HMM_V3(0, 1, 0)) * HMM_Rotate_LH(euler.X * HMM_DegToRad, HMM_V3(1, 0, 0)) * HMM_Rotate_LH(euler.Z * HMM_DegToRad, HMM_V3(0, 0, 1));
 	matrix = HMM_Translate(position) * combinedRotation * HMM_Scale(scale);
 
 	// Calc Directions 
@@ -50,6 +50,7 @@ const float CameraTransform::ANGLE_SPEED_MULTIPLIER = 3;
 
 void CameraTransform::CaptureControls()
 {
+	// Translation
 	if (Input::IsKeyDown('W')) {
 		position += forward * speed;
 	}
@@ -69,6 +70,7 @@ void CameraTransform::CaptureControls()
 		position -= right * speed;
 	}
 
+	// Rotation
 	if (Input::IsKeyDown('I')) {
 		euler.X += speed * ANGLE_SPEED_MULTIPLIER;
 	}
@@ -80,6 +82,23 @@ void CameraTransform::CaptureControls()
 	}
 	else if (Input::IsKeyDown('J')) {
 		euler.Y -= speed * ANGLE_SPEED_MULTIPLIER;
+	}
+
+	if (Input::IsKeyPressed('P')) {
+		mouseLocked = !mouseLocked;
+		Input::SetMouseLock(mouseLocked);
+	}
+	if (mouseLocked) {
+		euler.X -= speed * Input::GetMousePositionDifference().Y;
+		euler.Y -= speed * Input::GetMousePositionDifference().X;
+	}
+
+	// Speed
+	if (Input::IsKeyPressed('X')) {
+		speed += 0.05f;
+	}
+	else if (Input::IsKeyPressed('Z')) {
+		speed -= 0.05f;
 	}
 
 	UpdateMatrix();

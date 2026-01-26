@@ -24,6 +24,7 @@ public:
 	static void EndRender();
 
 	static void RegisterWindowSizeChange(HMM_Vec2 newSize);
+	static HMM_Vec2 GetWindowLocation();
 
 	static VkInstance GetVkInstance() { return instance.vkInstance; }
 	static VkSurfaceKHR GetVkSurface() { return instance.vkSurface; }
