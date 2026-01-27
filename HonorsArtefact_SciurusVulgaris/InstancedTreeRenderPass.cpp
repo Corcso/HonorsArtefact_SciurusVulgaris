@@ -338,6 +338,7 @@ void InstancedTreeRenderPass::Shutdown() {
     gBufferToOutput_GP.Shutdown();
     pointsToGBuffer_GP.Shutdown();
     meshTraditionalToGBuffer_GP.Shutdown();
+    pointsToGBufferMeshShade_GP.Shutdown();
 
     // Destroy Render Pass
     vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);

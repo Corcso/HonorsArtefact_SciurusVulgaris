@@ -8,7 +8,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer)};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
 	myModel = nullptr;
@@ -64,9 +64,9 @@ void MainDisplayApp::Frame() {
 		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, 1, 0.001, 100));
+		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 		InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 		
@@ -113,7 +113,7 @@ void MainDisplayApp::Frame() {
 	WCP_Matrices terrainBufferData = {
 		HMM_Translate(HMM_V3(-50, 0, 50)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
+		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
 	};
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
 	pointRenderingPass.SwitchToTraditionalMeshPipeline();

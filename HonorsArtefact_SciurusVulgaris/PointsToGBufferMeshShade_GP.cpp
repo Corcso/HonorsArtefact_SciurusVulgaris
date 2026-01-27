@@ -6,7 +6,7 @@
 
 void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[4]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[5]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -39,10 +39,18 @@ void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
     // Not used for images
     uboLayoutBindings[3].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[4].binding = 4;
+    uboLayoutBindings[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[4].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[4].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+    // Not used for images
+    uboLayoutBindings[4].pImmutableSamplers = nullptr;
+
 
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 4; 
+    vkDescriptorSetLayoutInfo.bindingCount = 5; 
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {

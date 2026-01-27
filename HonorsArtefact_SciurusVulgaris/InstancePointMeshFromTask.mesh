@@ -59,7 +59,7 @@ void main(){
 
 	// Vertices color
 	outColor[gl_LocalInvocationID.x] = vec4(pointsData.pointArray[pointDataIndex].color, 1.0);
-	outColor[gl_LocalInvocationID.x] = vec4(debugColors[payload.debugLevel], 1.0);
+	//outColor[gl_LocalInvocationID.x] = vec4(debugColors[payload.debugLevel], 1.0);
 	// Points indices
 	gl_PrimitivePointIndicesEXT[gl_LocalInvocationID.x] = gl_LocalInvocationID.x;
 	
