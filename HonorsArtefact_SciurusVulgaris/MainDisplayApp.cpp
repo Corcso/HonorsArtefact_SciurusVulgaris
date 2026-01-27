@@ -8,7 +8,8 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { sizeof(WCP_Matrices) * 4000, sizeof(LODDataBuffer)};
+	//descriptorSizes = { sizeof(WCP_Matrices) * 4000, sizeof(LODDataBuffer)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
 	myModel = nullptr;
 	angle = 0;
@@ -64,9 +65,11 @@ void MainDisplayApp::Frame() {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, 1, 0.001, 100));
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(0, treeInstancePositions.matrices.data());
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
+		//myModel->GetDescriptorSet()->UpdateStorageBufferData(0, treeInstancePositions.matrices.data());
+		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
 		
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+
 		//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
 		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, pointToRenderCount);
 	}
@@ -79,8 +82,10 @@ void MainDisplayApp::Frame() {
 		myModel = new PointTreeMesh();
 
 		myModel->LoadFromTreeFile(modelPath);
-		myModel->CopyPointsToVRAM();
-		myModel->CreateDescriptorSet(pointRenderingPass.GetDescriptorSetLayout(), pointRenderingPass.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
+		//myModel->CopyPointsToVRAM();
+		descriptorSizes[0] = myModel->GetPointsArraySize(true);
+		myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+		myModel->CopyPointsToVRAMMeshBuffer(0);
 	}
 	ImGui::SliderAngle("Angle", &angle);
 	if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());

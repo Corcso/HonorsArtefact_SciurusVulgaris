@@ -16,7 +16,6 @@ void PointMesh::CopyPointsToVRAM()
     
     // Staging Vertex buffer
     VkBuffer stagingVertexBuffer;
-    //VkDeviceMemory stagingVertexBufferMemory;
     VulkanMemoryAllocator::VulkanMemoryBlock stagingVertexBufferMemory;
 
     VkDeviceSize bufferSize = sizeof(points[0]) * points.size();
@@ -28,43 +27,63 @@ void PointMesh::CopyPointsToVRAM()
     // Map GPU memory to CPU memory
     VulkanUtility::MapCopyBlockToGPU(stagingVertexBufferMemory, points.data(), bufferSize);
 
+    // Copy Staging -> Local
     VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         &pointBuffer, &pointBufferMemory);
 
-    // See below
     VulkanUtility::CopyBufferData(stagingVertexBuffer, pointBuffer, bufferSize);
 
     // Dont need the stager anymore
     VulkanUtility::DestroyBuffer(stagingVertexBuffer);
-    //VulkanUtility::FreeGPUMemory(stagingVertexBufferMemory);
     VulkanUtility::FreeGPUMemoryBlock(stagingVertexBufferMemory);
 
-    // INDEX BUFFER
-    //bufferSize = sizeof(indices[0]) * indices.size();
+    isDataOnGPU = true;
+}
 
-    //VkBuffer stagingIndexBuffer;
-    //VulkanMemoryAllocator::VulkanMemoryBlock stagingIndexBufferMemory;
-    ////VkDeviceMemory stagingIndexBufferMemory;
+void PointMesh::CopyPointsToVRAMMeshBuffer(uint32_t bindingIndex)
+{    
+    // STORAGE BUFFER
+    // For Use In Mesh Shading
+
+    // TODO Stop no desciriptor from copying
+
+    std::vector<PointPadded> tempPaddedPoints;
+    tempPaddedPoints.resize(points.size());
+    for (int i = 0; i < points.size(); i++) {
+        tempPaddedPoints[i].position = points[i].position;
+        tempPaddedPoints[i].color = points[i].color;
+        tempPaddedPoints[i].normal = points[i].normal;
+    }
+    GetDescriptorSet()->UpdateStorageBufferData(bindingIndex, tempPaddedPoints.data());
+
+    //// Staging Storage buffer
+    //VkBuffer stagingStorageBuffer;
+    //VulkanMemoryAllocator::VulkanMemoryBlock stagingStorageBufferMemory;
+
+    //VkDeviceSize bufferSize = sizeof(points[0]) * points.size();
     //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
     //    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     //    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //    &stagingIndexBuffer, &stagingIndexBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
+    //    &stagingStorageBuffer, &stagingStorageBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
 
-    //VulkanUtility::MapCopyBlockToGPU(stagingIndexBufferMemory, indices.data(), bufferSize);
+    //// Map GPU memory to CPU memory
+    //VulkanUtility::MapCopyBlockToGPU(stagingStorageBufferMemory, points.data(), bufferSize);
 
+    //// Copy Staging -> Local
     //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
-    //    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-    //    &indexBuffer, &indexBufferMemory);
+    //    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+    //    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    //    &pointBuffer, &pointBufferMemory);
 
-    //VulkanUtility::CopyBufferData(stagingIndexBuffer, indexBuffer, bufferSize);
+    //VulkanUtility::CopyBufferData(stagingStorageBuffer, pointBuffer, bufferSize);
 
-    //VulkanUtility::DestroyBuffer(stagingIndexBuffer);
-    //VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
-    //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
+    //// Dont need the stager anymore
+    //VulkanUtility::DestroyBuffer(stagingStorageBuffer);
+    //VulkanUtility::FreeGPUMemoryBlock(stagingStorageBufferMemory);
 
-    isDataOnGPU = true;
+    //isDataOnGPU = true;
 }
 
 void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
@@ -224,7 +243,5 @@ PointMesh::~PointMesh()
     if (isDataOnGPU) {
         VulkanUtility::DestroyBuffer(pointBuffer);
         VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
-        //VulkanUtility::DestroyBuffer(indexBuffer);
-        //VulkanUtility::FreeGPUMemoryBlock(indexBufferMemory);
     }
 }

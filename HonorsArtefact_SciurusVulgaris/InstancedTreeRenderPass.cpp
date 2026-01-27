@@ -243,7 +243,10 @@ void InstancedTreeRenderPass::RenderPointTreeViaMeshShader(PointTreeMesh* points
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     //vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
-    reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkCmdDrawMeshTasksEXT"))(commandBuffer, 1, 1, 1);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBufferMeshShade_GP.vkPipelineLayout, 0, 1,
+        points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
+
+    reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkCmdDrawMeshTasksEXT"))(commandBuffer, points->GetMeshletCount(), 1, 1);
 }
 
 void InstancedTreeRenderPass::SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer)

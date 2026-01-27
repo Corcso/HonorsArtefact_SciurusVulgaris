@@ -54,6 +54,9 @@ public:
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return pointsToGBuffer_GP.vkDescriptorSetLayoutInfo; }
 
+	VkDescriptorSetLayout GetMeshShadeDescriptorSetLayout() { return pointsToGBufferMeshShade_GP.vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetMeshShadeDescriptorSetLayoutInfo() { return pointsToGBufferMeshShade_GP.vkDescriptorSetLayoutInfo; }
+
 	VkDescriptorSetLayout GetMeshTraditionalDescriptorSetLayout() { return meshTraditionalToGBuffer_GP.vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetMeshTraditionalDescriptorSetLayoutInfo() { return meshTraditionalToGBuffer_GP.vkDescriptorSetLayoutInfo; }
 
