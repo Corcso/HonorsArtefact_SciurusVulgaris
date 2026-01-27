@@ -37,12 +37,15 @@ private:
 	bool extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 
 	bool extractPointsConstantly = false; // Extracts and saves points every frame, just used for easy render doc capture
 
-	// LOD View Page
+	// == LOD View Page ==
 	DebugPointRenderer debugPointRenderer;
 	void RenderLODPagePrerequisites();
 	void RenderLODPageMenu();
 	std::vector<VulkanObjectDescriptorSet> LODViewDescriptors;
 	float LODViewRotation;
 	std::vector<float> LODViewDistances;
+	int exclusivleyViewing = -1;
+	bool isDebugCoverageViewOn;
+
 };
 

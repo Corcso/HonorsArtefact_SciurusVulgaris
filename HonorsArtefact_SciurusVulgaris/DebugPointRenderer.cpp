@@ -127,18 +127,24 @@ void DebugPointRenderer::CreateFrameBuffer()
 
 void DebugPointRenderer::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     // Only using this in vertex shader
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[1].descriptorCount = 1;
+    // Make accessible to both for ease
+    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 1;
+    vkDescriptorSetLayoutInfo.bindingCount = 2;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {

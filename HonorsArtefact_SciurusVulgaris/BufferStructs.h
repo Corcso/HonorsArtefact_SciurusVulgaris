@@ -21,3 +21,7 @@ struct LODDataBuffer {
 	int  maxVertexLevels[16][4];
 	int maxLevel;
 };
+
+struct PointRenderDebugInfo{
+	bool coverageDisplayEnabled;
+};

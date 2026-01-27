@@ -40,8 +40,8 @@ void GeneratorApp::Initialize(){
 				HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)),
 				HMM_Perspective_RH_ZO((70 + (i * 5)) * HMM_DegToRad, 1, 0.001, 100)
 		};
-		size_t sizes = sizeof(WCP_Matrices);
-		LODViewDescriptors[i].Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), &sizes);
+		size_t sizes[] = { sizeof(WCP_Matrices), sizeof(PointRenderDebugInfo) };
+		LODViewDescriptors[i].Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), sizes);
 
 		LODViewDescriptors[i].UpdateUniformBufferData(0, &newData);
 	}
@@ -178,13 +178,27 @@ void GeneratorApp::Shutdown() {
 void GeneratorApp::RenderLODPagePrerequisites()
 {
 	if (!meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU) return;
+
+	PointRenderDebugInfo debugInfo{ isDebugCoverageViewOn };
+	for (int i = 0; i < 16; i++) {
+		LODViewDescriptors[i].UpdateUniformBufferData(1, &debugInfo);
+	}
+	
 	debugPointRenderer.BeginRender(HMM_V4(0, 0, 0, 1));
-	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
-		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->UpdateUniformBufferData(0, &newData);
+	if (exclusivleyViewing == -1) {
+		for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
+			//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->UpdateUniformBufferData(0, &newData);
+			VkRect2D view{
+				{i % 4 * 256, i / 4 * 256}, {256, 256}
+			};
+			debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, i, &LODViewDescriptors[i]);
+		}
+	}
+	else {
 		VkRect2D view{
-			{i % 4 * 256, i / 4 * 256}, {256, 256}
+				{0, 0}, {1024, 1024}
 		};
-		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, i, &LODViewDescriptors[i]);
+		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, exclusivleyViewing, &LODViewDescriptors[exclusivleyViewing]);
 	}
 	debugPointRenderer.EndRender();
 }
@@ -195,6 +209,8 @@ void GeneratorApp::RenderLODPageMenu()
 	ImGui::Image(debugPointRenderer.GetImGuiOutputTexture(), ImVec2{ 700, 700 });
 	ImGui::End();
 	ImGui::Begin("Level Of Detail Studio");
+	ImGui::Checkbox("Coverage View", &isDebugCoverageViewOn);
+	ImGui::DragInt("Exclusive View", &exclusivleyViewing, 1, -1, 15);
 	if (ImGui::Button("Reshuffle Points"))
 	{
 		std::random_device rd;
