@@ -257,6 +257,8 @@
     <None Include="DeferedTree.frag" />
     <None Include="DeferredMesh.frag" />
     <None Include="InstancePointMesh.mesh" />
+    <None Include="InstancePointMeshFromTask.mesh" />
+    <None Include="InstancePointTask.task" />
     <None Include="InstancePointVertex.vert" />
     <None Include="MeshFragment.frag" />
     <None Include="CompileAllShaders.bat" />

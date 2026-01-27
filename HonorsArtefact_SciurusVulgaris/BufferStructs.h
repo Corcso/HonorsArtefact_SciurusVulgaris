@@ -7,6 +7,15 @@ struct WCP_Matrices {
 	HMM_Mat4 projection;
 };
 
+struct InstancingInfo {
+	uint32_t numberOfInstances;
+	uint32_t instanceStride;
+};
+
+struct MeshletInfo {
+	uint32_t numberOfMeshlets;
+};
+
 struct LODDataBuffer {
 	HMM_Vec4 cameraPosition;
 	int  maxVertexLevels[16][4];

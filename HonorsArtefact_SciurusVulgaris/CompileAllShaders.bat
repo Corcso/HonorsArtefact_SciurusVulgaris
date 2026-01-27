@@ -12,5 +12,7 @@ C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferredMesh.frag -o ./COMPILEDSHADER_Defer
 
 :: Mesh Shader
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointMesh.mesh -o ./COMPILEDSHADER_InstancePointMesh.spv --target-spv=spv1.4 --target-env=vulkan1.2
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointTask.task -o ./COMPILEDSHADER_InstancePointTask.spv --target-spv=spv1.4 --target-env=vulkan1.2
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointMeshFromTask.mesh -o ./COMPILEDSHADER_InstancePointMeshFromTask.spv --target-spv=spv1.4 --target-env=vulkan1.2
 
 pause

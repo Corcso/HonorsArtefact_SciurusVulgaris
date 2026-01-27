@@ -45,11 +45,8 @@
 //	SetMeshOutputsEXT(3, 3);
 //}
 
-layout(local_size_x = 64) in;
-layout(points, max_vertices = 64, max_primitives = 64) out;
-
-const vec3 vertices[3] = {vec3(-1,-1,0), vec3(0,1,0), vec3(1,-1,0)};
-const vec3 colors[3] = {vec3(1.0,0.0,0.0), vec3(0.0,1.0,0.0), vec3(0.0,0.0,1.0)};
+layout(local_size_x = 128) in;
+layout(points, max_vertices = 128, max_primitives = 128) out;
 
 struct Point{
 	vec3 position;
@@ -61,11 +58,20 @@ layout(binding = 0) buffer readonly PointData{
 	Point pointArray[];
 } pointsData;
 
-layout(binding = 1) uniform WCPMatrices{
+struct WCPMatrices{
     mat4 world;
     mat4 view;
     mat4 proj;
-} transformation; 
+};
+
+layout(binding = 1) readonly buffer UniformBufferObject {
+    WCPMatrices matrices[400];
+} transformation;
+
+layout(binding = 2) uniform InstancingInfo {
+    uint instanceCount;
+    uint instanceStride;
+} instanceInfo; 
 
 layout(location = 0) out vec3 outWorldPos[];
 layout(location = 1) out vec4 outColor[];
@@ -73,21 +79,29 @@ layout(location = 2) out vec3 outNormal[];
 
 
 void main(){
+	uint instanceID = gl_WorkGroupID.x / instanceInfo.instanceStride;
+	uint pointDataIndex = gl_GlobalInvocationID.x % (instanceInfo.instanceStride * 64);
+
+	if(pointDataIndex > 2000){
+		gl_MeshPrimitivesEXT[gl_LocalInvocationID.x].gl_CullPrimitiveEXT = true;
+	}
+	else{
+
 	// Vertices position
-	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position =  transformation.proj * transformation.view * transformation.world * vec4(pointsData.pointArray[gl_GlobalInvocationID.x].position, 1.0); 
+	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
 
-	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 4;
+	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 1;
 
-	outWorldPos[gl_LocalInvocationID.x] = (transformation.world * vec4(pointsData.pointArray[gl_GlobalInvocationID.x].position, 1.0)).xyz;
+	outWorldPos[gl_LocalInvocationID.x] = (transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0)).xyz;
 
-	outNormal[gl_LocalInvocationID.x] = (transformation.world * vec4(pointsData.pointArray[gl_GlobalInvocationID.x].normal, 0.0)).xyz;
+	outNormal[gl_LocalInvocationID.x] = (transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].normal, 0.0)).xyz;
 
 	// Vertices color
-	outColor[gl_LocalInvocationID.x] = vec4(pointsData.pointArray[gl_GlobalInvocationID.x].color, 1.0);
+	outColor[gl_LocalInvocationID.x] = vec4(pointsData.pointArray[pointDataIndex].color, 1.0);
 
 	// Points indices
 	gl_PrimitivePointIndicesEXT[gl_LocalInvocationID.x] = gl_LocalInvocationID.x;
-
+	}
 	// Number of points  
-	SetMeshOutputsEXT(64, 64);
+	SetMeshOutputsEXT(128, 128);
 }

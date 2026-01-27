@@ -6,7 +6,7 @@
 
 void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[4]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -16,16 +16,33 @@ void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
     uboLayoutBindings[1].binding = 1;
-    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[1].descriptorCount = 1;
     // Only using this in vertex shader
-    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT;
+    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
     // Not used for images
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[2].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT;
+    // Not used for images
+    uboLayoutBindings[2].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[3].binding = 3;
+    uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[3].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT;
+    // Not used for images
+    uboLayoutBindings[3].pImmutableSamplers = nullptr;
+
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 2; 
+    vkDescriptorSetLayoutInfo.bindingCount = 4; 
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
@@ -37,11 +54,19 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
 {
     // Get shader code
 
-    auto meshShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_InstancePointMesh.spv");
+    auto taskShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_InstancePointTask.spv");
+    auto meshShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_InstancePointMeshFromTask.spv");
     auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferedPoint.spv");
 
+    VkShaderModule taskShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), taskShaderCode);
     VkShaderModule meshShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), meshShaderCode);
     VkShaderModule fragShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), fragShaderCode);
+
+    VkPipelineShaderStageCreateInfo taskShaderStageInfo{};
+    taskShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    taskShaderStageInfo.stage = VK_SHADER_STAGE_TASK_BIT_EXT;
+    taskShaderStageInfo.module = taskShaderModule;
+    taskShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo meshShaderStageInfo{};
     meshShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -56,7 +81,7 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
     fragShaderStageInfo.module = fragShaderModule;
     fragShaderStageInfo.pName = "main";
     // Array these
-    VkPipelineShaderStageCreateInfo shaderStages[] = { meshShaderStageInfo, fragShaderStageInfo };
+    VkPipelineShaderStageCreateInfo shaderStages[] = { taskShaderStageInfo, meshShaderStageInfo, fragShaderStageInfo };
 
     // Some things can be dynamic, viewport should be for ease
     std::vector<VkDynamicState> dynamicStates = {
@@ -206,7 +231,7 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = 2;
+    pipelineInfo.stageCount = 3;
     pipelineInfo.pStages = shaderStages;
 
     //pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -232,6 +257,7 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
 
     vkDestroyShaderModule(Graphics::GetVkDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(Graphics::GetVkDevice(), meshShaderModule, nullptr);
+    vkDestroyShaderModule(Graphics::GetVkDevice(), taskShaderModule, nullptr);
 }
 
 void PointsToGBufferMeshShade_GP::Shutdown() {

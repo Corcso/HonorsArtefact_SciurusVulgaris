@@ -32,6 +32,7 @@ private:
 	CameraTransform cameraTransform;
 
 	int pointToRenderCount;
+	int instanceCount;
 
 	Light sun;
 };

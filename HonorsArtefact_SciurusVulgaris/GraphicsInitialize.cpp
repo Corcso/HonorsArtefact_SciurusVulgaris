@@ -219,7 +219,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = true;
-    meshShaderFeatures.taskShader = false;
+    meshShaderFeatures.taskShader = true;
     meshShaderFeatures.multiviewMeshShader = false;
     meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
     meshShaderFeatures.meshShaderQueries = false;

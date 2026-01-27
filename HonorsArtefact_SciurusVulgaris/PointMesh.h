@@ -24,7 +24,7 @@ public:
 		if (padded) return sizeof(PointPadded) * points.size();
 		else return sizeof(points[0]) * points.size(); 
 	}
-	uint32_t GetMeshletCount() { return ceil(points.size() / 64.0f); }
+	uint32_t GetMeshletCount() { return ceil(points.size() / 128.0f); }
 
 	void LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL);
 	void LoadFromFile(std::string path);

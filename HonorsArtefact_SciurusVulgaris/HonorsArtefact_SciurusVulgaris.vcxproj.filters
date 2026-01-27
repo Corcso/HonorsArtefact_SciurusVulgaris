@@ -307,5 +307,11 @@
     <None Include="InstancePointMesh.mesh">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="InstancePointTask.task">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="InstancePointMeshFromTask.mesh">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

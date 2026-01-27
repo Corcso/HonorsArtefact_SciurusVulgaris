@@ -8,8 +8,8 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	//descriptorSizes = { sizeof(WCP_Matrices) * 4000, sizeof(LODDataBuffer)};
-	descriptorSizes = { 0, sizeof(WCP_Matrices)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo)};
+	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
 	myModel = nullptr;
 	angle = 0;
@@ -65,13 +65,16 @@ void MainDisplayApp::Frame() {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, 1, 0.001, 100));
-		//myModel->GetDescriptorSet()->UpdateStorageBufferData(0, treeInstancePositions.matrices.data());
+		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
+
+		InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 		
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 		//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
-		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, pointToRenderCount);
+		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
 	}
 
 	ImGui::Begin("Point Model Selection");
@@ -86,9 +89,13 @@ void MainDisplayApp::Frame() {
 		descriptorSizes[0] = myModel->GetPointsArraySize(true);
 		myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 		myModel->CopyPointsToVRAMMeshBuffer(0);
+
+		MeshletInfo meshletInfo{myModel->GetMeshletCount()};
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 	}
 	ImGui::SliderAngle("Angle", &angle);
 	if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
+	if (myModel != nullptr) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
 	if (myModel != nullptr) {
 		if (ImGui::Button("Shuffle")) {
 			std::random_device rd;
