@@ -67,7 +67,8 @@ void MainDisplayApp::Frame() {
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(0, treeInstancePositions.matrices.data());
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &lodData);
 		
-		pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
+		//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
+		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, pointToRenderCount);
 	}
 
 	ImGui::Begin("Point Model Selection");

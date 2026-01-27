@@ -175,6 +175,7 @@
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
     <ClInclude Include="PointRenderPipeline.h" />
+    <ClInclude Include="PointsToGBufferMeshShade_GP.h" />
     <ClInclude Include="PointsToGBuffer_GP.h" />
     <ClInclude Include="PointTreeMesh.h" />
     <ClInclude Include="Transform.h" />
@@ -240,6 +241,7 @@
     </ClCompile>
     <ClCompile Include="PointMesh.cpp" />
     <ClCompile Include="PointRenderPipeline.cpp" />
+    <ClCompile Include="PointsToGBufferMeshShade_GP.cpp" />
     <ClCompile Include="PointsToGBuffer_GP.cpp" />
     <ClCompile Include="PointTreeMesh.cpp" />
     <ClCompile Include="Transform.cpp" />
@@ -254,6 +256,7 @@
     <None Include="DeferedQuad.vert" />
     <None Include="DeferedTree.frag" />
     <None Include="DeferredMesh.frag" />
+    <None Include="InstancePointMesh.mesh" />
     <None Include="InstancePointVertex.vert" />
     <None Include="MeshFragment.frag" />
     <None Include="CompileAllShaders.bat" />

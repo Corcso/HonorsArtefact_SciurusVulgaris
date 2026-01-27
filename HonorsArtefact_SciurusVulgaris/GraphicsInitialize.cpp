@@ -122,7 +122,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.apiVersion = VK_API_VERSION_1_2;
 
     // Setup instance creation info
     VkInstanceCreateInfo createInfo{};
@@ -133,6 +133,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     std::vector<const char*> extensionsNames = {
         "VK_KHR_surface", "VK_KHR_win32_surface"//, "VK_EXT_debug_utils"
     };
+    
 
     createInfo.enabledExtensionCount = extensionsNames.size();
     createInfo.ppEnabledExtensionNames = extensionsNames.data();
@@ -147,7 +148,8 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     }
 
     // Create the instance
-    if (vkCreateInstance(&createInfo, nullptr, &instance.vkInstance) != VK_SUCCESS) {
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &instance.vkInstance);
+    if (result != VK_SUCCESS) {
         throw - 1;
     }
 
@@ -214,7 +216,22 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     }
 
     // Coming back later here
+    VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
+    meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
+    meshShaderFeatures.meshShader = true;
+    meshShaderFeatures.taskShader = false;
+    meshShaderFeatures.multiviewMeshShader = false;
+    meshShaderFeatures.primitiveFragmentShadingRateMeshShader = false;
+    meshShaderFeatures.meshShaderQueries = false;
+    meshShaderFeatures.pNext = nullptr;
+
     VkPhysicalDeviceFeatures deviceFeatures{};
+
+    VkPhysicalDeviceFeatures2 deviceFeatures2{};
+    deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    deviceFeatures2.features = deviceFeatures;
+    deviceFeatures2.pNext = &meshShaderFeatures;
+    
 
     // Device info
     VkDeviceCreateInfo logicDeviceCreateInfo{};
@@ -223,7 +240,8 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     logicDeviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     logicDeviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-    logicDeviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    logicDeviceCreateInfo.pEnabledFeatures = nullptr;
+    logicDeviceCreateInfo.pNext = &deviceFeatures2;
 
     logicDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(VK_DEVICE_EXTENSIONS_REQUIRED.size());
     std::vector<const char*> deviceExtensionsAsCStr;

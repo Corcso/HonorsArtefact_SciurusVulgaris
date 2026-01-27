@@ -10,4 +10,7 @@ C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedTree.frag -o ./COMPILEDSHADER_Defere
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedPoint.frag -o ./COMPILEDSHADER_DeferedPoint.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferredMesh.frag -o ./COMPILEDSHADER_DeferredMesh.spv
 
+:: Mesh Shader
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointMesh.mesh -o ./COMPILEDSHADER_InstancePointMesh.spv --target-spv=spv1.4 --target-env=vulkan1.2
+
 pause

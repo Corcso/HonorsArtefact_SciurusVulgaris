@@ -6,6 +6,7 @@
 #include "PointsToGBuffer_GP.h"
 #include "GBufferToOutput_GP.h"
 #include "MeshTraditionalToGBuffer_GP.h"
+#include "PointsToGBufferMeshShade_GP.h"
 
 class InstancedTreeRenderPass
 {
@@ -29,6 +30,8 @@ public:
 		//CreatePipeline();
 		pointsToGBuffer_GP.CreateDescriptorLayout();
 		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
+		pointsToGBufferMeshShade_GP.CreateDescriptorLayout();
+		pointsToGBufferMeshShade_GP.CreatePipeline(vkRenderPass);
 		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
 		meshTraditionalToGBuffer_GP.CreatePipeline(vkRenderPass);
 		gBufferToOutput_GP.CreateDescriptorLayout();
@@ -40,6 +43,7 @@ public:
 
 	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void RenderPointTree(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void RenderPointTreeViaMeshShader(PointTreeMesh* points = nullptr, uint32_t pointCountOverride = 0, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void RenderTraditionalMesh(TriListMesh* mesh, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
@@ -61,6 +65,7 @@ private:
 	PointsToGBuffer_GP pointsToGBuffer_GP;
 	GBufferToOutput_GP gBufferToOutput_GP;
 	MeshTraditionalToGBuffer_GP meshTraditionalToGBuffer_GP;
+	PointsToGBufferMeshShade_GP pointsToGBufferMeshShade_GP;
 	//VkDescriptorSetLayout vkDescriptorSetLayout;
 	//VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 

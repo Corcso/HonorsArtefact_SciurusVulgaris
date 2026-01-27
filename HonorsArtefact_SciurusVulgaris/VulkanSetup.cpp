@@ -5,7 +5,7 @@
 #include "PointMesh.h"
 
 const std::vector<std::string> VulkanSetup::deviceExtensions = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_MESH_SHADER_EXTENSION_NAME
 };
 
 void VulkanSetup::CreateInstance(VkInstance* instance)

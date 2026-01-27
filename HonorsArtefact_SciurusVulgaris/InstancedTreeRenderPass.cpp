@@ -200,7 +200,7 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBufferMeshShade_GP.vkPipeline);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -236,6 +236,14 @@ void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, uint32_t po
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
     vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 4000, 0, 0);
+}
+
+void InstancedTreeRenderPass::RenderPointTreeViaMeshShader(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    //vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
+    reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkCmdDrawMeshTasksEXT"))(commandBuffer, 1, 1, 1);
 }
 
 void InstancedTreeRenderPass::SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer)

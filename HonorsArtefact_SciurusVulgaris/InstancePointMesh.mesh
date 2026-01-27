@@ -1,0 +1,46 @@
+#version 460
+
+#extension GL_EXT_mesh_shader : require
+
+layout(local_size_x = 1) in;
+layout(points, max_vertices = 3, max_primitives = 3) out;
+
+const vec3 vertices[3] = {vec3(-1,-1,0), vec3(0,1,0), vec3(1,-1,0)};
+const vec3 colors[3] = {vec3(1.0,0.0,0.0), vec3(0.0,1.0,0.0), vec3(0.0,0.0,1.0)};
+
+layout(location = 0) out vec3 outWorldPos[];
+layout(location = 1) out vec4 outColor[];
+layout(location = 2) out vec3 outNormal[];
+
+
+void main(){
+	// Vertices position
+	gl_MeshVerticesEXT[0].gl_Position = vec4(vertices[0], 1.0); 
+	gl_MeshVerticesEXT[1].gl_Position = vec4(vertices[1], 1.0); 
+	gl_MeshVerticesEXT[2].gl_Position = vec4(vertices[2], 1.0); 
+
+	gl_MeshVerticesEXT[0].gl_PointSize = 10;
+	gl_MeshVerticesEXT[1].gl_PointSize = 10;
+	gl_MeshVerticesEXT[2].gl_PointSize = 10;
+
+	outWorldPos[0] = vertices[0];
+	outWorldPos[1] = vertices[1];
+	outWorldPos[2] = vertices[2];
+
+	outNormal[0] = vec3(0, 1, 0);
+	outNormal[1] = vec3(0, 1, 0);
+	outNormal[2] = vec3(0, 1, 0);
+
+	// Vertices color
+	outColor[0] = vec4(colors[0], 1.0);
+	outColor[1] = vec4(colors[1], 1.0);
+	outColor[2] = vec4(colors[2], 1.0);
+
+	// Points indices
+	gl_PrimitivePointIndicesEXT[0] = 0;
+	gl_PrimitivePointIndicesEXT[1] = 1;
+	gl_PrimitivePointIndicesEXT[2] = 2;
+
+	// Number of points  
+	SetMeshOutputsEXT(3, 3);
+}
