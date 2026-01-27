@@ -147,17 +147,17 @@
     <ClInclude Include="PointsToGBuffer_GP.h">
       <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
-    <ClInclude Include="GBufferToOutput_GP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshTraditionalToGBuffer_GP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InstancedWCPHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PointsToGBufferMeshShade_GP.h">
-      <Filter>Header Files</Filter>
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshTraditionalToGBuffer_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="GBufferToOutput_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -260,17 +260,17 @@
     <ClCompile Include="PointsToGBuffer_GP.cpp">
       <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
-    <ClCompile Include="GBufferToOutput_GP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshTraditionalToGBuffer_GP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InstancedWCPHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MeshTraditionalToGBuffer_GP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="GBufferToOutput_GP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
     <ClCompile Include="PointsToGBufferMeshShade_GP.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
