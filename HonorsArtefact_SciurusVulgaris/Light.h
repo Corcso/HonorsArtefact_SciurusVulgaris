@@ -1,5 +1,6 @@
 #pragma once
 #include "PCH.h"
+#include "Image.h"
 
 class Light
 {
@@ -36,6 +37,12 @@ public:
 
 	void RenderImGuiMenu(bool createWindow = false);
 
+	void CreateShadowResources(VkRenderPass vkRenderPass);
+	void ShutdownShadowResources();
+
+	Image* GetShadowImage() { return &shadowImage; }
+	VkFramebuffer GetShadowFrameBuffer() { return shadowFrameBuffer; }
+
 private:
 	Type myType;
 
@@ -44,5 +51,8 @@ private:
 	HMM_Vec3 direction;
 	HMM_Vec3 color;
 	float intensity;
+
+	Image shadowImage;
+	VkFramebuffer shadowFrameBuffer;
 };
 

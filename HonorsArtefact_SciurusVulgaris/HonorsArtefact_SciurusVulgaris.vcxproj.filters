@@ -159,6 +159,12 @@
     <ClInclude Include="GBufferToOutput_GP.h">
       <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
+    <ClInclude Include="PointsToShadowMeshShade_GP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightShadow_RP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -271,6 +277,12 @@
     </ClCompile>
     <ClCompile Include="PointsToGBufferMeshShade_GP.cpp">
       <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="PointsToShadowMeshShade_GP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LightShadow_RP.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

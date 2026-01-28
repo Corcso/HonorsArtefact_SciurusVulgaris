@@ -6,6 +6,7 @@
 #include "BufferStructs.h"
 #include "Light.h"
 #include "InstancedWCPHelper.h"
+#include "LightShadow_RP.h"
 
 
 class MainDisplayApp :

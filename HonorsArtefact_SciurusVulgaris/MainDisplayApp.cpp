@@ -18,8 +18,10 @@ void MainDisplayApp::Initialize() {
 	cameraTransform.position = HMM_V3(0, 0, -5);
 
 	pointToRenderCount = 0;
-
+	
+	lightShadow_RP.CreateAll();
 	sun.SetName("Sun");
+	sun.CreateShadowResources(lightShadow_RP.GetRenderPass());
 
 	terrain = new TriListMesh();
 	terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
@@ -35,7 +37,31 @@ void MainDisplayApp::Initialize() {
 }
 
 void MainDisplayApp::Frame() {
+
+	InstancingInfo instancingInfo;
+	LODDataBuffer lodData;
 	
+	if (myModel != nullptr) {
+		
+		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+		}
+		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+
+		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+
+		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+
+
+		lightShadow_RP.BeginRender(&sun);
+
+		lightShadow_RP.RenderPointTree(myModel, instancingInfo);
+
+		lightShadow_RP.EndRender();
+	}
 
 	// Render logic
 	Graphics::BeginRender();
@@ -57,18 +83,18 @@ void MainDisplayApp::Frame() {
 		//	}
 		//}
 
-		LODDataBuffer lodData;
-		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
-		}
-		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+		//LODDataBuffer lodData;
+		//for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+		//	lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+		//}
+		//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-		InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
+		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 		
 		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
