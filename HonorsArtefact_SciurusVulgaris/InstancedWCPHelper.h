@@ -7,6 +7,7 @@ public:
 	void LoadFromFile(std::string path);
 	void SetViewAndProjection(HMM_Mat4 view, HMM_Mat4 projection);
 	void ApplyAlternateTransform(HMM_Mat4 transform);
+	void ApplyRandomRotation();
 
 	std::vector<WCP_Matrices> matrices;
 };

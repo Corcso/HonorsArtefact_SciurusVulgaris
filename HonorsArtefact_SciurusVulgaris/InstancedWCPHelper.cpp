@@ -50,3 +50,10 @@ void InstancedWCPHelper::ApplyAlternateTransform(HMM_Mat4 transform)
         WCP.world = WCP.world * transform;
     }
 }
+
+void InstancedWCPHelper::ApplyRandomRotation()
+{
+    for (auto& WCP : matrices) {
+        WCP.world = WCP.world * HMM_Rotate_LH(rand(), HMM_V3(0, 1, 0));
+    }
+}
