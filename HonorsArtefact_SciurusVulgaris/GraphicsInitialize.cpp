@@ -335,7 +335,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     init_info.CheckVkResultFn = CheckVulkanResult;
     ImGui_ImplVulkan_Init(&init_info);
 
-    // Create basic sampler
+    // Create basic samplers
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -355,6 +355,13 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     samplerInfo.maxLod = 0.0f;
 
     if (vkCreateSampler(Graphics::GetVkDevice(), &samplerInfo, nullptr, &instance.basicLinearSampler) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    samplerInfo.magFilter = VK_FILTER_NEAREST;
+    samplerInfo.minFilter = VK_FILTER_NEAREST;
+
+    if (vkCreateSampler(Graphics::GetVkDevice(), &samplerInfo, nullptr, &instance.basicNearestSampler) != VK_SUCCESS) {
         throw - 1;
     }
 

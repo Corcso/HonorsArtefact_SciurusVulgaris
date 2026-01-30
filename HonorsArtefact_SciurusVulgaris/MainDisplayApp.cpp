@@ -35,7 +35,7 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 
-	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicLinearSampler());
+	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 }
 
 void MainDisplayApp::Frame() {
@@ -53,7 +53,7 @@ void MainDisplayApp::Frame() {
 		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)),sun.GetProjectionMatrix(25, 20, 10));
+		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)),sun.GetProjectionMatrix(100, 50, 50));
 		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
