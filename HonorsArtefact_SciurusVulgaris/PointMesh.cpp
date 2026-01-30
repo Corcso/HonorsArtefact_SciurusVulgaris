@@ -57,6 +57,7 @@ void PointMesh::CopyPointsToVRAMMeshBuffer(uint32_t bindingIndex)
         tempPaddedPoints[i].normal = points[i].normal;
     }
     GetDescriptorSet()->UpdateStorageBufferData(bindingIndex, tempPaddedPoints.data());
+    GetShadowDescriptorSet()->UpdateStorageBufferData(bindingIndex, tempPaddedPoints.data());
 
     //// Staging Storage buffer
     //VkBuffer stagingStorageBuffer;
@@ -237,9 +238,15 @@ void PointMesh::CreateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSe
     descriptor.Create(layout, layoutInformation, sizes);
 }
 
+void PointMesh::CreateShadowDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes)
+{
+    shadowDescriptor.Create(layout, layoutInformation, sizes);
+}
+
 PointMesh::~PointMesh()
 {
     descriptor.CleanupDescriptor();
+    shadowDescriptor.CleanupDescriptor();
     if (isDataOnGPU) {
         VulkanUtility::DestroyBuffer(pointBuffer);
         VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);

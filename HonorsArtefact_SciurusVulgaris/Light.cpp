@@ -3,10 +3,24 @@
 #include "Graphics.h"
 #include "VulkanSetup.h"
 
+HMM_Mat4 Light::GetProjectionMatrix(float radius, float backFactor, float forwardsFactor)
+{
+    projMatrix = HMM_Orthographic_RH_ZO(-radius, radius, -radius, radius, -backFactor, forwardsFactor);
+    return projMatrix;
+}
+
+HMM_Mat4 Light::GetViewMatrix(HMM_Vec3 focusPoint)
+{
+    HMM_Vec3 nonParallelVector = HMM_V3(0, 1, 0);
+    if (HMM_Dot(nonParallelVector, direction) < 0.01) nonParallelVector = HMM_V3(0, 0, 1);
+    viewMatrix = HMM_LookAt_LH(focusPoint, focusPoint - direction, HMM_Cross(nonParallelVector, -direction));
+    return viewMatrix;
+}
+
 Light::BufferStruct Light::GetBufferData()
 {
 	return {
-		direction, 0, color, intensity
+		direction, 0, color, intensity, viewMatrix, projMatrix
 	};
 }
 
@@ -23,7 +37,7 @@ void Light::RenderImGuiMenu(bool createWindow)
 
 void Light::CreateShadowResources(VkRenderPass vkRenderPass)
 {
-    shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     shadowImage.CreateImageView(true);
    
     VkImageView imageViewList[]{ shadowImage.GetImageView() };

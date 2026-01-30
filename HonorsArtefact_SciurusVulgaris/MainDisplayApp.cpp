@@ -33,14 +33,18 @@ void MainDisplayApp::Initialize() {
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 2, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+
+	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicLinearSampler());
 }
 
 void MainDisplayApp::Frame() {
 
 	InstancingInfo instancingInfo;
 	LODDataBuffer lodData;
-	
+
+	Graphics::BeginRender();
+	lightShadow_RP.BeginRender(&sun);
 	if (myModel != nullptr) {
 		
 		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
@@ -49,22 +53,22 @@ void MainDisplayApp::Frame() {
 		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)),sun.GetProjectionMatrix(25, 20, 10));
+		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
 
 
-		lightShadow_RP.BeginRender(&sun);
+		
 
 		lightShadow_RP.RenderPointTree(myModel, instancingInfo);
 
-		lightShadow_RP.EndRender();
+		
 	}
-
+	lightShadow_RP.EndRender();
 	// Render logic
-	Graphics::BeginRender();
+	
 	pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
 	cameraTransform.CaptureControls();
@@ -114,6 +118,7 @@ void MainDisplayApp::Frame() {
 		//myModel->CopyPointsToVRAM();
 		descriptorSizes[0] = myModel->GetPointsArraySize(true);
 		myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+		myModel->CreateShadowDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 		myModel->CopyPointsToVRAMMeshBuffer(0);
 
 		MeshletInfo meshletInfo{myModel->GetMeshletCount()};
@@ -150,6 +155,7 @@ void MainDisplayApp::Frame() {
 	sun.RenderImGuiMenu(true);
 	Light::BufferStruct rawSunData = sun.GetBufferData();
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
+	
 
 	pointRenderingPass.ExecuteSecondRender();
 	Graphics::FinishImGuiRender();

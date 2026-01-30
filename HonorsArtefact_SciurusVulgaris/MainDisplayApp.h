@@ -36,5 +36,6 @@ private:
 	int instanceCount;
 
 	Light sun;
+	LightShadow_RP lightShadow_RP;
 };
 

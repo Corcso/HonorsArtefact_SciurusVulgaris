@@ -122,8 +122,8 @@ std::unique_ptr<std::vector<uint8_t>> Image::ExtractImageData()
 
 void Image::Destroy()
 {
-    if(hasImageView) vkDestroyImageView(Graphics::GetVkDevice(), vkImageView, nullptr);
-    if(hasImage) vkDestroyImage(Graphics::GetVkDevice(), vkImage, nullptr);
+    if (hasImageView) vkDestroyImageView(Graphics::GetVkDevice(), vkImageView, nullptr);
+    if (hasImage) vkDestroyImage(Graphics::GetVkDevice(), vkImage, nullptr);
     hasImageView = false;
     hasImage = false;
 }

@@ -9,6 +9,8 @@ public:
 		HMM_Vec3 direction; float p_0;
 		HMM_Vec3 color; 
 		float intensity;
+		HMM_Mat4 viewMatrix;
+		HMM_Mat4 projMatrix;
 	};
 
 	enum class Type {
@@ -33,6 +35,9 @@ public:
 	HMM_Vec3 GetColor() {return color; }
 	float GetIntensity() { return intensity; }
 
+	HMM_Mat4 GetProjectionMatrix(float radius, float backFactor, float forwardsFactor);
+	HMM_Mat4 GetViewMatrix(HMM_Vec3 focusPoint);
+
 	BufferStruct GetBufferData();
 
 	void RenderImGuiMenu(bool createWindow = false);
@@ -54,5 +59,8 @@ private:
 
 	Image shadowImage;
 	VkFramebuffer shadowFrameBuffer;
+
+	HMM_Mat4 viewMatrix;
+	HMM_Mat4 projMatrix;
 };
 

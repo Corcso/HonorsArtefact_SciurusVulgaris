@@ -34,12 +34,17 @@ public:
 
 	VulkanObjectDescriptorSet* GetDescriptorSet() { return &descriptor; };
 
+	void CreateShadowDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSetLayoutCreateInfo layoutInformation, size_t* sizes);
+
+	VulkanObjectDescriptorSet* GetShadowDescriptorSet() { return &shadowDescriptor; };
+
 	// Vulkan Buffers
 	bool isDataOnGPU = false;
 	VkBuffer pointBuffer;
 	VulkanMemoryAllocator::VulkanMemoryBlock pointBufferMemory;
 
 	VulkanObjectDescriptorSet descriptor;
+	VulkanObjectDescriptorSet shadowDescriptor;
 
 	~PointMesh();
 };
