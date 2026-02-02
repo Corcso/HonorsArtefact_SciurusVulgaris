@@ -160,10 +160,10 @@
       <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
     <ClInclude Include="PointsToShadowMeshShade_GP.h">
-      <Filter>Header Files</Filter>
+      <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
     <ClInclude Include="LightShadow_RP.h">
-      <Filter>Header Files</Filter>
+      <Filter>Renderers\Passes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -279,10 +279,10 @@
       <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
     <ClCompile Include="PointsToShadowMeshShade_GP.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
     <ClCompile Include="LightShadow_RP.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Renderers\Passes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
