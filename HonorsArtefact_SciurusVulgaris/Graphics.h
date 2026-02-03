@@ -3,6 +3,7 @@
 #include "VulkanDescriptor.h"
 #include "PointMesh.h"
 #include "MeshRenderer.h"
+#include "Image.h"
 
 const std::vector<std::string> VK_DEVICE_EXTENSIONS_REQUIRED{
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_MESH_SHADER_EXTENSION_NAME
@@ -44,6 +45,7 @@ public:
 	static VkFramebuffer GetThisFramesFrameBuffer() { return instance.vkSwapChainFrameBuffers[instance.thisRenderImageIndex]; }
 	static VkSampler GetBasicLinearSampler() { return instance.basicLinearSampler; }
 	static VkSampler GetBasicNearestSampler() { return instance.basicNearestSampler; }
+	static Image* GetNoShadowMapImage() { return &instance.noShadowMapImage; }
 	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
 	static void CheckVulkanResult(VkResult res)
@@ -102,6 +104,7 @@ private:
 	// Helpers
 	VkSampler basicLinearSampler;
 	VkSampler basicNearestSampler;
+	Image noShadowMapImage;
 
 	// Variables
 	HMM_Vec4 clearColor{ 0.3f, 0.6f, 0.8f, 1.0f };

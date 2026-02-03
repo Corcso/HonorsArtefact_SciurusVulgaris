@@ -2,6 +2,7 @@
 #include "Image.h"
 #include "Graphics.h"
 #include "VulkanUtility.h"
+#include "VulkanSetup.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -94,6 +95,11 @@ bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage
 bool Image::LoadImageFromFile(std::string path)
 {
     return false;
+}
+
+void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+    VulkanUtility::TransitionImageLayout(vkImage, vkFormat, oldLayout, newLayout, vkFormat == VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()));
 }
 
 std::unique_ptr<std::vector<uint8_t>> Image::ExtractImageData()

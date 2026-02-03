@@ -365,6 +365,11 @@ void Graphics::Initialize(int width, int height, std::wstring title)
         throw - 1;
     }
 
+    // Create a 1x1 shadow map so buffers don't complain
+    instance.noShadowMapImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 1, 1, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    instance.noShadowMapImage.CreateImageView(true);
+    instance.noShadowMapImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
     return ;
 }
 

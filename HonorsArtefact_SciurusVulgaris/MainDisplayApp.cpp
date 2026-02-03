@@ -44,6 +44,7 @@ void MainDisplayApp::Initialize() {
 	treeMeshInstancePositions.ApplyRandomRotation();
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
 
 	meshRenderOn = true;
 }

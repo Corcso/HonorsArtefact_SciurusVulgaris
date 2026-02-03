@@ -295,7 +295,7 @@ void VulkanUtility::CopyImageToBuffer(VkBuffer buffer, VkImage image, uint32_t w
     vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
-void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, bool isDepth)
 {
     
 
@@ -326,7 +326,7 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
     barrier.image = image;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.aspectMask = !isDepth ? VK_IMAGE_ASPECT_COLOR_BIT : VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
     barrier.subresourceRange.baseMipLevel = 0;
     barrier.subresourceRange.levelCount = 1;
     barrier.subresourceRange.baseArrayLayer = 0;
@@ -362,6 +362,13 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
 
         sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
     else {
         throw -1; // Unsupported layout transition
