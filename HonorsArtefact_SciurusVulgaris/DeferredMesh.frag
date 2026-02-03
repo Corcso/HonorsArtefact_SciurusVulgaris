@@ -13,6 +13,7 @@ layout(location = 2) out vec4 outNormal;
 
 void main() {
     outColor = texture(colorTexture, inTex);
+    if(outColor.a == 0) discard;
     outPosition = vec4(inWorldPos, 1);
     outNormal = vec4(normalize(inNormal), 1);
 }

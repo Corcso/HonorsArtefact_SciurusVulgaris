@@ -7,6 +7,7 @@
 #include "Light.h"
 #include "InstancedWCPHelper.h"
 #include "LightShadow_RP.h"
+#include "InstancedMeshTree_RP.h"
 
 
 class MainDisplayApp :
@@ -37,5 +38,16 @@ private:
 
 	Light sun;
 	LightShadow_RP lightShadow_RP;
+
+	void RenderImGuiControls();
+
+	bool meshRenderOn;
+	std::vector<size_t> descriptorSizesMesh;
+	InstancedMeshTree_RP instancedMeshTree_RP;
+	std::vector<TriListMesh> treeMesh;
+	std::vector<Image> treeMeshTextures;
+	char meshModelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
+
+	InstancedWCPHelper treeMeshInstancePositions;
 };
 

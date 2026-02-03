@@ -165,6 +165,8 @@
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="InstancedMeshTraditionalToGBuffer_GP.h" />
+    <ClInclude Include="InstancedMeshTree_RP.h" />
     <ClInclude Include="InstancedTreeRenderPass.h" />
     <ClInclude Include="InstancedWCPHelper.h" />
     <ClInclude Include="json.hpp" />
@@ -193,6 +195,8 @@
     <ClCompile Include="DebugPointRenderer.cpp" />
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
+    <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp" />
+    <ClCompile Include="InstancedMeshTree_RP.cpp" />
     <ClCompile Include="InstancedWCPHelper.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightShadow_RP.cpp" />
@@ -260,6 +264,7 @@
     <None Include="DeferedQuad.vert" />
     <None Include="DeferedTree.frag" />
     <None Include="DeferredMesh.frag" />
+    <None Include="InstanceMeshVertex.vert" />
     <None Include="InstancePointMesh.mesh" />
     <None Include="InstancePointMeshFromTask.mesh" />
     <None Include="InstancePointTask.task" />

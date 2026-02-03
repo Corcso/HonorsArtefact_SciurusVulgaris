@@ -9,6 +9,7 @@ void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
 	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer)};
+	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
 	myModel = nullptr;
@@ -37,77 +38,172 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
+
+	instancedMeshTree_RP.CreateAll();
+	treeMeshInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
+	treeMeshInstancePositions.ApplyRandomRotation();
+	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+
+	meshRenderOn = true;
 }
 
 void MainDisplayApp::Frame() {
+	if (!meshRenderOn) {
+		InstancingInfo instancingInfo;
+		LODDataBuffer lodData;
 
-	InstancingInfo instancingInfo;
-	LODDataBuffer lodData;
+		Graphics::BeginRender();
+		lightShadow_RP.BeginRender(&sun);
+		if (myModel != nullptr) {
 
-	Graphics::BeginRender();
-	lightShadow_RP.BeginRender(&sun);
-	if (myModel != nullptr) {
-		
-		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+			for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+				lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+			}
+			lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+
+			treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
+			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+
+			instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+
+
+
+
+			lightShadow_RP.RenderPointTree(myModel, instancingInfo);
+
+
 		}
-		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+		lightShadow_RP.EndRender();
+		// Render logic
 
-		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)),sun.GetProjectionMatrix(100, 50, 50));
-		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
-		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+		cameraTransform.CaptureControls();
+		if (myModel != nullptr) {
+
+			//std::vector<WCP_Matrices> dataForUBO(400);
+
+			//for (int x = 0; x < 20; x++) {
+			//	for (int y = 0; y < 20; y++) {
+			//		dataForUBO[x * 20 + y] = {
+			//			//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
+			//			HMM_Translate(HMM_V3(x * 2.5f, 0, y * 2.5f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
+			//			cameraTransform.viewMatrix,
+			//			HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
+			//		};
+			//	}
+			//}
+
+			//LODDataBuffer lodData;
+			//for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+			//	lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+			//}
+			//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+
+			treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+			myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+
+			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
+
+			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+			myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+
+			//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
+			pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
+		}
 
 
-		
 
-		lightShadow_RP.RenderPointTree(myModel, instancingInfo);
 
-		
+		WCP_Matrices terrainBufferData = {
+			HMM_Translate(HMM_V3(-50, 0, 50)),
+			cameraTransform.viewMatrix,
+			HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+		};
+		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+		pointRenderingPass.SwitchToTraditionalMeshPipeline();
+		pointRenderingPass.RenderTraditionalMesh(terrain);
+
+		pointRenderingPass.EndRender();
+
+		RenderImGuiControls();
+
+		Light::BufferStruct rawSunData = sun.GetBufferData();
+		pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
+
+
+		pointRenderingPass.ExecuteSecondRender();
+		Graphics::FinishImGuiRender();
+		pointRenderingPass.EndSecondRender();
+		Graphics::EndRender();
 	}
-	lightShadow_RP.EndRender();
-	// Render logic
-	
-	pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
+	else {
+		InstancingInfo instancingInfo;
+		LODDataBuffer lodData;
 
-	cameraTransform.CaptureControls();
-	if (myModel != nullptr) {
-		
-		//std::vector<WCP_Matrices> dataForUBO(400);
+		Graphics::BeginRender();
 
-		//for (int x = 0; x < 20; x++) {
-		//	for (int y = 0; y < 20; y++) {
-		//		dataForUBO[x * 20 + y] = {
-		//			//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
-		//			HMM_Translate(HMM_V3(x * 2.5f, 0, y * 2.5f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
-		//			cameraTransform.viewMatrix,
-		//			HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
-		//		};
-		//	}
-		//}
+		// Render logic
+		instancedMeshTree_RP.BeginRender();
 
-		//LODDataBuffer lodData;
-		//for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-		//	lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
-		//}
-		//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+		cameraTransform.CaptureControls();
+		if (treeMesh.size() > 0) {
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+			treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+			for (int i = 0; i < treeMesh.size(); i++) {
+				treeMesh[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+				//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
-		
-		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+				InstancingInfo instancingInfo{ instanceCount, 0 };
 
-		//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
-		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
+				//myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+				instancedMeshTree_RP.RenderMeshTree(&treeMesh[i], instancingInfo);
+			}
+		}
+
+
+
+
+		WCP_Matrices terrainBufferData = {
+			HMM_Translate(HMM_V3(-50, 0, 50)),
+			cameraTransform.viewMatrix,
+			HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+		};
+		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+		/*instancedMeshTree_RP.SwitchToTraditionalMeshPipeline();
+		instancedMeshTree_RP.RenderTraditionalMesh(terrain);*/
+
+		instancedMeshTree_RP.EndRender();
+
+		RenderImGuiControls();
+
+		Light::BufferStruct rawSunData = sun.GetBufferData();
+		instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
+
+
+		instancedMeshTree_RP.ExecuteSecondRender();
+		Graphics::FinishImGuiRender();
+		instancedMeshTree_RP.EndSecondRender();
+		Graphics::EndRender();
 	}
+}
 
+void MainDisplayApp::Shutdown() {
+	Graphics::WaitUntilGPUIdle();
+	if (myModel != nullptr) delete myModel;
+	delete terrain;
+	terrainTexture.Destroy();
+	pointRenderingPass.Shutdown();
+}
+
+void MainDisplayApp::RenderImGuiControls()
+{
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
 	if (ImGui::Button("Load")) {
@@ -122,12 +218,29 @@ void MainDisplayApp::Frame() {
 		myModel->CreateShadowDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 		myModel->CopyPointsToVRAMMeshBuffer(0);
 
-		MeshletInfo meshletInfo{myModel->GetMeshletCount()};
+		MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+	}
+	ImGui::InputText("Mesh Model Path", meshModelPath, 256);
+	if (ImGui::Button("Load Mesh")) {
+		if (treeMesh.size() > 0) treeMesh.clear();
+
+		treeMesh = TriListMesh::LoadMultiMeshFile(meshModelPath);
+
+		treeMeshTextures.resize(2);
+		treeMeshTextures[0].CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+		treeMeshTextures[0].CreateImageView();
+		treeMeshTextures[1].CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", VK_IMAGE_USAGE_SAMPLED_BIT);
+		treeMeshTextures[1].CreateImageView();
+
+		for (int i = 0; i < treeMesh.size(); i++) {
+			treeMesh[i].CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+			treeMesh[i].GetDescriptorSet()->UpdateImageSampler(1, &treeMeshTextures[i], Graphics::GetBasicLinearSampler());
+		}
 	}
 	ImGui::SliderAngle("Angle", &angle);
 	if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
-	if (myModel != nullptr) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
+	if (myModel != nullptr || treeMesh.size() > 0) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
 	if (myModel != nullptr) {
 		if (ImGui::Button("Shuffle")) {
 			std::random_device rd;
@@ -139,35 +252,8 @@ void MainDisplayApp::Frame() {
 	}
 
 	ImGui::Text("FPS %i", Clock::GetFPS());
+	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
 	ImGui::End();
 
-
-	WCP_Matrices terrainBufferData = {
-		HMM_Translate(HMM_V3(-50, 0, 50)),
-		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
-	};
-	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
-	pointRenderingPass.SwitchToTraditionalMeshPipeline();
-	pointRenderingPass.RenderTraditionalMesh(terrain);
-
-	pointRenderingPass.EndRender();
-
 	sun.RenderImGuiMenu(true);
-	Light::BufferStruct rawSunData = sun.GetBufferData();
-	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
-	
-
-	pointRenderingPass.ExecuteSecondRender();
-	Graphics::FinishImGuiRender();
-	pointRenderingPass.EndSecondRender();
-	Graphics::EndRender();
-}
-
-void MainDisplayApp::Shutdown() {
-	Graphics::WaitUntilGPUIdle();
-	if (myModel != nullptr) delete myModel;
-	delete terrain;
-	terrainTexture.Destroy();
-	pointRenderingPass.Shutdown();
 }

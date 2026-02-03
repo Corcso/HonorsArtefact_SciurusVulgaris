@@ -4,6 +4,7 @@
 #include "InstancedMeshTraditionalToGBuffer_GP.h"
 #include "GBufferToOutput_GP.h"
 #include "TriListMesh.h"
+#include "Graphics.h"
 
 class InstancedMeshTree_RP
 {
@@ -34,6 +35,11 @@ public:
 
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	VkDescriptorSetLayout GetDescriptorSetLayout() { return instancedMeshTraditionalToGBuffer_GP.vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return instancedMeshTraditionalToGBuffer_GP.vkDescriptorSetLayoutInfo; }
+
+	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
 	void Shutdown();
 private:
