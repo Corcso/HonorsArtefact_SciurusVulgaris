@@ -39,6 +39,7 @@ private:
 	Light sun;
 	LightShadow_RP lightShadow_RP;
 
+	bool fxaaEnabled;
 	void RenderImGuiControls();
 
 	bool meshRenderOn;

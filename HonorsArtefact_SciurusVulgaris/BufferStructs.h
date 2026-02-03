@@ -25,3 +25,8 @@ struct LODDataBuffer {
 struct PointRenderDebugInfo{
 	bool coverageDisplayEnabled;
 };
+
+struct FXAAInfo {
+	HMM_Vec2 inverseImageSize;
+	bool enabled;
+};

@@ -150,6 +150,7 @@
     <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="DebugPointRenderer.h" />
+    <ClInclude Include="FXAA_GP.h" />
     <ClInclude Include="GBufferToOutput_GP.h" />
     <ClInclude Include="GeneratorApp.h" />
     <ClInclude Include="Graphics.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="DebugPointRenderer.cpp" />
     <ClCompile Include="entry.cpp" />
+    <ClCompile Include="FXAA_GP.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
     <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp" />
     <ClCompile Include="InstancedMeshTree_RP.cpp" />
@@ -264,6 +266,7 @@
     <None Include="DeferedQuad.vert" />
     <None Include="DeferedTree.frag" />
     <None Include="DeferredMesh.frag" />
+    <None Include="FXAAFrag.frag" />
     <None Include="InstanceMeshVertex.vert" />
     <None Include="InstancePointMesh.mesh" />
     <None Include="InstancePointMeshFromTask.mesh" />

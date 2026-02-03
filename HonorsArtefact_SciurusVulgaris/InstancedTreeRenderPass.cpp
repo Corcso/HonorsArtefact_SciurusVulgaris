@@ -17,6 +17,12 @@ void InstancedTreeRenderPass::CreateImages() {
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
+
+    colorImageFinal.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    colorImageFinal.CreateImageView();
+
+    depthImageFinal.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    depthImageFinal.CreateImageView(true);
 }
 
 void InstancedTreeRenderPass::CreateUniqueMeshData()
@@ -46,6 +52,13 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(0, &colorImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(1, &positionImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(2, &normalImage, vkSampler);
+
+    size_t fxaaSizes[] = { 0, sizeof(FXAAInfo) };
+    fxaaDescriptor.Create(fxaa_GP.vkDescriptorSetLayout, fxaa_GP.vkDescriptorSetLayoutInfo, fxaaSizes);
+    fxaaDescriptor.UpdateImageSampler(0, &colorImageFinal, Graphics::GetBasicLinearSampler());
+    fxaaInfo.enabled = true;
+    fxaaInfo.inverseImageSize = HMM_V2(1.0f / colorImageFinal.GetImageExtent().width, 1.0f / colorImageFinal.GetImageExtent().height);
+    fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
 }
 
 void InstancedTreeRenderPass::CreateSampler() {
@@ -73,114 +86,200 @@ void InstancedTreeRenderPass::CreateSampler() {
 }
 
 void InstancedTreeRenderPass::CreateFrameBuffer() {
-    VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), normalImage.GetImageView(), depthImage.GetImageView() };
+    {
+        VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), normalImage.GetImageView(), depthImage.GetImageView() };
 
-    VkFramebufferCreateInfo frameBufferCreateInfo{};
-    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    frameBufferCreateInfo.width = colorImage.GetImageExtent().width;
-    frameBufferCreateInfo.height = colorImage.GetImageExtent().height;
-    frameBufferCreateInfo.attachmentCount = 4;
-    frameBufferCreateInfo.pAttachments = imageViewList;
-    frameBufferCreateInfo.renderPass = vkRenderPass;
-    frameBufferCreateInfo.layers = 1;
+        VkFramebufferCreateInfo frameBufferCreateInfo{};
+        frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frameBufferCreateInfo.width = colorImage.GetImageExtent().width;
+        frameBufferCreateInfo.height = colorImage.GetImageExtent().height;
+        frameBufferCreateInfo.attachmentCount = 4;
+        frameBufferCreateInfo.pAttachments = imageViewList;
+        frameBufferCreateInfo.renderPass = vkRenderPass;
+        frameBufferCreateInfo.layers = 1;
 
-    if (vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &vkFrameBuffer) != VK_SUCCESS) {
-        throw - 1;
+        if (vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &vkFrameBuffer) != VK_SUCCESS) {
+            throw - 1;
+        }
+    }
+    {
+        VkImageView imageViewList[]{ colorImageFinal.GetImageView(), depthImageFinal.GetImageView() };
+
+        VkFramebufferCreateInfo frameBufferCreateInfo{};
+        frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frameBufferCreateInfo.width = colorImageFinal.GetImageExtent().width;
+        frameBufferCreateInfo.height = colorImageFinal.GetImageExtent().height;
+        frameBufferCreateInfo.attachmentCount = 2;
+        frameBufferCreateInfo.pAttachments = imageViewList;
+        frameBufferCreateInfo.renderPass = Graphics::GetSwapChainRenderPass();
+        frameBufferCreateInfo.layers = 1;
+
+        if (vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &vkFrameBufferFinal) != VK_SUCCESS) {
+            throw - 1;
+        }
     }
 }
 
-void InstancedTreeRenderPass::CreateRenderPass() {
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = colorImage.GetImageFormat();
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    // Load and store for colour and depth data.
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    // Load and store for stencil data. 
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+void InstancedTreeRenderPass::CreateRenderPasses() {
+    {
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format = colorImage.GetImageFormat();
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        // Load and store for colour and depth data.
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        // Load and store for stencil data. 
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-    // Read tutorial its hard to explain
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // Read tutorial its hard to explain
+        VkAttachmentReference colorAttachmentRef{};
+        colorAttachmentRef.attachment = 0;
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    // Depth buffer attachment image
-    VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice());
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 3;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        // Depth buffer attachment image
+        VkAttachmentDescription depthAttachment{};
+        depthAttachment.format = VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice());
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 3;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-    // Position buffer attachment image
-    VkAttachmentDescription positionAttachment{};
-    positionAttachment.format = positionImage.GetImageFormat();
-    positionAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    positionAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    positionAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    positionAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    positionAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    positionAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    positionAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    VkAttachmentReference positionAttachmentRef{};
-    positionAttachmentRef.attachment = 1;
-    positionAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // Position buffer attachment image
+        VkAttachmentDescription positionAttachment{};
+        positionAttachment.format = positionImage.GetImageFormat();
+        positionAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        positionAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        positionAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        positionAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        positionAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        positionAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        positionAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        VkAttachmentReference positionAttachmentRef{};
+        positionAttachmentRef.attachment = 1;
+        positionAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    // Normal buffer attachment image
-    VkAttachmentDescription normalAttachment{};
-    normalAttachment.format = normalImage.GetImageFormat();
-    normalAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    normalAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    VkAttachmentReference normalAttachmentRef{};
-    normalAttachmentRef.attachment = 2;
-    normalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        // Normal buffer attachment image
+        VkAttachmentDescription normalAttachment{};
+        normalAttachment.format = normalImage.GetImageFormat();
+        normalAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        normalAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        normalAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        normalAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        normalAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        normalAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        normalAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        VkAttachmentReference normalAttachmentRef{};
+        normalAttachmentRef.attachment = 2;
+        normalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentReference colorAttachments[3]{ colorAttachmentRef, positionAttachmentRef, normalAttachmentRef };
+        VkAttachmentReference colorAttachments[3]{ colorAttachmentRef, positionAttachmentRef, normalAttachmentRef };
 
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 3;
-    subpass.pColorAttachments = colorAttachments;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 3;
+        subpass.pColorAttachments = colorAttachments;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    // Subpass dependencies (not sure what these are at all)
-    // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
-    VkSubpassDependency dependency{};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        // Subpass dependencies (not sure what these are at all)
+        // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-    // Create render pass
-    std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment,normalAttachment, depthAttachment };
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-    renderPassInfo.pAttachments = attachments.data();
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+        // Create render pass
+        std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment,normalAttachment, depthAttachment };
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(Graphics::GetVkDevice(), &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
-        throw - 1;
+        if (vkCreateRenderPass(Graphics::GetVkDevice(), &renderPassInfo, nullptr, &vkRenderPass) != VK_SUCCESS) {
+            throw - 1;
+        }
+    }
+    {
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format = colorImage.GetImageFormat();
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        // Load and store for colour and depth data.
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        // Load and store for stencil data. 
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        // Read tutorial its hard to explain
+        VkAttachmentReference colorAttachmentRef{};
+        colorAttachmentRef.attachment = 0;
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Depth buffer attachment image
+        VkAttachmentDescription depthAttachment{};
+        depthAttachment.format = VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice());
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 1;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference colorAttachments[1]{ colorAttachmentRef };
+
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = colorAttachments;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+        // Subpass dependencies (not sure what these are at all)
+        // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        // Create render pass
+        std::vector<VkAttachmentDescription> attachments = { colorAttachment, depthAttachment };
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
+
+        if (vkCreateRenderPass(Graphics::GetVkDevice(), &renderPassInfo, nullptr, &vkSecondRenderPass) != VK_SUCCESS) {
+            throw - 1;
+        }
     }
 }
 
@@ -285,6 +384,60 @@ void InstancedTreeRenderPass::ExecuteSecondRender(VkCommandBuffer commandBuffer)
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = vkSecondRenderPass;
+    renderPassInfo.framebuffer = vkFrameBufferFinal;
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = colorImageFinal.GetImageExtent();
+
+    std::vector<VkClearValue> clearColors = { {{0, 0, 0, 1}}, {1.0f, 0} };
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
+    renderPassInfo.pClearValues = clearColors.data();
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipeline);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(colorImageFinal.GetImageExtent().width);
+    viewport.height = static_cast<float>(colorImageFinal.GetImageExtent().height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = colorImageFinal.GetImageExtent();
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    VkBuffer vertexBuffers[] = { fullScreenQuad->vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipelineLayout, 0, 1,
+        fullScreenQuad->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
+
+    vkCmdDrawIndexed(commandBuffer, fullScreenQuad->indices.size(), 1, 0, 0, 0);
+}
+
+void InstancedTreeRenderPass::EndSecondRender(VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    vkCmdEndRenderPass(commandBuffer);
+}
+
+void InstancedTreeRenderPass::ExecuteThirdAARender(bool enableFXAA, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = Graphics::GetSwapChainRenderPass();
     renderPassInfo.framebuffer = Graphics::GetThisFramesFrameBuffer();
     renderPassInfo.renderArea.offset = { 0, 0 };
@@ -296,7 +449,7 @@ void InstancedTreeRenderPass::ExecuteSecondRender(VkCommandBuffer commandBuffer)
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, fxaa_GP.vkPipeline);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -320,13 +473,16 @@ void InstancedTreeRenderPass::ExecuteSecondRender(VkCommandBuffer commandBuffer)
 
     vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipelineLayout, 0, 1,
-        fullScreenQuad->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
+    fxaaInfo.enabled = enableFXAA;
+    fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, fxaa_GP.vkPipelineLayout, 0, 1,
+        fxaaDescriptor.GetDescriptorSet(), 0, nullptr);
 
     vkCmdDrawIndexed(commandBuffer, fullScreenQuad->indices.size(), 1, 0, 0, 0);
 }
 
-void InstancedTreeRenderPass::EndSecondRender(VkCommandBuffer commandBuffer)
+void InstancedTreeRenderPass::EndThirdAARender(VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 

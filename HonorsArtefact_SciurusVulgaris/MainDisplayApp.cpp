@@ -45,8 +45,6 @@ void MainDisplayApp::Initialize() {
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
-
-	meshRenderOn = true;
 }
 
 void MainDisplayApp::Frame() {
@@ -139,8 +137,10 @@ void MainDisplayApp::Frame() {
 
 
 		pointRenderingPass.ExecuteSecondRender();
-		Graphics::FinishImGuiRender();
 		pointRenderingPass.EndSecondRender();
+		pointRenderingPass.ExecuteThirdAARender(fxaaEnabled);
+		Graphics::FinishImGuiRender();
+		pointRenderingPass.EndThirdAARender();
 		Graphics::EndRender();
 	}
 	else {
@@ -191,6 +191,7 @@ void MainDisplayApp::Frame() {
 		instancedMeshTree_RP.ExecuteSecondRender();
 		Graphics::FinishImGuiRender();
 		instancedMeshTree_RP.EndSecondRender();
+
 		Graphics::EndRender();
 	}
 }
@@ -251,7 +252,8 @@ void MainDisplayApp::RenderImGuiControls()
 			myModel->CopyPointsToVRAM();
 		}
 	}
-
+	ImGui::Checkbox("FXAA", &fxaaEnabled);
+	ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
 	ImGui::End();

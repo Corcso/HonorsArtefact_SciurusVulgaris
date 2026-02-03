@@ -7,6 +7,7 @@
 #include "GBufferToOutput_GP.h"
 #include "MeshTraditionalToGBuffer_GP.h"
 #include "PointsToGBufferMeshShade_GP.h"
+#include "FXAA_GP.h"
 
 class InstancedTreeRenderPass
 {
@@ -19,13 +20,13 @@ public:
 	void CreateSampler();
 	void CreateFrameBuffer();
 
-	void CreateRenderPass();
+	void CreateRenderPasses();
 
 	void CreateAll() {
 		//CreateDescriptorLayout();
 		CreateImages();
 		CreateSampler();
-		CreateRenderPass();
+		CreateRenderPasses();
 		CreateFrameBuffer();
 		//CreatePipeline();
 		pointsToGBuffer_GP.CreateDescriptorLayout();
@@ -35,7 +36,9 @@ public:
 		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
 		meshTraditionalToGBuffer_GP.CreatePipeline(vkRenderPass);
 		gBufferToOutput_GP.CreateDescriptorLayout();
-		gBufferToOutput_GP.CreatePipeline(Graphics::GetSwapChainRenderPass());
+		gBufferToOutput_GP.CreatePipeline(vkSecondRenderPass);
+		fxaa_GP.CreateDescriptorLayout();
+		fxaa_GP.CreatePipeline(Graphics::GetSwapChainRenderPass());
 		
 		CreateUniqueMeshData();
 	}
@@ -50,6 +53,9 @@ public:
 
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	void ExecuteThirdAARender(bool enableFXAA, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void EndThirdAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return pointsToGBuffer_GP.vkDescriptorSetLayoutInfo; }
@@ -83,8 +89,16 @@ private:
 	//VkPipeline vkMainPipeline;
 
 	// Second Pass
+	Image colorImageFinal;
+	Image depthImageFinal;
+	VkFramebuffer vkFrameBufferFinal;
 	TriListMesh* fullScreenQuad;
 
 	VkRenderPass vkSecondRenderPass;
+
+	// Third AA Pass
+	FXAA_GP fxaa_GP;
+	VulkanObjectDescriptorSet fxaaDescriptor;
+	FXAAInfo fxaaInfo;
 };
 

@@ -171,6 +171,9 @@
     <ClInclude Include="InstancedMeshTraditionalToGBuffer_GP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FXAA_GP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -296,6 +299,9 @@
     <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FXAA_GP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileAllShaders.bat">
@@ -338,6 +344,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="InstanceMeshVertex.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="FXAAFrag.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
