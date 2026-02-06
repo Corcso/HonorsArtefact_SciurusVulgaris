@@ -23,3 +23,12 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_vulkan.h"
+
+#ifdef NV_PERF_METER
+//#include <NvPerfUtilities.h>
+#include <NvPerfVulkan.h>
+//#include <NvPerfPeriodicSamplerCommon.h>
+#include <NvPerfReportGenerator.h>
+#include <NvPerfReportGeneratorVulkan.h>
+//#include <NvPerfHudRenderer.h>
+#endif // NV_PERF_METER

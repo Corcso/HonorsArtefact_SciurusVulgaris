@@ -114,6 +114,10 @@ void Graphics::Initialize(int width, int height, std::wstring title)
         }
     }
 #endif
+#ifdef NV_PERF_METER
+    enableValidationLayers = false;
+#endif // NV_PERF_METER
+
 
     // Setup app info
     VkApplicationInfo appInfo{};
@@ -369,6 +373,16 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.noShadowMapImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 1, 1, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     instance.noShadowMapImage.CreateImageView(true);
     instance.noShadowMapImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+#ifdef NV_PERF_METER
+    instance.nvperf_reportGenerator.additionalMetrics = { "crop__write_throughput" };
+    instance.nvperf_reportGenerator.InitializeReportGenerator(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
+    instance.nvperf_reportGenerator.SetFrameLevelRangeName("Frame");
+    instance.nvperf_reportGenerator.SetNumNestingLevels(10);
+    instance.nvperf_reportGenerator.outputOptions.directoryName = "NVPERFOUTPUT";
+    instance.nvperf_reportGenerator.outputOptions.enableHtmlReport = true;
+#endif // NV_PERF_METER
+
 
     return ;
 }

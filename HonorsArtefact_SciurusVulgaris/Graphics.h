@@ -113,5 +113,15 @@ private:
 	uint8_t currentFrame;
 	uint32_t thisRenderImageIndex;
 	uint64_t thisFramesDrawCall;
+#ifdef NV_PERF_METER
+	nv::perf::profiler::ReportGeneratorVulkan nvperf_reportGenerator;
+	bool nvperf_InitiateReportNextFrame = false;
+	//nv::perf::hud::HudDataModel nvperf_hudDataModel;
+	//nv::perf::hud::HudImPlotRenderer nvperf_hudRenderer;
+public:
+	static void nvperf_InitiateReport();
+	static std::string nfperf_GetLastReportDir();
+#endif // NV_PERF_METER
+
 };
 

@@ -256,6 +256,10 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
+	if (ImGui::Button("NVPERFRUN")) {
+		Graphics::nvperf_InitiateReport();
+	}
+	ImGui::Text(("Saved to" + Graphics::nfperf_GetLastReportDir()).c_str());
 	ImGui::End();
 
 	sun.RenderImGuiMenu(true);

@@ -7,6 +7,20 @@ Graphics Graphics::instance;
 
 void Graphics::BeginRender()
 {
+#ifdef NV_PERF_METER
+    VkResult res = vkDeviceWaitIdle(instance.vkDevice);
+    if (res != VK_SUCCESS){
+        std::cout << "CANNOT IDLE WAIT FOR NVPERF\n";
+    }
+    vkQueueWaitIdle(instance.vkGraphicsQueue);
+    vkQueueWaitIdle(instance.vkPresentQueue);
+
+    if (instance.nvperf_InitiateReportNextFrame) {
+        instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
+        instance.nvperf_InitiateReportNextFrame = false;
+    }
+    instance.nvperf_reportGenerator.OnFrameStart(instance.vkPresentQueue, VulkanSetup::GetQueueFamilyIndices(instance.vkPhysicalDevice, instance.vkSurface).presentFamily);
+#endif
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -41,6 +55,7 @@ void Graphics::BeginRender()
     if (vkBeginCommandBuffer(instance.vkCommandBuffers[instance.currentFrame], &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
+    instance.nvperf_reportGenerator.rangeCommands.PushRange(instance.vkCommandBuffers[instance.currentFrame], "Test");
     // Do mesh render
     /*instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
     instance.meshRenderer.Render(instance.myMesh);
@@ -110,6 +125,8 @@ void Graphics::EndRender()
     //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
     //// Finish recording command buffer
     //vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
+    
+    instance.nvperf_reportGenerator.rangeCommands.PopRange(instance.vkCommandBuffers[instance.currentFrame]);
 
     if (vkEndCommandBuffer(instance.vkCommandBuffers[instance.currentFrame]) != VK_SUCCESS) {
         throw - 1;
@@ -152,7 +169,21 @@ void Graphics::EndRender()
 
     presentInfo.pResults = nullptr; // Optional
 
+#ifdef NV_PERF_METER
+    instance.nvperf_reportGenerator.OnFrameEnd();
+    ////instance.nvperf_reportGenerator.Reset();
+    //vkQueueWaitIdle(instance.vkGraphicsQueue);
+    //vkQueueWaitIdle(instance.vkPresentQueue);
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
+
+    //if (instance.nvperf_InitiateReportNextFrame) {
+    //    instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
+    //    instance.nvperf_InitiateReportNextFrame = false;
+    //}
+    //instance.nvperf_reportGenerator.OnFrameStart(instance.vkGraphicsQueue, VulkanSetup::GetQueueFamilyIndices(instance.vkPhysicalDevice, instance.vkSurface).graphicsFamily);
+#else
+    VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
+#endif // NV_PERF_METER
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || instance.swapChainNeedsRecreation) {
         instance.swapChainNeedsRecreation = false;
@@ -218,6 +249,18 @@ void Graphics::RecreateSwapChain()
 
 
 }
+#ifdef NV_PERF_METER
+void Graphics::nvperf_InitiateReport()
+{
+    instance.nvperf_InitiateReportNextFrame = true;
+}
+std::string Graphics::nfperf_GetLastReportDir()
+{
+    return instance.nvperf_reportGenerator.GetLastReportDirectoryName();
+}
+#endif // NV_PERF_METER
+
+
 
 //void Graphics::AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout)
 //{
