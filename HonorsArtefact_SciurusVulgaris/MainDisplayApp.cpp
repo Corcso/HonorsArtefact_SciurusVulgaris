@@ -45,9 +45,14 @@ void MainDisplayApp::Initialize() {
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
+
+	captureUnderway = false;
+	renderImGui = true;
 }
 
 void MainDisplayApp::Frame() {
+	ImageCaptureSequence();
+
 	if (!meshRenderOn) {
 		InstancingInfo instancingInfo;
 		LODDataBuffer lodData;
@@ -206,6 +211,7 @@ void MainDisplayApp::Shutdown() {
 
 void MainDisplayApp::RenderImGuiControls()
 {
+	if (!renderImGui) return;
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
 	if (ImGui::Button("Load")) {
@@ -265,7 +271,52 @@ void MainDisplayApp::RenderImGuiControls()
 	if (ImGui::Button("Save Swap Chain")) {
 		Graphics::SaveSwapChainImageToFile("./swapchainout.bmp");
 	}
+	if (ImGui::Button("Run Save Sequence")) {
+		imageSequenceTimer = 0;
+		captureUnderway = true;
+		stageImagesSaved = 0;
+	}
 	ImGui::End();
 
 	sun.RenderImGuiMenu(true);
+}
+
+void MainDisplayApp::ImageCaptureSequence()
+{
+	if (!captureUnderway) return;
+
+	imageSequenceTimer += Clock::DeltaTime();
+
+	renderImGui = false;
+	if (imageSequenceTimer < 1.0f) {
+		cameraTransform.position = HMM_V3(0, 30, 0);
+		cameraTransform.euler = HMM_V3(-45, 0, 0);
+		instanceCount = 4000;
+	}
+	else if (imageSequenceTimer < 2.0f) {
+		if (stageImagesSaved == 0) {
+			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+			stageImagesSaved++;
+		}
+		cameraTransform.position = HMM_V3(0, 30, 0);
+		cameraTransform.euler = HMM_V3(-45, -90, 0);
+		instanceCount = 1000;
+	}
+	else if (imageSequenceTimer < 3.0f) {
+		if (stageImagesSaved == 1) {
+			Graphics::SaveSwapChainImageToFile("./Render002.bmp");
+			stageImagesSaved++;
+		}
+		cameraTransform.position = HMM_V3(0, 30, 0);
+		cameraTransform.euler = HMM_V3(-45, 90, 0);
+		instanceCount = 100;
+	}
+	else {
+		if (stageImagesSaved == 2) {
+			Graphics::SaveSwapChainImageToFile("./Render003.bmp");
+			stageImagesSaved++;
+		}
+		captureUnderway = false;
+		renderImGui = true;
+	}
 }

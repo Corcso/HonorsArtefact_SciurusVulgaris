@@ -50,5 +50,11 @@ private:
 	char meshModelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
 
 	InstancedWCPHelper treeMeshInstancePositions;
+	// For Image Capture
+	bool renderImGui;
+	bool captureUnderway;
+	float imageSequenceTimer;
+	int stageImagesSaved;
+	void ImageCaptureSequence();
 };
 

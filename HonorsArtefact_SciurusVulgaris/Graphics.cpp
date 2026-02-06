@@ -101,7 +101,7 @@ void Graphics::BeginRender()
 
 void Graphics::FinishImGuiRender()
 {
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
 
     /*ImGui::Begin("Mesh");
     ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
@@ -109,7 +109,7 @@ void Graphics::FinishImGuiRender()
     ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
     ImGui::End();*/
 
-    instance.VRAMAllocator.RenderMemoryUsageStat();
+    //instance.VRAMAllocator.RenderMemoryUsageStat();
 
     ImGui::Render();
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
