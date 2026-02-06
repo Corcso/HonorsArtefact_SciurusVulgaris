@@ -46,6 +46,7 @@ public:
 	static VkSampler GetBasicLinearSampler() { return instance.basicLinearSampler; }
 	static VkSampler GetBasicNearestSampler() { return instance.basicNearestSampler; }
 	static Image* GetNoShadowMapImage() { return &instance.noShadowMapImage; }
+	static void SaveSwapChainImageToFile(std::string path);
 	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
 	static void CheckVulkanResult(VkResult res)

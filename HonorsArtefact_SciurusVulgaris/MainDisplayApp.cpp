@@ -262,6 +262,9 @@ void MainDisplayApp::RenderImGuiControls()
 	}
 	ImGui::Text(("Saved to" + Graphics::nfperf_GetLastReportDir()).c_str());
 #endif
+	if (ImGui::Button("Save Swap Chain")) {
+		Graphics::SaveSwapChainImageToFile("./swapchainout.bmp");
+	}
 	ImGui::End();
 
 	sun.RenderImGuiMenu(true);

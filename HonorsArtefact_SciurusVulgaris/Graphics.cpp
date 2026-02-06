@@ -1,7 +1,11 @@
 #include "PCH.h"
 #include "Graphics.h"
 #include "VulkanSetup.h"
+#include "VulkanUtility.h"
 #include "Input.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
 
 Graphics Graphics::instance;
 
@@ -215,6 +219,32 @@ HMM_Vec2 Graphics::GetWindowLocation()
     }
 
     return location;
+}
+
+void Graphics::SaveSwapChainImageToFile(std::string path)
+{
+    // Create CPU visible transfer DST buffer
+    VkBuffer stagingBuffer;
+    VulkanMemoryAllocator::VulkanMemoryBlock stagingBufferMemory;
+
+    VulkanUtility::CreateBufferAndAssignMemory(instance.vkSwapChainExtent.width * instance.vkSwapChainExtent.height * 4 /*My magic number!*/, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &stagingBuffer, &stagingBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
+
+    VulkanUtility::TransitionImageLayout(instance.vkSwapChainImages[0], instance.vkSwapChainFormat, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+
+    VulkanUtility::CopyImageToBuffer(stagingBuffer, instance.vkSwapChainImages[0], instance.vkSwapChainExtent.width, instance.vkSwapChainExtent.height);
+
+    VulkanUtility::TransitionImageLayout(instance.vkSwapChainImages[0], instance.vkSwapChainFormat, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    char* data = new char[instance.vkSwapChainExtent.width * instance.vkSwapChainExtent.height * 4];
+    VulkanUtility::MapCopyBlockFromGPU(stagingBufferMemory, data, instance.vkSwapChainExtent.width * instance.vkSwapChainExtent.height * 4);
+
+    vkDestroyBuffer(instance.vkDevice, stagingBuffer, nullptr);
+    instance.VRAMAllocator.FreeMemory(instance.vkDevice, stagingBufferMemory);
+
+    stbi_write_bmp(path.c_str(), instance.vkSwapChainExtent.width, instance.vkSwapChainExtent.height, 4, data);
+
+    delete[] data;
 }
 
 void Graphics::RecreateSwapChain()
