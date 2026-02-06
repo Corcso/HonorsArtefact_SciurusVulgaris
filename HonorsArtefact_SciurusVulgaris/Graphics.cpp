@@ -55,7 +55,9 @@ void Graphics::BeginRender()
     if (vkBeginCommandBuffer(instance.vkCommandBuffers[instance.currentFrame], &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
+#ifdef NV_PERF_METER
     instance.nvperf_reportGenerator.rangeCommands.PushRange(instance.vkCommandBuffers[instance.currentFrame], "Test");
+#endif
     // Do mesh render
     /*instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
     instance.meshRenderer.Render(instance.myMesh);
@@ -125,9 +127,9 @@ void Graphics::EndRender()
     //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
     //// Finish recording command buffer
     //vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
-    
+#ifdef NV_PERF_METER
     instance.nvperf_reportGenerator.rangeCommands.PopRange(instance.vkCommandBuffers[instance.currentFrame]);
-
+#endif
     if (vkEndCommandBuffer(instance.vkCommandBuffers[instance.currentFrame]) != VK_SUCCESS) {
         throw - 1;
     }
