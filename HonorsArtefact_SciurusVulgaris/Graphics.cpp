@@ -176,12 +176,13 @@ void Graphics::EndRender()
     presentInfo.pResults = nullptr; // Optional
 
 #ifdef NV_PERF_METER
-    instance.nvperf_reportGenerator.OnFrameEnd();
+    
     ////instance.nvperf_reportGenerator.Reset();
     //vkQueueWaitIdle(instance.vkGraphicsQueue);
     //vkQueueWaitIdle(instance.vkPresentQueue);
+    vkDeviceWaitIdle(instance.vkDevice);
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
-
+    instance.nvperf_reportGenerator.OnFrameEnd();
     //if (instance.nvperf_InitiateReportNextFrame) {
     //    instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
     //    instance.nvperf_InitiateReportNextFrame = false;

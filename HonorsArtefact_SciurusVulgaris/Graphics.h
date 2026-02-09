@@ -5,7 +5,7 @@
 #include "MeshRenderer.h"
 #include "Image.h"
 
-const std::vector<std::string> VK_DEVICE_EXTENSIONS_REQUIRED{
+const std::vector<const char *> VK_DEVICE_EXTENSIONS_REQUIRED{
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_MESH_SHADER_EXTENSION_NAME
 };
 constexpr int VULKAN_MAX_FRAMES_IN_FLIGHT = 2;
@@ -116,6 +116,7 @@ private:
 	uint64_t thisFramesDrawCall;
 #ifdef NV_PERF_METER
 	nv::perf::profiler::ReportGeneratorVulkan nvperf_reportGenerator;
+	nv::perf::ClockInfo nvperf_clockInfo;
 	bool nvperf_InitiateReportNextFrame = false;
 	//nv::perf::hud::HudDataModel nvperf_hudDataModel;
 	//nv::perf::hud::HudImPlotRenderer nvperf_hudRenderer;

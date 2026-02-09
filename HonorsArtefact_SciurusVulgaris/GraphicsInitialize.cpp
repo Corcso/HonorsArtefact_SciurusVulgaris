@@ -137,7 +137,10 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     std::vector<const char*> extensionsNames = {
         "VK_KHR_surface", "VK_KHR_win32_surface"//, "VK_EXT_debug_utils"
     };
-    
+
+#ifdef NV_PERF_METER
+    nv::perf::VulkanAppendInstanceRequiredExtensions(extensionsNames, appInfo.apiVersion);
+#endif // NV_PERF_METER
 
     createInfo.enabledExtensionCount = extensionsNames.size();
     createInfo.ppEnabledExtensionNames = extensionsNames.data();
@@ -247,10 +250,14 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     logicDeviceCreateInfo.pEnabledFeatures = nullptr;
     logicDeviceCreateInfo.pNext = &deviceFeatures2;
 
-    logicDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(VK_DEVICE_EXTENSIONS_REQUIRED.size());
-    std::vector<const char*> deviceExtensionsAsCStr;
-    for (const auto& string : VK_DEVICE_EXTENSIONS_REQUIRED) deviceExtensionsAsCStr.push_back(string.c_str());
-    logicDeviceCreateInfo.ppEnabledExtensionNames = deviceExtensionsAsCStr.data();
+    std::vector<const char*> deviceExtensionsNames = VK_DEVICE_EXTENSIONS_REQUIRED;
+
+#ifdef NV_PERF_METER
+    nv::perf::VulkanAppendDeviceRequiredExtensions(instance.vkInstance, instance.vkPhysicalDevice, vkGetInstanceProcAddr(instance.vkInstance, "vkGetInstanceProcAddr"), deviceExtensionsNames);
+#endif // NV_PERF_METER
+
+    logicDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionsNames.size());
+    logicDeviceCreateInfo.ppEnabledExtensionNames = deviceExtensionsNames.data();
 
     // Not required only for backwards compat
     /*if (enableValidationLayers) {
@@ -375,12 +382,16 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.noShadowMapImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 #ifdef NV_PERF_METER
+    nv::perf::InitializeNvPerf();
     instance.nvperf_reportGenerator.additionalMetrics = { "crop__write_throughput" };
     instance.nvperf_reportGenerator.InitializeReportGenerator(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
     instance.nvperf_reportGenerator.SetFrameLevelRangeName("Frame");
     instance.nvperf_reportGenerator.SetNumNestingLevels(10);
     instance.nvperf_reportGenerator.outputOptions.directoryName = "NVPERFOUTPUT";
     instance.nvperf_reportGenerator.outputOptions.enableHtmlReport = true;
+
+    instance.nvperf_clockInfo = nv::perf::VulkanGetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
+    nv::perf::VulkanSetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice, NVPW_DEVICE_CLOCK_SETTING_LOCK_TO_RATED_TDP);
 #endif // NV_PERF_METER
 
 
