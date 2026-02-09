@@ -43,6 +43,9 @@
     <Filter Include="Renderers\Passes">
       <UniqueIdentifier>{385d94df-0d54-4571-a8e6-f31ca0b3a652}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ImPlot">
+      <UniqueIdentifier>{ac6866bd-35da-4f27-b782-f913258d38c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PCH.h">
@@ -174,6 +177,12 @@
     <ClInclude Include="FXAA_GP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="implot\implot.h">
+      <Filter>ImPlot</Filter>
+    </ClInclude>
+    <ClInclude Include="implot\implot_internal.h">
+      <Filter>ImPlot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -301,6 +310,15 @@
     </ClCompile>
     <ClCompile Include="FXAA_GP.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="implot\implot_items.cpp">
+      <Filter>ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="implot\implot.cpp">
+      <Filter>ImPlot</Filter>
+    </ClCompile>
+    <ClCompile Include="implot\implot_demo.cpp">
+      <Filter>ImPlot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

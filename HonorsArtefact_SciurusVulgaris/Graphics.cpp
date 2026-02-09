@@ -111,6 +111,24 @@ void Graphics::FinishImGuiRender()
 
     //instance.VRAMAllocator.RenderMemoryUsageStat();
 
+#ifdef NV_PERF_METER
+    instance.nvperf_sampler.DecodeCounters();
+    instance.nvperf_sampler.ConsumeSamples([&](const uint8_t* pCounterDataImage, size_t counterDataImageSize, uint32_t rangeIndex, bool& stop) {
+        stop = false;
+        return instance.nvperf_hudDataModel.AddSample(pCounterDataImage, counterDataImageSize, rangeIndex);
+        });
+    for (auto& frameDelimiter : instance.nvperf_sampler.GetFrameDelimiters())
+    {
+        instance.nvperf_hudDataModel.AddFrameDelimiter(frameDelimiter.frameEndTime);
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(400, -1), ImGuiCond_Appearing);
+    ImGui::Begin("Graphics General Triage");
+    instance.nvperf_hudRenderer.Render();
+    ImGui::End();
+#endif // NV_PERF_METER
+
+
     ImGui::Render();
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
 }
@@ -183,6 +201,7 @@ void Graphics::EndRender()
     vkDeviceWaitIdle(instance.vkDevice);
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
     instance.nvperf_reportGenerator.OnFrameEnd();
+    instance.nvperf_sampler.OnFrameEnd();
     //if (instance.nvperf_InitiateReportNextFrame) {
     //    instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
     //    instance.nvperf_InitiateReportNextFrame = false;

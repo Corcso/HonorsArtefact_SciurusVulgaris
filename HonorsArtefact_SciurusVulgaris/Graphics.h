@@ -116,6 +116,12 @@ private:
 	uint64_t thisFramesDrawCall;
 #ifdef NV_PERF_METER
 	nv::perf::profiler::ReportGeneratorVulkan nvperf_reportGenerator;
+
+	nv::perf::sampler::PeriodicSamplerTimeHistoryVulkan nvperf_sampler;
+	nv::perf::hud::HudPresets nvperf_hudPresets;
+	nv::perf::hud::HudDataModel nvperf_hudDataModel;
+	nv::perf::hud::HudImPlotRenderer nvperf_hudRenderer;
+
 	nv::perf::ClockInfo nvperf_clockInfo;
 	bool nvperf_InitiateReportNextFrame = false;
 	//nv::perf::hud::HudDataModel nvperf_hudDataModel;

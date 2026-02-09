@@ -254,6 +254,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
 #ifdef NV_PERF_METER
     nv::perf::VulkanAppendDeviceRequiredExtensions(instance.vkInstance, instance.vkPhysicalDevice, vkGetInstanceProcAddr(instance.vkInstance, "vkGetInstanceProcAddr"), deviceExtensionsNames);
+    nv::perf::sampler::PeriodicSamplerTimeHistoryVulkan::AppendDeviceRequiredExtensions(appInfo.apiVersion, deviceExtensionsNames);
 #endif // NV_PERF_METER
 
     logicDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionsNames.size());
@@ -392,6 +393,35 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     instance.nvperf_clockInfo = nv::perf::VulkanGetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
     nv::perf::VulkanSetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice, NVPW_DEVICE_CLOCK_SETTING_LOCK_TO_RATED_TDP);
+
+    // LIVE STATS
+    instance.nvperf_sampler.Initialize(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
+    const nv::perf::DeviceIdentifiers deviceIdentifiers = instance.nvperf_sampler.GetGpuDeviceIdentifiers();
+    const uint32_t                    maxFrameLatency = instance.vkSwapChainImages.size() + 1;
+    instance.nvperf_sampler.BeginSession(instance.vkGraphicsQueue, indices.graphicsFamily, 1000 * 1000 * 1000 / 60, 1000U * 1000U * 1000U * 60U, maxFrameLatency);
+
+    instance.nvperf_hudPresets.Initialize(deviceIdentifiers.pChipName);
+    for (auto& preset : instance.nvperf_hudPresets.GetPresets()) {
+        std::cout << preset.name << "\n";
+
+    }
+    instance.nvperf_hudDataModel.Load(instance.nvperf_hudPresets.GetPreset("Graphics General Triage"));
+
+    std::string                  metricConfigName;
+    nv::perf::MetricConfigObject metricConfigObject;
+    if (nv::perf::MetricConfigurations::GetMetricConfigNameBasedOnHudConfigurationName(metricConfigName, deviceIdentifiers.pChipName, "Graphics General Triage"))
+    {
+        nv::perf::MetricConfigurations::LoadMetricConfigObject(metricConfigObject, deviceIdentifiers.pChipName, metricConfigName);
+    }
+    instance.nvperf_hudDataModel.Initialize(1.0 / (double)60, 4, metricConfigObject);
+    instance.nvperf_sampler.SetConfig(&instance.nvperf_hudDataModel.GetCounterConfiguration());
+    instance.nvperf_hudDataModel.PrepareSampleProcessing(instance.nvperf_sampler.GetCounterData());
+
+    // initialize renderer
+    ImPlot::CreateContext();
+    nv::perf::hud::HudImPlotRenderer::SetStyle();
+
+    instance.nvperf_hudRenderer.Initialize(instance.nvperf_hudDataModel);
 #endif // NV_PERF_METER
 
 

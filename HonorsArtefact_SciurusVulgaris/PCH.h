@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef NV_PERF_METER
+#define NOMINMAX
+#endif
+
 // STL Includes
 #include <iostream>
 #include <string>
@@ -27,10 +31,13 @@
 #include "imgui_impl_vulkan.h"
 
 #ifdef NV_PERF_METER
-//#include <NvPerfUtilities.h>
 #include <NvPerfVulkan.h>
-//#include <NvPerfPeriodicSamplerCommon.h>
 #include <NvPerfReportGenerator.h>
 #include <NvPerfReportGeneratorVulkan.h>
-//#include <NvPerfHudRenderer.h>
+
+#include <NvPerfMetricConfigurationsHAL.h>
+#include <NvPerfHudDataModel.h>
+#include <NvPerfHudImPlotRenderer.h>
+#include <NvPerfPeriodicSamplerVulkan.h>
+#include <implot.h>
 #endif // NV_PERF_METER

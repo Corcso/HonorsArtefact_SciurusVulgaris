@@ -166,7 +166,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\NvPerf\utilities\include;C:\VulkanSDK\1.4.321.1\Include;$(SolutionDir)include;C:\VulkanSDK\NvPerf\include;C:\VulkanSDK\NvPerf\include\windows-desktop-x64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)implot;C:\VulkanSDK\NvPerf\utilities\imports\rapidyaml-0.4.0;C:\VulkanSDK\NvPerf\utilities\include;C:\VulkanSDK\1.4.321.1\Include;$(ProjectDir);$(SolutionDir)include;C:\VulkanSDK\NvPerf\include;C:\VulkanSDK\NvPerf\include\windows-desktop-x64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -222,6 +222,8 @@
     <ClInclude Include="imgui_impl_vulkan.h" />
     <ClInclude Include="imgui_impl_win32.h" />
     <ClInclude Include="imgui_internal.h" />
+    <ClInclude Include="implot\implot.h" />
+    <ClInclude Include="implot\implot_internal.h" />
     <ClInclude Include="imstb_rectpack.h" />
     <ClInclude Include="imstb_textedit.h" />
     <ClInclude Include="imstb_truetype.h" />
@@ -257,6 +259,15 @@
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="FXAA_GP.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
+    <ClCompile Include="implot\implot.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="implot\implot_demo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="implot\implot_items.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp" />
     <ClCompile Include="InstancedMeshTree_RP.cpp" />
     <ClCompile Include="InstancedWCPHelper.cpp" />
