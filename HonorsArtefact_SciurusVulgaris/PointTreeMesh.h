@@ -5,7 +5,7 @@ class PointTreeMesh :
 {
 public:
     enum class LODType {
-        RANDOM_LEVELS
+        RANDOM_LEVELS, CONTINUOUS
     };
 
     void LoadFromTreeFile(std::string path);
@@ -13,5 +13,7 @@ public:
 
     LODType levelOfDetailType;
     std::vector<unsigned int> randomLevelsLODPointCount;
+    float continousLOD_steepness;
+    float continousLOD_start;
 };
 

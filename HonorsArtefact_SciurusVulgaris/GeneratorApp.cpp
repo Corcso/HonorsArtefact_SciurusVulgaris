@@ -191,14 +191,14 @@ void GeneratorApp::RenderLODPagePrerequisites()
 			VkRect2D view{
 				{i % 4 * 256, i / 4 * 256}, {256, 256}
 			};
-			debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, i, &LODViewDescriptors[i]);
+			debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, i, &LODViewDescriptors[i], LODViewDistances[i]);
 		}
 	}
 	else {
 		VkRect2D view{
 				{0, 0}, {1024, 1024}
 		};
-		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, exclusivleyViewing, &LODViewDescriptors[exclusivleyViewing]);
+		debugPointRenderer.Render(meshRenderingPipeline.GetPointMeshOutput(), view, exclusivleyViewing, &LODViewDescriptors[exclusivleyViewing], LODViewDistances[exclusivleyViewing]);
 	}
 	debugPointRenderer.EndRender();
 }
@@ -211,6 +211,14 @@ void GeneratorApp::RenderLODPageMenu()
 	ImGui::Begin("Level Of Detail Studio");
 	ImGui::Checkbox("Coverage View", &isDebugCoverageViewOn);
 	ImGui::DragInt("Exclusive View", &exclusivleyViewing, 1, -1, 15);
+	if (ImGui::Button("Use Random Levels"))
+	{
+		meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType = PointTreeMesh::LODType::RANDOM_LEVELS;
+	}
+	if (ImGui::Button("Use Continuous"))
+	{
+		meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType = PointTreeMesh::LODType::CONTINUOUS;
+	}
 	if (ImGui::Button("Reshuffle Points"))
 	{
 		std::random_device rd;
@@ -236,10 +244,16 @@ void GeneratorApp::RenderLODPageMenu()
 		}
 	}
 	ImGui::SliderAngle("Rotation", &LODViewRotation);
+	if (meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
+		ImGui::DragFloat("Level 0 Points", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_start, 128, 0, meshRenderingPipeline.GetPointMeshOutput()->points.size());
+		ImGui::DragFloat("Steepness", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_steepness, 128, 0, 10000);
+	}
 	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
 		ImGui::DragFloat(("Distance " + std::to_string(i)).c_str(), &LODViewDistances[i]);
-		ImGui::SameLine();
-		ImGui::InputScalar(("Point Count LOD " + std::to_string(i)).c_str(), ImGuiDataType_U32, &meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[i]);
+		if (meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType == PointTreeMesh::LODType::RANDOM_LEVELS) {
+			ImGui::SameLine();
+			ImGui::InputScalar(("Point Count LOD " + std::to_string(i)).c_str(), ImGuiDataType_U32, &meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount[i]);
+		}
 	}
 	if (ImGui::Button("Save Tree File")) {
 		meshRenderingPipeline.GetPointMeshOutput()->SaveToTreeFile("./models/output.tree");

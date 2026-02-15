@@ -372,7 +372,7 @@ void DebugPointRenderer::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer comman
     
 }
 
-void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned int LODLevel, VulkanObjectDescriptorSet* descriptorSet, VkCommandBuffer commandBuffer)
+void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned int LODLevel, VulkanObjectDescriptorSet* descriptorSet, float distanceToUse, VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -403,9 +403,13 @@ void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned i
             descriptorSet->GetDescriptorSet(), 0, nullptr);
     }
 
-    unsigned int pointCount = points->points.size();
-    if(LODLevel < points->randomLevelsLODPointCount.size()){
+    int pointCount = points->points.size();
+    if(LODLevel < points->randomLevelsLODPointCount.size() && points->levelOfDetailType == PointTreeMesh::LODType::RANDOM_LEVELS){
         pointCount = points->randomLevelsLODPointCount[LODLevel];
+    }
+    else if (points->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
+        pointCount = points->continousLOD_start + (-points->continousLOD_steepness * sqrt(distanceToUse));
+        pointCount = HMM_MAX(pointCount, 1);
     }
 
     vkCmdDraw(commandBuffer, pointCount, 1, 0, 0);
