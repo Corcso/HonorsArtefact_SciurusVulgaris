@@ -13,7 +13,8 @@ public:
 
     LODType levelOfDetailType;
     std::vector<unsigned int> randomLevelsLODPointCount;
-    float continousLOD_steepness;
+    float continousLOD_shallowness;
+    float continousLOD_decay;
     float continousLOD_start;
 };
 

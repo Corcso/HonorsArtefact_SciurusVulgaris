@@ -27,6 +27,8 @@ layout(binding = 4) uniform LODDataBuffer {
     vec4 cameraPosition;
     int maxVertexLevels[16];
     int maxLevel;
+    float continousStart, continousShallowness, continousDecay;
+	int lodType;
 } levelOfDetailData;
 
 struct MyPayloadStruct {
@@ -41,9 +43,17 @@ void main(){
     vec3 cameraPosition = levelOfDetailData.cameraPosition.xyz; // Assumed for now
 
     float distanceToInstance = length(instancePosition - cameraPosition);
-    uint level =  clamp(uint(floor(distanceToInstance / 10.0f)), 0, levelOfDetailData.maxLevel - 1);
+    uint level = 0;
+    uint meshletCountToDraw = 0;
+    if(levelOfDetailData.lodType == 0){ // RANDOM_LEVELS
+        level =  clamp(uint(floor(distanceToInstance / 10.0f)), 0, levelOfDetailData.maxLevel - 1);
+        meshletCountToDraw = uint(ceil(levelOfDetailData.maxVertexLevels[level] / 128.0));
+    }
+    else if(levelOfDetailData.lodType == 1){ // CONTINUOUS
+        level = uint(floor(distanceToInstance / levelOfDetailData.continousShallowness));
+        meshletCountToDraw = uint(ceil((levelOfDetailData.continousStart * pow(levelOfDetailData.continousDecay, -distanceToInstance * (1.0f / levelOfDetailData.continousShallowness))) / 128.0f ));
+    }
     payload.debugLevel = level;
-    uint meshletCountToDraw = uint(ceil(levelOfDetailData.maxVertexLevels[level] / 128.0));
     payload.instanceIndex = instanceID;
 
     EmitMeshTasksEXT(meshletCountToDraw, 1, 1);

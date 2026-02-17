@@ -20,6 +20,8 @@ struct LODDataBuffer {
 	HMM_Vec4 cameraPosition;
 	int  maxVertexLevels[16][4];
 	int maxLevel;
+	float continousStart, continousShallowness, continousDecay;
+	int lodType;
 };
 
 struct PointRenderDebugInfo{

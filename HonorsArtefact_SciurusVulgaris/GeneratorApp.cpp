@@ -246,7 +246,8 @@ void GeneratorApp::RenderLODPageMenu()
 	ImGui::SliderAngle("Rotation", &LODViewRotation);
 	if (meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
 		ImGui::DragFloat("Level 0 Points", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_start, 128, 0, meshRenderingPipeline.GetPointMeshOutput()->points.size());
-		ImGui::DragFloat("Steepness", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_steepness, 128, 0, 10000);
+		ImGui::DragFloat("Shallowness", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_shallowness, 1, 0, 100);
+		ImGui::DragFloat("Decay", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_decay, 0.1f, 1, 5);
 	}
 	for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
 		ImGui::DragFloat(("Distance " + std::to_string(i)).c_str(), &LODViewDistances[i]);

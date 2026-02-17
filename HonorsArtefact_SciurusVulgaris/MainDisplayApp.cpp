@@ -65,6 +65,10 @@ void MainDisplayApp::Frame() {
 				lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
 			}
 			lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+			lodData.continousDecay = myModel->continousLOD_decay;
+			lodData.continousStart = myModel->continousLOD_start;
+			lodData.continousShallowness = myModel->continousLOD_shallowness;
+			lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 			treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));

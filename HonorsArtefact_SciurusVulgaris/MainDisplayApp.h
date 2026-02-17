@@ -34,7 +34,7 @@ private:
 	CameraTransform cameraTransform;
 
 	int pointToRenderCount;
-	int instanceCount;
+	int instanceCount = 1;
 
 	Light sun;
 	LightShadow_RP lightShadow_RP;

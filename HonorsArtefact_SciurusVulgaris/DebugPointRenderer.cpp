@@ -408,7 +408,7 @@ void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned i
         pointCount = points->randomLevelsLODPointCount[LODLevel];
     }
     else if (points->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
-        pointCount = points->continousLOD_start + (-points->continousLOD_steepness * sqrt(distanceToUse));
+        pointCount = points->continousLOD_start * pow(points->continousLOD_decay, -distanceToUse * (1.0f / points->continousLOD_shallowness));
         pointCount = HMM_MAX(pointCount, 1);
     }
 

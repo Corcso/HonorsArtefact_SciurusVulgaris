@@ -21,6 +21,11 @@ void PointTreeMesh::LoadFromTreeFile(std::string path)
 			randomLevelsLODPointCount.push_back(item);
 		}
 		break;
+	case LODType::CONTINUOUS:
+		continousLOD_decay = data["decay"];
+		continousLOD_shallowness = data["shallowness"];
+		continousLOD_start = data["start"];
+		break;
 	}
 }
 
@@ -39,6 +44,17 @@ void PointTreeMesh::SaveToTreeFile(std::string path)
 
 		// Truncate model if needed
 		if (randomLevelsLODPointCount.size() > 0 && randomLevelsLODPointCount[0] < points.size()) {
+			points.resize(randomLevelsLODPointCount[0]);
+		}
+		break;
+	case LODType::CONTINUOUS:
+		output["levelOfDetailType"] = 1;
+		output["decay"] = continousLOD_decay;
+		output["shallowness"] = continousLOD_shallowness;
+		output["start"] = continousLOD_start;
+
+		// Truncate model if needed
+		if (randomLevelsLODPointCount.size() > 0 && continousLOD_start < points.size()) {
 			points.resize(randomLevelsLODPointCount[0]);
 		}
 		break;

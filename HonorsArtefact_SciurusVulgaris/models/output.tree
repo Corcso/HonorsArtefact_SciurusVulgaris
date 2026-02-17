@@ -1,1 +1,1 @@
-{"levelOfDetailType":0,"randomLevelsPointCount":[20000,10000,4000,1500,1250]}
+{"decay":2.0,"levelOfDetailType":1,"shallowness":10.0,"start":40000.0}
