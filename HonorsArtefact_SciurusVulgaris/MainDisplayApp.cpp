@@ -306,174 +306,297 @@ void MainDisplayApp::RenderImGuiControls()
 void MainDisplayApp::ImageCaptureSequence()
 {
 	if (!captureUnderway) return;
+
+	std::vector<ImageCaptureRule> rules{
+		{"Render001a", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001b", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001c", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001d", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001e", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001f", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001g", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render001h", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 0, 0);
+			instanceCount = 4000;
+		} },
+		{"Render002", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, -90, 0);
+			instanceCount = 1000;
+		} },
+		{"Render003", [&]() {
+			cameraTransform.position = HMM_V3(0, 30, 0);
+			cameraTransform.euler = HMM_V3(-45, 90, 0);
+			instanceCount = 100;
+		} },
+
+	};
+
 	std::cout << Graphics::nfperf_GetLastReportDir() << "\n";
 	bool pauseTimer = false;
 
 	renderImGui = false;
-	if (imageSequenceTimer < 1.0f) {
-		if (stageImagesSaved == -1) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001a");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 4000;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001a\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 2.0f) {
-		if (stageImagesSaved == 0) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001b");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 3000;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001b\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 3.0f) {
-		if (stageImagesSaved == 1) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001c");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 2000;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001c\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 4.0f) {
-		if (stageImagesSaved == 2) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001d");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 1000;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001d\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 5.0f) {
-		if (stageImagesSaved == 3) {
-			Graphics::SaveSwapChainImageToFile("./Render001e.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001e");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 750;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001e\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 6.0f) {
-		if (stageImagesSaved == 4) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001f");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 500;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001f\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 7.0f) {
-		if (stageImagesSaved == 5) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001g");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 250;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001g\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
-	else if (imageSequenceTimer < 8.0f) {
-		if (stageImagesSaved == 6) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render001h");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 0, 0);
-		instanceCount = 125;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001h\\") pauseTimer = true;
-#endif // NV_PERF_METER
-		}
+//	if (imageSequenceTimer < 1.0f) {
+//		if (stageImagesSaved == -1) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001a");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 4000;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001a\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 2.0f) {
+//		if (stageImagesSaved == 0) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001b");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 3000;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001b\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 3.0f) {
+//		if (stageImagesSaved == 1) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001c");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 2000;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001c\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 4.0f) {
+//		if (stageImagesSaved == 2) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001d");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 1000;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001d\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 5.0f) {
+//		if (stageImagesSaved == 3) {
+//			Graphics::SaveSwapChainImageToFile("./Render001e.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001e");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 750;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001e\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 6.0f) {
+//		if (stageImagesSaved == 4) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001f");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 500;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001f\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 7.0f) {
+//		if (stageImagesSaved == 5) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001g");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 250;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001g\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//	else if (imageSequenceTimer < 8.0f) {
+//		if (stageImagesSaved == 6) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render001h");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 0, 0);
+//		instanceCount = 125;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001h\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//		}
+//
+//	else if (imageSequenceTimer < 9.0f) {
+//		if (stageImagesSaved == 7) {
+//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render002");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, -90, 0);
+//		instanceCount = 1000;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render002\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//
+//	else if (imageSequenceTimer < 10.0f) {
+//		if (stageImagesSaved == 8) {
+//			Graphics::SaveSwapChainImageToFile("./Render002.bmp");
+//#ifdef NV_PERF_METER
+//			Graphics::nvperf_InitiateReport("Render003");
+//#endif // NV_PERF_METER
+//			stageImagesSaved++;
+//		}
+//		cameraTransform.position = HMM_V3(0, 30, 0);
+//		cameraTransform.euler = HMM_V3(-45, 90, 0);
+//		instanceCount = 100;
+//#ifdef NV_PERF_METER
+//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render003\\") pauseTimer = true;
+//#endif // NV_PERF_METER
+//	}
+//
+//	else {
+//		if (stageImagesSaved == 9) {
+//			Graphics::SaveSwapChainImageToFile("./Render003.bmp");
+//			stageImagesSaved++;
+//		}
+//		captureUnderway = false;
+//		renderImGui = true;
+//
+//#ifdef NV_PERF_METER
+//		// Combine CSVS
+//		std::vector<std::pair<std::string, std::string>> reportsToCombine{
+//			{"nvperfout\\Render001a\\nvperf_metrics_summary.csv", "1a"},
+//			{"nvperfout\\Render001b\\nvperf_metrics_summary.csv", "1b"},
+//			{"nvperfout\\Render001c\\nvperf_metrics_summary.csv", "1c"},
+//			{"nvperfout\\Render001d\\nvperf_metrics_summary.csv", "1d"},
+//			{"nvperfout\\Render001e\\nvperf_metrics_summary.csv", "1e"},
+//			{"nvperfout\\Render001f\\nvperf_metrics_summary.csv", "1f"},
+//			{"nvperfout\\Render001g\\nvperf_metrics_summary.csv", "1g"},
+//			{"nvperfout\\Render001h\\nvperf_metrics_summary.csv", "1h"},
+//			{"nvperfout\\Render002\\nvperf_metrics_summary.csv", "2"},
+//			{"nvperfout\\Render003\\nvperf_metrics_summary.csv", "3"},
+//		};
+//		std::vector<std::vector<std::string>> outRows;
+//
+//		csv2::Reader<csv2::delimiter<','>,
+//			csv2::quote_character<'"'>,
+//			csv2::first_row_is_header<true>,
+//			csv2::trim_policy::trim_whitespace> csv;
+//
+//		for (auto& report : reportsToCombine) {
+//			if (csv.mmap(report.first)) {
+//				const auto header = csv.header();
+//				for (const auto& row : csv) {
+//					outRows.push_back(std::vector<std::string>());
+//					outRows[outRows.size() - 1].push_back(report.second);
+//					for (const auto& cell : row) {
+//						// Do something with cell value
+//						std::string value;
+//						cell.read_value(value);
+//						outRows[outRows.size() - 1].push_back(value);
+//					}
+//				}
+//			}
+//		}
+//
+//		std::ofstream stream("nvperfout\\combined.csv");
+//		csv2::Writer<csv2::delimiter<','>> writer(stream);
+//
+//		writer.write_rows(outRows);
+//		stream.close();
+//
+//#endif // NV_PERF_METER
+//	}
 
-	else if (imageSequenceTimer < 9.0f) {
-		if (stageImagesSaved == 7) {
-			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render002");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
-		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, -90, 0);
-		instanceCount = 1000;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render002\\") pauseTimer = true;
-#endif // NV_PERF_METER
-	}
 
-	else if (imageSequenceTimer < 10.0f) {
-		if (stageImagesSaved == 8) {
-			Graphics::SaveSwapChainImageToFile("./Render002.bmp");
-#ifdef NV_PERF_METER
-			Graphics::nvperf_InitiateReport("Render003");
-#endif // NV_PERF_METER
-			stageImagesSaved++;
+	for (int i = 0; i < rules.size(); i++) {
+		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
+			if (stageImagesSaved == i - 1) {
+				Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i].name + ".bmp");
+			#ifdef NV_PERF_METER
+				Graphics::nvperf_InitiateReport(rules[i].name);
+			#endif // NV_PERF_METER
+				stageImagesSaved++;
+			}
+			rules[i].settings();
+		#ifdef NV_PERF_METER
+			if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\"+ rules[i].name +"\\") pauseTimer = true;
+		#endif // NV_PERF_METER
 		}
-		cameraTransform.position = HMM_V3(0, 30, 0);
-		cameraTransform.euler = HMM_V3(-45, 90, 0);
-		instanceCount = 100;
-#ifdef NV_PERF_METER
-		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render003\\") pauseTimer = true;
-#endif // NV_PERF_METER
 	}
-
-	else {
-		if (stageImagesSaved == 9) {
-			Graphics::SaveSwapChainImageToFile("./Render003.bmp");
-			stageImagesSaved++;
-		}
+	if (imageSequenceTimer > (float)rules.size()) {
+		Graphics::SaveSwapChainImageToFile("./Render003.bmp");
+		stageImagesSaved++;
 		captureUnderway = false;
 		renderImGui = true;
 
 #ifdef NV_PERF_METER
 		// Combine CSVS
-		std::vector<std::pair<std::string, std::string>> reportsToCombine{
+		/*std::vector<std::pair<std::string, std::string>> reportsToCombine{
 			{"nvperfout\\Render001a\\nvperf_metrics_summary.csv", "1a"},
 			{"nvperfout\\Render001b\\nvperf_metrics_summary.csv", "1b"},
 			{"nvperfout\\Render001c\\nvperf_metrics_summary.csv", "1c"},
@@ -484,7 +607,7 @@ void MainDisplayApp::ImageCaptureSequence()
 			{"nvperfout\\Render001h\\nvperf_metrics_summary.csv", "1h"},
 			{"nvperfout\\Render002\\nvperf_metrics_summary.csv", "2"},
 			{"nvperfout\\Render003\\nvperf_metrics_summary.csv", "3"},
-		};
+		};*/
 		std::vector<std::vector<std::string>> outRows;
 
 		csv2::Reader<csv2::delimiter<','>,
@@ -492,12 +615,12 @@ void MainDisplayApp::ImageCaptureSequence()
 			csv2::first_row_is_header<true>,
 			csv2::trim_policy::trim_whitespace> csv;
 
-		for (auto& report : reportsToCombine) {
-			if (csv.mmap(report.first)) {
+		for (auto& rule : rules) {
+			if (csv.mmap("nvperfout\\"+ rule.name +"\\nvperf_metrics_summary.csv")) {
 				const auto header = csv.header();
 				for (const auto& row : csv) {
 					outRows.push_back(std::vector<std::string>());
-					outRows[outRows.size() - 1].push_back(report.second);
+					outRows[outRows.size() - 1].push_back(rule.name);
 					for (const auto& cell : row) {
 						// Do something with cell value
 						std::string value;

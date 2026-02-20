@@ -51,6 +51,11 @@ private:
 
 	InstancedWCPHelper treeMeshInstancePositions;
 	// For Image Capture
+	struct ImageCaptureRule {
+		std::string name;
+		std::function<void()> settings;
+	};
+
 	bool renderImGui;
 	bool captureUnderway;
 	float imageSequenceTimer;
