@@ -66,8 +66,10 @@ void VulkanSetup::CreateInstance(VkInstance* instance)
 
     // Validation layers layeers
     if (enableValidationLayers) {
+#ifdef _DEBUG
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
+#endif
     }
     else {
         createInfo.enabledLayerCount = 0;

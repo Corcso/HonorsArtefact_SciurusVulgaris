@@ -58,6 +58,7 @@ void MainDisplayApp::Frame() {
 		LODDataBuffer lodData;
 
 		Graphics::BeginRender();
+		Graphics::PushMetricRange("Shadow Map Render");
 		lightShadow_RP.BeginRender(&sun);
 		if (myModel != nullptr) {
 
@@ -85,8 +86,9 @@ void MainDisplayApp::Frame() {
 
 		}
 		lightShadow_RP.EndRender();
+		Graphics::PopMetricRange();
 		// Render logic
-
+		Graphics::PushMetricRange("Render Point Trees");
 		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
 		cameraTransform.CaptureControls();
@@ -134,20 +136,25 @@ void MainDisplayApp::Frame() {
 			HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
 		};
 		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+		Graphics::PopMetricRange();
 		pointRenderingPass.SwitchToTraditionalMeshPipeline();
+		Graphics::PushMetricRange("Terrain Mesh Render");
 		pointRenderingPass.RenderTraditionalMesh(terrain);
 
 		pointRenderingPass.EndRender();
-
+		Graphics::PopMetricRange();
 		RenderImGuiControls();
 
 		Light::BufferStruct rawSunData = sun.GetBufferData();
 		pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
-
+		Graphics::PushMetricRange("Colour Deferred");
 		pointRenderingPass.ExecuteSecondRender();
 		pointRenderingPass.EndSecondRender();
+		Graphics::PopMetricRange();
+		Graphics::PushMetricRange("Anti Aliasing");
 		pointRenderingPass.ExecuteThirdAARender(fxaaEnabled);
+		Graphics::PopMetricRange();
 		Graphics::FinishImGuiRender();
 		pointRenderingPass.EndThirdAARender();
 		Graphics::EndRender();
@@ -268,7 +275,7 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
 #ifdef NV_PERF_METER
 	if (ImGui::Button("NVPERFRUN")) {
-		Graphics::nvperf_InitiateReport();
+		Graphics::nvperf_InitiateReport("Manual Trigger");
 	}
 	ImGui::Text(("Saved to" + Graphics::nfperf_GetLastReportDir()).c_str());
 #endif
@@ -278,8 +285,18 @@ void MainDisplayApp::RenderImGuiControls()
 	if (ImGui::Button("Run Save Sequence")) {
 		imageSequenceTimer = 0;
 		captureUnderway = true;
-		stageImagesSaved = 0;
+		stageImagesSaved = -1;
 	}
+	ImGui::End();
+
+	ImGui::Begin("Live LOD Edits");
+
+	if (myModel != nullptr && myModel->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
+		ImGui::DragFloat("Level 0 Points", &myModel->continousLOD_start, 128, 0, myModel->points.size());
+		ImGui::DragFloat("Shallowness", &myModel->continousLOD_shallowness, 1, 0, 100);
+		ImGui::DragFloat("Decay", &myModel->continousLOD_decay, 0.1f, 1, 5);
+	}
+
 	ImGui::End();
 
 	sun.RenderImGuiMenu(true);
@@ -288,32 +305,54 @@ void MainDisplayApp::RenderImGuiControls()
 void MainDisplayApp::ImageCaptureSequence()
 {
 	if (!captureUnderway) return;
-
-	imageSequenceTimer += Clock::DeltaTime();
+	std::cout << Graphics::nfperf_GetLastReportDir() << "\n";
+	bool pauseTimer = false;
 
 	renderImGui = false;
 	if (imageSequenceTimer < 1.0f) {
+		if (stageImagesSaved == -1) {
+			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+#ifdef NV_PERF_METER
+			Graphics::nvperf_InitiateReport("Render001");
+#endif // NV_PERF_METER
+			stageImagesSaved++;
+		}
 		cameraTransform.position = HMM_V3(0, 30, 0);
 		cameraTransform.euler = HMM_V3(-45, 0, 0);
 		instanceCount = 4000;
+#ifdef NV_PERF_METER
+		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001\\") pauseTimer = true;
+#endif // NV_PERF_METER
 	}
 	else if (imageSequenceTimer < 2.0f) {
 		if (stageImagesSaved == 0) {
 			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
+#ifdef NV_PERF_METER
+			Graphics::nvperf_InitiateReport("Render002");
+#endif // NV_PERF_METER
 			stageImagesSaved++;
 		}
 		cameraTransform.position = HMM_V3(0, 30, 0);
 		cameraTransform.euler = HMM_V3(-45, -90, 0);
 		instanceCount = 1000;
+#ifdef NV_PERF_METER
+		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render002\\") pauseTimer = true;
+#endif // NV_PERF_METER
 	}
 	else if (imageSequenceTimer < 3.0f) {
 		if (stageImagesSaved == 1) {
 			Graphics::SaveSwapChainImageToFile("./Render002.bmp");
+#ifdef NV_PERF_METER
+			Graphics::nvperf_InitiateReport("Render003");
+#endif // NV_PERF_METER
 			stageImagesSaved++;
 		}
 		cameraTransform.position = HMM_V3(0, 30, 0);
 		cameraTransform.euler = HMM_V3(-45, 90, 0);
 		instanceCount = 100;
+#ifdef NV_PERF_METER
+		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render003\\") pauseTimer = true;
+#endif // NV_PERF_METER
 	}
 	else {
 		if (stageImagesSaved == 2) {
@@ -323,4 +362,6 @@ void MainDisplayApp::ImageCaptureSequence()
 		captureUnderway = false;
 		renderImGui = true;
 	}
+
+	if (!pauseTimer) imageSequenceTimer += Clock::DeltaTime();
 }

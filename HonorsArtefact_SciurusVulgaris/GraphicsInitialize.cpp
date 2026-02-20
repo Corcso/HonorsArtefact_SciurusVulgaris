@@ -147,8 +147,10 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     // Validation layers layeers
     if (enableValidationLayers) {
+#ifdef _DEBUG
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
+#endif // _DEBUG
     }
     else {
         createInfo.enabledLayerCount = 0;
@@ -388,40 +390,50 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.nvperf_reportGenerator.InitializeReportGenerator(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
     instance.nvperf_reportGenerator.SetFrameLevelRangeName("Frame");
     instance.nvperf_reportGenerator.SetNumNestingLevels(10);
-    instance.nvperf_reportGenerator.outputOptions.directoryName = "NVPERFOUTPUT";
+    instance.nvperf_reportGenerator.outputOptions.directoryName = "nvperfout\\metricpass";
+    instance.nvperf_reportGenerator.outputOptions.enableCsvReport = true;
     instance.nvperf_reportGenerator.outputOptions.enableHtmlReport = true;
+    instance.nvperf_reportGenerator.outputOptions.appendDateTimeToDirName = nv::perf::AppendDateTime::no;
 
     instance.nvperf_clockInfo = nv::perf::VulkanGetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
     nv::perf::VulkanSetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice, NVPW_DEVICE_CLOCK_SETTING_LOCK_TO_RATED_TDP);
 
+    std::cout << "Would you like live statistics? (Y/N) : ";
+    std::string liveStatisticsEnabled;
+    std::cin >> liveStatisticsEnabled;
+
     // LIVE STATS
-    instance.nvperf_sampler.Initialize(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
-    const nv::perf::DeviceIdentifiers deviceIdentifiers = instance.nvperf_sampler.GetGpuDeviceIdentifiers();
-    const uint32_t                    maxFrameLatency = instance.vkSwapChainImages.size() + 1;
-    instance.nvperf_sampler.BeginSession(instance.vkGraphicsQueue, indices.graphicsFamily, 1000 * 1000 * 1000 / 60, 1000U * 1000U * 1000U * 60U, maxFrameLatency);
+    if (liveStatisticsEnabled == "Y" || liveStatisticsEnabled == "y") {
+        instance.nvperf_liveMode = true;
 
-    instance.nvperf_hudPresets.Initialize(deviceIdentifiers.pChipName);
-    for (auto& preset : instance.nvperf_hudPresets.GetPresets()) {
-        std::cout << preset.name << "\n";
+        instance.nvperf_sampler.Initialize(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
+        const nv::perf::DeviceIdentifiers deviceIdentifiers = instance.nvperf_sampler.GetGpuDeviceIdentifiers();
+        const uint32_t                    maxFrameLatency = instance.vkSwapChainImages.size() + 1;
+        instance.nvperf_sampler.BeginSession(instance.vkGraphicsQueue, indices.graphicsFamily, 1000 * 1000 * 1000 / 60, 1000U * 1000U * 1000U * 60U, maxFrameLatency);
 
+        instance.nvperf_hudPresets.Initialize(deviceIdentifiers.pChipName);
+        for (auto& preset : instance.nvperf_hudPresets.GetPresets()) {
+            std::cout << preset.name << "\n";
+
+        }
+        instance.nvperf_hudDataModel.Load(instance.nvperf_hudPresets.GetPreset("Graphics General Triage"));
+
+        std::string                  metricConfigName;
+        nv::perf::MetricConfigObject metricConfigObject;
+        if (nv::perf::MetricConfigurations::GetMetricConfigNameBasedOnHudConfigurationName(metricConfigName, deviceIdentifiers.pChipName, "Graphics General Triage"))
+        {
+            nv::perf::MetricConfigurations::LoadMetricConfigObject(metricConfigObject, deviceIdentifiers.pChipName, metricConfigName);
+        }
+        instance.nvperf_hudDataModel.Initialize(1.0 / (double)60, 4, metricConfigObject);
+        instance.nvperf_sampler.SetConfig(&instance.nvperf_hudDataModel.GetCounterConfiguration());
+        instance.nvperf_hudDataModel.PrepareSampleProcessing(instance.nvperf_sampler.GetCounterData());
+
+        // initialize renderer
+        ImPlot::CreateContext();
+        nv::perf::hud::HudImPlotRenderer::SetStyle();
+
+        instance.nvperf_hudRenderer.Initialize(instance.nvperf_hudDataModel);
     }
-    instance.nvperf_hudDataModel.Load(instance.nvperf_hudPresets.GetPreset("Graphics General Triage"));
-
-    std::string                  metricConfigName;
-    nv::perf::MetricConfigObject metricConfigObject;
-    if (nv::perf::MetricConfigurations::GetMetricConfigNameBasedOnHudConfigurationName(metricConfigName, deviceIdentifiers.pChipName, "Graphics General Triage"))
-    {
-        nv::perf::MetricConfigurations::LoadMetricConfigObject(metricConfigObject, deviceIdentifiers.pChipName, metricConfigName);
-    }
-    instance.nvperf_hudDataModel.Initialize(1.0 / (double)60, 4, metricConfigObject);
-    instance.nvperf_sampler.SetConfig(&instance.nvperf_hudDataModel.GetCounterConfiguration());
-    instance.nvperf_hudDataModel.PrepareSampleProcessing(instance.nvperf_sampler.GetCounterData());
-
-    // initialize renderer
-    ImPlot::CreateContext();
-    nv::perf::hud::HudImPlotRenderer::SetStyle();
-
-    instance.nvperf_hudRenderer.Initialize(instance.nvperf_hudDataModel);
 #endif // NV_PERF_METER
 
 

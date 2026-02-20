@@ -19,7 +19,7 @@ void Graphics::BeginRender()
     vkQueueWaitIdle(instance.vkGraphicsQueue);
     vkQueueWaitIdle(instance.vkPresentQueue);
 
-    if (instance.nvperf_InitiateReportNextFrame) {
+    if (instance.nvperf_InitiateReportNextFrame && !instance.nvperf_liveMode) {
         instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
         instance.nvperf_InitiateReportNextFrame = false;
     }
@@ -59,9 +59,7 @@ void Graphics::BeginRender()
     if (vkBeginCommandBuffer(instance.vkCommandBuffers[instance.currentFrame], &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
-#ifdef NV_PERF_METER
-    instance.nvperf_reportGenerator.rangeCommands.PushRange(instance.vkCommandBuffers[instance.currentFrame], "Test");
-#endif
+    PushMetricRange("Program Render");
     // Do mesh render
     /*instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
     instance.meshRenderer.Render(instance.myMesh);
@@ -101,6 +99,8 @@ void Graphics::BeginRender()
 
 void Graphics::FinishImGuiRender()
 {
+    PopMetricRange(); // Program Render
+
     //ImGui::ShowDemoWindow();
 
     /*ImGui::Begin("Mesh");
@@ -112,20 +112,22 @@ void Graphics::FinishImGuiRender()
     //instance.VRAMAllocator.RenderMemoryUsageStat();
 
 #ifdef NV_PERF_METER
-    instance.nvperf_sampler.DecodeCounters();
-    instance.nvperf_sampler.ConsumeSamples([&](const uint8_t* pCounterDataImage, size_t counterDataImageSize, uint32_t rangeIndex, bool& stop) {
-        stop = false;
-        return instance.nvperf_hudDataModel.AddSample(pCounterDataImage, counterDataImageSize, rangeIndex);
-        });
-    for (auto& frameDelimiter : instance.nvperf_sampler.GetFrameDelimiters())
-    {
-        instance.nvperf_hudDataModel.AddFrameDelimiter(frameDelimiter.frameEndTime);
-    }
+    if (instance.nvperf_liveMode) {
+        instance.nvperf_sampler.DecodeCounters();
+        instance.nvperf_sampler.ConsumeSamples([&](const uint8_t* pCounterDataImage, size_t counterDataImageSize, uint32_t rangeIndex, bool& stop) {
+            stop = false;
+            return instance.nvperf_hudDataModel.AddSample(pCounterDataImage, counterDataImageSize, rangeIndex);
+            });
+        for (auto& frameDelimiter : instance.nvperf_sampler.GetFrameDelimiters())
+        {
+            instance.nvperf_hudDataModel.AddFrameDelimiter(frameDelimiter.frameEndTime);
+        }
 
-    ImGui::SetNextWindowSize(ImVec2(400, -1), ImGuiCond_Appearing);
-    ImGui::Begin("Graphics General Triage");
-    instance.nvperf_hudRenderer.Render();
-    ImGui::End();
+        ImGui::SetNextWindowSize(ImVec2(400, -1), ImGuiCond_Appearing);
+        ImGui::Begin("Graphics General Triage");
+        instance.nvperf_hudRenderer.Render();
+        ImGui::End();
+    }
 #endif // NV_PERF_METER
 
 
@@ -149,9 +151,7 @@ void Graphics::EndRender()
     //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
     //// Finish recording command buffer
     //vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
-#ifdef NV_PERF_METER
-    instance.nvperf_reportGenerator.rangeCommands.PopRange(instance.vkCommandBuffers[instance.currentFrame]);
-#endif
+
     if (vkEndCommandBuffer(instance.vkCommandBuffers[instance.currentFrame]) != VK_SUCCESS) {
         throw - 1;
     }
@@ -201,7 +201,7 @@ void Graphics::EndRender()
     vkDeviceWaitIdle(instance.vkDevice);
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
     instance.nvperf_reportGenerator.OnFrameEnd();
-    instance.nvperf_sampler.OnFrameEnd();
+    if(instance.nvperf_liveMode) instance.nvperf_sampler.OnFrameEnd();
     //if (instance.nvperf_InitiateReportNextFrame) {
     //    instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
     //    instance.nvperf_InitiateReportNextFrame = false;
@@ -302,8 +302,9 @@ void Graphics::RecreateSwapChain()
 
 }
 #ifdef NV_PERF_METER
-void Graphics::nvperf_InitiateReport()
+void Graphics::nvperf_InitiateReport(std::string folder)
 {
+    instance.nvperf_reportGenerator.outputOptions.directoryName = "nvperfout\\" + folder;
     instance.nvperf_InitiateReportNextFrame = true;
 }
 std::string Graphics::nfperf_GetLastReportDir()
@@ -311,6 +312,22 @@ std::string Graphics::nfperf_GetLastReportDir()
     return instance.nvperf_reportGenerator.GetLastReportDirectoryName();
 }
 #endif // NV_PERF_METER
+void Graphics::PushMetricRange(std::string name)
+{
+    // For ease this function can be called anytime, but does nothing if not in NVPERF mode
+#ifdef NV_PERF_METER
+    instance.nvperf_reportGenerator.rangeCommands.PushRange(instance.vkCommandBuffers[instance.currentFrame], name.c_str());
+#endif // NV_PERF_METER
+}
+
+void Graphics::PopMetricRange()
+{
+    // For ease this function can be called anytime, but does nothing if not in NVPERF mode
+#ifdef NV_PERF_METER
+    instance.nvperf_reportGenerator.rangeCommands.PopRange(instance.vkCommandBuffers[instance.currentFrame]);
+#endif // NV_PERF_METER
+}
+
 
 
 

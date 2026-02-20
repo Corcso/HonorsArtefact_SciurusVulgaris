@@ -126,10 +126,15 @@ private:
 	bool nvperf_InitiateReportNextFrame = false;
 	//nv::perf::hud::HudDataModel nvperf_hudDataModel;
 	//nv::perf::hud::HudImPlotRenderer nvperf_hudRenderer;
+
+	bool nvperf_liveMode = false;
+
 public:
-	static void nvperf_InitiateReport();
+	static void nvperf_InitiateReport(std::string folder);
 	static std::string nfperf_GetLastReportDir();
 #endif // NV_PERF_METER
+	static void PushMetricRange(std::string name);
+	static void PopMetricRange();
 
 };
 
