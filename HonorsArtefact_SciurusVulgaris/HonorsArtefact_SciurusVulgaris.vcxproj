@@ -222,6 +222,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="BufferStructs.h" />
     <ClInclude Include="Clock.h" />
+    <ClInclude Include="csv2.hpp" />
     <ClInclude Include="DebugPointRenderer.h" />
     <ClInclude Include="FXAA_GP.h" />
     <ClInclude Include="GBufferToOutput_GP.h" />
