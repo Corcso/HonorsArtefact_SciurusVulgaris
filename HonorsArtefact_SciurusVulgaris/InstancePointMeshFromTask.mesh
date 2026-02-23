@@ -30,6 +30,11 @@ layout(binding = 2) uniform InstancingInfo {
     uint instanceStride;
 } instanceInfo; 
 
+layout(binding = 5) uniform TAAInfo {
+	vec2 currentJitter;
+	bool enabled;
+} taaInfo; 
+
 layout(location = 0) out vec3 outWorldPos[];
 layout(location = 1) out vec4 outColor[];
 layout(location = 2) out vec3 outNormal[];
@@ -49,7 +54,10 @@ void main(){
 	
 
 	// Vertices position
-	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	vec4 screenSpacePosition =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	// Apply TAA Jitter
+	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w, 0, 0);
+	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position = screenSpacePosition;
 
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 1;
 

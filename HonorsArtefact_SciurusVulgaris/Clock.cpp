@@ -30,6 +30,9 @@ void Clock::Frame()
 		instance.timeSinceLastFPSReset = 0.0f;
 		instance.framesThisSecond = 0;
 	}
+
+	// Increase counter
+	instance.currentFrameNumber++;
 }
 
 float Clock::DeltaTime()
@@ -40,4 +43,9 @@ float Clock::DeltaTime()
 int Clock::GetFPS()
 {
 	return instance.lastSecondFPS;
+}
+
+uint32_t Clock::GetCurrentFrameNumber()
+{
+	return instance.currentFrameNumber;
 }

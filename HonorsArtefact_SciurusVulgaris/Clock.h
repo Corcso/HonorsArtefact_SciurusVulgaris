@@ -12,6 +12,8 @@ public:
 	static float DeltaTime();
 
 	static int GetFPS();
+
+	static uint32_t GetCurrentFrameNumber();
 private:
 	static Clock instance;
 
@@ -25,6 +27,8 @@ private:
 	int framesThisSecond;
 	float timeSinceLastFPSReset;
 	int lastSecondFPS;
+
+	uint32_t currentFrameNumber;
 
 };
 

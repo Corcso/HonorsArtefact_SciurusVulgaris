@@ -4,6 +4,7 @@
 #include "Graphics.h"
 #include "VulkanSetup.h"
 #include "Light.h"
+#include "Clock.h"
 
 void InstancedTreeRenderPass::CreateImages() {
     colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
@@ -283,6 +284,29 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
     }
 }
 
+void InstancedTreeRenderPass::CreateTAAResources()
+{
+    // (Lee, 2021) Halton sequence
+    TAAJitterValues[0] = HMM_V2(0.500000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.333333f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[1] = HMM_V2(0.250000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.666667f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[2] = HMM_V2(0.750000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.111111f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[3] = HMM_V2(0.125000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.444444f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[4] = HMM_V2(0.625000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.777778f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[5] = HMM_V2(0.375000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.222222f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[6] = HMM_V2(0.875000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.555556f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[7] = HMM_V2(0.062500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.888889f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[8] = HMM_V2(0.562500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.037037f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[9] = HMM_V2(0.312500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.370370f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[10] = HMM_V2(0.812500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.703704f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[11] = HMM_V2(0.187500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.148148f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[12] = HMM_V2(0.687500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.481481f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[13] = HMM_V2(0.437500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.814815f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[14] = HMM_V2(0.937500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.259259f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[15] = HMM_V2(0.031250f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.592593f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+
+
+}
+
 void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -487,6 +511,12 @@ void InstancedTreeRenderPass::EndThirdAARender(VkCommandBuffer commandBuffer)
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     vkCmdEndRenderPass(commandBuffer);
+}
+
+void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding)
+{
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], true }; // TODO Stop Force True.
+    descriptor->UpdateUniformBufferData(binding, &data);
 }
 
 void InstancedTreeRenderPass::Shutdown() {

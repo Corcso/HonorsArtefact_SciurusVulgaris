@@ -133,6 +133,7 @@ public:
 	static void nvperf_InitiateReport(std::string folder);
 	static std::string nfperf_GetLastReportDir();
 #endif // NV_PERF_METER
+public:
 	static void PushMetricRange(std::string name);
 	static void PopMetricRange();
 

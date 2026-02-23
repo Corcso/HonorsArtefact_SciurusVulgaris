@@ -9,7 +9,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
 	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
@@ -123,6 +123,8 @@ void MainDisplayApp::Frame() {
 
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
 			myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+
+			pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5);
 
 			//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
 			pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
@@ -361,7 +363,7 @@ void MainDisplayApp::ImageCaptureSequence()
 
 	};
 
-	std::cout << Graphics::nfperf_GetLastReportDir() << "\n";
+	//std::cout << Graphics::nfperf_GetLastReportDir() << "\n";
 	bool pauseTimer = false;
 
 	renderImGui = false;

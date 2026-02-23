@@ -22,6 +22,8 @@ public:
 
 	void CreateRenderPasses();
 
+	void CreateTAAResources();
+
 	void CreateAll() {
 		//CreateDescriptorLayout();
 		CreateImages();
@@ -29,6 +31,7 @@ public:
 		CreateRenderPasses();
 		CreateFrameBuffer();
 		//CreatePipeline();
+		CreateTAAResources();
 		pointsToGBuffer_GP.CreateDescriptorLayout();
 		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
 		pointsToGBufferMeshShade_GP.CreateDescriptorLayout();
@@ -68,6 +71,8 @@ public:
 
 	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
+	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding);
+
 private:
 	// First Pass
 	VkRenderPass vkRenderPass;
@@ -96,9 +101,14 @@ private:
 
 	VkRenderPass vkSecondRenderPass;
 
-	// Third AA Pass
+	// == Third AA Pass ==
+
+	// FXAA
 	FXAA_GP fxaa_GP;
 	VulkanObjectDescriptorSet fxaaDescriptor;
 	FXAAInfo fxaaInfo;
+
+	//TAA
+	HMM_Vec2 TAAJitterValues[16];
 };
 

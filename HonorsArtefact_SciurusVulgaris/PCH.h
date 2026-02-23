@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 // Windows Includes
 #include <windows.h>
