@@ -30,7 +30,7 @@ void MainDisplayApp::Initialize() {
 	terrain->CopyPointsToVRAM();
 	terrainTexture.CreateAndLoadImageFromFile("./models/Terrain004 - Lennart Demes/color.jpg", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
-	size_t sizes[] = { sizeof(WCP_Matrices), 0 };
+	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0 };
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
@@ -140,10 +140,16 @@ void MainDisplayApp::Frame() {
 
 
 
-		WCP_Matrices terrainBufferData = {
+		WCP_Matrices terrainBufferData[2] = { {
 			HMM_Translate(HMM_V3(-50, 0, 50)),
 			cameraTransform.viewMatrix,
 			HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+			},
+			{
+			HMM_Translate(HMM_V3(-50, 0, 50)),
+			treeInstancePositionsLastFrame.matrices[0].camera,
+			treeInstancePositionsLastFrame.matrices[0].projection
+			}
 		};
 		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
 		Graphics::PopMetricRange();

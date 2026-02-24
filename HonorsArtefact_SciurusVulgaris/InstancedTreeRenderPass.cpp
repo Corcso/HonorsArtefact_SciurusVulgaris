@@ -64,10 +64,11 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
     fxaaInfo.inverseImageSize = HMM_V2(1.0f / TAAOutputImage.GetImageExtent().width, 1.0f / TAAOutputImage.GetImageExtent().height);
     fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
 
-    size_t taaSizes[3]{ 0, 0, sizeof(TAAInfo) };
+    size_t taaSizes[4]{ 0, 0, 0, sizeof(TAAInfo) };
     taaDescriptor.Create(taa_GP.vkDescriptorSetLayout, taa_GP.vkDescriptorSetLayoutInfo, taaSizes);
     taaDescriptor.UpdateImageSampler(0, &colorImageFinal, Graphics::GetBasicNearestSampler());
     taaDescriptor.UpdateImageSampler(1, &TAAHistoryImage, Graphics::GetBasicLinearSampler());
+    taaDescriptor.UpdateImageSampler(2, &velocityImage, Graphics::GetBasicNearestSampler());
 }
 
 void InstancedTreeRenderPass::CreateSampler() {
@@ -645,9 +646,9 @@ void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, VkCommandBuffer com
 
     vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], true };
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), true };
 
-    taaDescriptor.UpdateUniformBufferData(2, &data);
+    taaDescriptor.UpdateUniformBufferData(3, &data);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, taa_GP.vkPipelineLayout, 0, 1,
         taaDescriptor.GetDescriptorSet(), 0, nullptr);
@@ -689,7 +690,7 @@ void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
 
 void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding)
 {
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], true }; // TODO Stop Force True.
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), true}; // TODO Stop Force True.
     descriptor->UpdateUniformBufferData(binding, &data);
 }
 

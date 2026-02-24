@@ -33,6 +33,7 @@ layout(binding = 2) uniform InstancingInfo {
 
 layout(binding = 5) uniform TAAInfo {
 	vec2 currentJitter;
+    vec2 inverseScreenSize;
 	bool enabled;
 } taaInfo; 
 

@@ -5,7 +5,7 @@
 
 void TAA_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[3]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[4]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0; // Render Input
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -18,15 +18,21 @@ void TAA_GP::CreateDescriptorLayout()
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[2].binding = 2; // TAA Info
-    uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[2].binding = 2; // Velocity Input
+    uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[2].descriptorCount = 1;
     uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[2].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[3].binding = 3; // TAA Info
+    uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[3].descriptorCount = 1;
+    uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBindings[3].pImmutableSamplers = nullptr;
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 3;
+    vkDescriptorSetLayoutInfo.bindingCount = 4;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
