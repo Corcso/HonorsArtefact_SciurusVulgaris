@@ -314,8 +314,27 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
-    // Do stuff
     
+    // Do stuff
+    TransitionImageLayout(commandBuffer, image, format, oldLayout, newLayout, isDepth);
+
+    // Over
+    vkEndCommandBuffer(commandBuffer);
+
+    // Execute commands
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
+
+    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
+}
+
+void VulkanUtility::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, bool isDepth)
+{
     // Barriers can also be used to change image format for some reason.
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -363,6 +382,13 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
         sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     }
+    else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
     else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -385,7 +411,7 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
         destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
     }
     else {
-        throw -1; // Unsupported layout transition
+        throw - 1; // Unsupported layout transition
     }
 
     vkCmdPipelineBarrier(
@@ -396,20 +422,6 @@ void VulkanUtility::TransitionImageLayout(VkImage image, VkFormat format, VkImag
         0, nullptr,
         1, &barrier
     );
-
-    // Over
-    vkEndCommandBuffer(commandBuffer);
-
-    // Execute commands
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(Graphics::GetVkGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(Graphics::GetVkGraphicsQueue());
-
-    vkFreeCommandBuffers(Graphics::GetVkDevice(), Graphics::GetCommandPool(), 1, &commandBuffer);
 }
 
 void VulkanUtility::MapCopyToGPU(VkDeviceMemory memory, void* data, size_t size, VkDeviceSize offset, VkMemoryMapFlags flags)

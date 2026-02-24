@@ -186,6 +186,9 @@
     <ClInclude Include="csv2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TAA_GP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -323,6 +326,9 @@
     <ClCompile Include="implot\implot_demo.cpp">
       <Filter>ImPlot</Filter>
     </ClCompile>
+    <ClCompile Include="TAA_GP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileAllShaders.bat">
@@ -370,5 +376,6 @@
     <None Include="FXAAFrag.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="TAAFrag.frag" />
   </ItemGroup>
 </Project>

@@ -56,10 +56,15 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
 
     size_t fxaaSizes[] = { 0, sizeof(FXAAInfo) };
     fxaaDescriptor.Create(fxaa_GP.vkDescriptorSetLayout, fxaa_GP.vkDescriptorSetLayoutInfo, fxaaSizes);
-    fxaaDescriptor.UpdateImageSampler(0, &colorImageFinal, Graphics::GetBasicLinearSampler());
+    fxaaDescriptor.UpdateImageSampler(0, &TAAOutputImage, Graphics::GetBasicLinearSampler());
     fxaaInfo.enabled = true;
-    fxaaInfo.inverseImageSize = HMM_V2(1.0f / colorImageFinal.GetImageExtent().width, 1.0f / colorImageFinal.GetImageExtent().height);
+    fxaaInfo.inverseImageSize = HMM_V2(1.0f / TAAOutputImage.GetImageExtent().width, 1.0f / TAAOutputImage.GetImageExtent().height);
     fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
+
+    size_t taaSizes[3]{ 0, 0, sizeof(TAAInfo) };
+    taaDescriptor.Create(taa_GP.vkDescriptorSetLayout, taa_GP.vkDescriptorSetLayoutInfo, taaSizes);
+    taaDescriptor.UpdateImageSampler(0, &colorImageFinal, Graphics::GetBasicNearestSampler());
+    taaDescriptor.UpdateImageSampler(1, &TAAHistoryImage, Graphics::GetBasicLinearSampler());
 }
 
 void InstancedTreeRenderPass::CreateSampler() {
@@ -304,7 +309,78 @@ void InstancedTreeRenderPass::CreateTAAResources()
     TAAJitterValues[14] = HMM_V2(0.937500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.259259f / static_cast<float>(Graphics::GetSwapChainExtent().height));
     TAAJitterValues[15] = HMM_V2(0.031250f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.592593f / static_cast<float>(Graphics::GetSwapChainExtent().height));
 
+    // Create Images
+    TAAOutputImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+    TAAOutputImage.CreateImageView();
 
+    TAAHistoryImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    TAAHistoryImage.CreateImageView();
+
+    // Create Render Pass
+    VkAttachmentDescription colorAttachment{};
+    colorAttachment.format = colorImage.GetImageFormat();
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+    // Read tutorial its hard to explain
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference colorAttachments[1]{ colorAttachmentRef };
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = colorAttachments;
+    subpass.pDepthStencilAttachment = nullptr;
+
+    // Subpass dependencies 
+    // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    std::vector<VkAttachmentDescription> attachments = { colorAttachment };
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    renderPassInfo.pAttachments = attachments.data();
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+
+    if (vkCreateRenderPass(Graphics::GetVkDevice(), &renderPassInfo, nullptr, &TAARenderPass) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    // Create Frame Buffer
+    VkImageView imageViewList[]{ TAAOutputImage.GetImageView()};
+
+    VkFramebufferCreateInfo frameBufferCreateInfo{};
+    frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    frameBufferCreateInfo.width = TAAOutputImage.GetImageExtent().width;
+    frameBufferCreateInfo.height = TAAOutputImage.GetImageExtent().height;
+    frameBufferCreateInfo.attachmentCount = 1;
+    frameBufferCreateInfo.pAttachments = imageViewList;
+    frameBufferCreateInfo.renderPass = TAARenderPass;
+    frameBufferCreateInfo.layers = 1;
+
+    if (vkCreateFramebuffer(Graphics::GetVkDevice(), &frameBufferCreateInfo, nullptr, &TAAOutputImageFrameBuffer) != VK_SUCCESS) {
+        throw - 1;
+    }
+
+    
 }
 
 void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer) {
@@ -456,7 +532,7 @@ void InstancedTreeRenderPass::EndSecondRender(VkCommandBuffer commandBuffer)
     vkCmdEndRenderPass(commandBuffer);
 }
 
-void InstancedTreeRenderPass::ExecuteThirdAARender(bool enableFXAA, VkCommandBuffer commandBuffer)
+void InstancedTreeRenderPass::ExecuteFXAARender(bool enabled, VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -497,7 +573,7 @@ void InstancedTreeRenderPass::ExecuteThirdAARender(bool enableFXAA, VkCommandBuf
 
     vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    fxaaInfo.enabled = enableFXAA;
+    fxaaInfo.enabled = enabled;
     fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, fxaa_GP.vkPipelineLayout, 0, 1,
@@ -506,11 +582,92 @@ void InstancedTreeRenderPass::ExecuteThirdAARender(bool enableFXAA, VkCommandBuf
     vkCmdDrawIndexed(commandBuffer, fullScreenQuad->indices.size(), 1, 0, 0, 0);
 }
 
-void InstancedTreeRenderPass::EndThirdAARender(VkCommandBuffer commandBuffer)
+void InstancedTreeRenderPass::EndFXAARender(VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     vkCmdEndRenderPass(commandBuffer);
+}
+
+void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = TAARenderPass;
+    renderPassInfo.framebuffer = TAAOutputImageFrameBuffer;
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = TAAOutputImage.GetImageExtent();
+
+    std::vector<VkClearValue> clearColors = { {{0, 0, 0, 1}}, {1.0f, 0} };
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
+    renderPassInfo.pClearValues = clearColors.data();
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, taa_GP.vkPipeline);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(TAAOutputImage.GetImageExtent().width);
+    viewport.height = static_cast<float>(TAAOutputImage.GetImageExtent().height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = TAAOutputImage.GetImageExtent();
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    VkBuffer vertexBuffers[] = { fullScreenQuad->vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+    vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], true };
+
+    taaDescriptor.UpdateUniformBufferData(2, &data);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, taa_GP.vkPipelineLayout, 0, 1,
+        taaDescriptor.GetDescriptorSet(), 0, nullptr);
+
+    vkCmdDrawIndexed(commandBuffer, fullScreenQuad->indices.size(), 1, 0, 0, 0);
+}
+
+void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    vkCmdEndRenderPass(commandBuffer);
+
+    VulkanUtility::TransitionImageLayout(commandBuffer, TAAHistoryImage.GetImage(), TAAHistoryImage.GetImageFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, false);
+
+
+    VkImageCopy region{};
+
+    region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.srcSubresource.mipLevel = 0;
+    region.srcSubresource.baseArrayLayer = 0;
+    region.srcSubresource.layerCount = 1;
+
+    region.dstSubresource = region.srcSubresource;
+
+    region.srcOffset = { 0, 0, 0 };
+    region.dstOffset = { 0, 0, 0 };
+    region.extent = {
+        TAAOutputImage.GetImageExtent().width,
+        TAAOutputImage.GetImageExtent().height,
+        1
+    };
+
+    vkCmdCopyImage(commandBuffer, TAAOutputImage.GetImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, TAAHistoryImage.GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+    VulkanUtility::TransitionImageLayout(commandBuffer, TAAHistoryImage.GetImage(), TAAHistoryImage.GetImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
+    VulkanUtility::TransitionImageLayout(commandBuffer, TAAOutputImage.GetImage(), TAAOutputImage.GetImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
 }
 
 void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding)

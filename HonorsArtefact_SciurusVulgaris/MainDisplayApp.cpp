@@ -156,10 +156,13 @@ void MainDisplayApp::Frame() {
 		pointRenderingPass.EndSecondRender();
 		Graphics::PopMetricRange();
 		Graphics::PushMetricRange("Anti Aliasing");
-		pointRenderingPass.ExecuteThirdAARender(fxaaEnabled);
+		pointRenderingPass.ExecuteTAARender(true);
+		pointRenderingPass.EndTAARender();
+
+		pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
 		Graphics::PopMetricRange();
 		Graphics::FinishImGuiRender();
-		pointRenderingPass.EndThirdAARender();
+		pointRenderingPass.EndFXAARender();
 		Graphics::EndRender();
 	}
 	else {

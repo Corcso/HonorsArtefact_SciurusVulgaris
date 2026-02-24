@@ -263,6 +263,7 @@
     <ClInclude Include="PointsToGBuffer_GP.h" />
     <ClInclude Include="PointsToShadowMeshShade_GP.h" />
     <ClInclude Include="PointTreeMesh.h" />
+    <ClInclude Include="TAA_GP.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="TriListMesh.h" />
     <ClInclude Include="VulkanDescriptor.h" />
@@ -355,6 +356,7 @@
     <ClCompile Include="PointsToGBuffer_GP.cpp" />
     <ClCompile Include="PointsToShadowMeshShade_GP.cpp" />
     <ClCompile Include="PointTreeMesh.cpp" />
+    <ClCompile Include="TAA_GP.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="TriListMesh.cpp" />
     <ClCompile Include="VulkanDescriptor.cpp" />
@@ -378,6 +380,7 @@
     <None Include="PointFragment.frag" />
     <None Include="MeshVertex.vert" />
     <None Include="PointVertex.vert" />
+    <None Include="TAAFrag.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

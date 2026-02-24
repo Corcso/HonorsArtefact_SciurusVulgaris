@@ -8,6 +8,7 @@
 #include "MeshTraditionalToGBuffer_GP.h"
 #include "PointsToGBufferMeshShade_GP.h"
 #include "FXAA_GP.h"
+#include "TAA_GP.h"
 
 class InstancedTreeRenderPass
 {
@@ -42,6 +43,10 @@ public:
 		gBufferToOutput_GP.CreatePipeline(vkSecondRenderPass);
 		fxaa_GP.CreateDescriptorLayout();
 		fxaa_GP.CreatePipeline(Graphics::GetSwapChainRenderPass());
+		taa_GP.CreateDescriptorLayout();
+		taa_GP.CreatePipeline(TAARenderPass);
+
+		
 		
 		CreateUniqueMeshData();
 	}
@@ -57,8 +62,11 @@ public:
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
-	void ExecuteThirdAARender(bool enableFXAA, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void EndThirdAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void ExecuteFXAARender(bool enabled, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void EndFXAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	void ExecuteTAARender(bool enabled, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void EndTAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() { return pointsToGBuffer_GP.vkDescriptorSetLayoutInfo; }
@@ -109,6 +117,12 @@ private:
 	FXAAInfo fxaaInfo;
 
 	//TAA
+	TAA_GP taa_GP;
+	VulkanObjectDescriptorSet taaDescriptor;
 	HMM_Vec2 TAAJitterValues[16];
+	Image TAAHistoryImage;
+	Image TAAOutputImage;
+	VkFramebuffer TAAOutputImageFrameBuffer;
+	VkRenderPass TAARenderPass;
 };
 
