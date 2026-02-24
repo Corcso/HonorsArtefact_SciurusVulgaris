@@ -53,12 +53,12 @@ const vec3[] debugColors = {vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 
 vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 {
     oldPos /= oldPos.w;
-    oldPos.xy = (oldPos.xy+1)/2.0f;
-    oldPos.y = 1 - oldPos.y;
+    oldPos.xy = (oldPos.xy + vec2(1,1))/2.0f;
+    //oldPos.y = 1 - oldPos.y;
     
     newPos /= newPos.w;
-    newPos.xy = (newPos.xy+1)/2.0f;
-    newPos.y = 1 - newPos.y;
+    newPos.xy = (newPos.xy + vec2(1,1))/2.0f;
+    //newPos.y = 1 - newPos.y;
     
     return (newPos - oldPos).xy;
 }

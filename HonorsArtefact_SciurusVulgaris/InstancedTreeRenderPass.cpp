@@ -224,7 +224,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         // Create render pass
-        std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment,normalAttachment, depthAttachment };
+        std::vector<VkAttachmentDescription> attachments = { colorAttachment, positionAttachment,normalAttachment, velocityAttachment, depthAttachment };
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -410,7 +410,7 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
     renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = colorImage.GetImageExtent();
 
-    std::vector<VkClearValue> clearColors = { {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {1.0f, 0} };
+    std::vector<VkClearValue> clearColors = { {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {1.0f, 0} };
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
     renderPassInfo.pClearValues = clearColors.data();
 

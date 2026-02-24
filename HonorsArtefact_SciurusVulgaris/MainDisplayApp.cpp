@@ -9,7 +9,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { 0, sizeof(WCP_Matrices) * 4000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices) * 8000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
 	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
@@ -120,7 +120,10 @@ void MainDisplayApp::Frame() {
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 			treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
-			myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			std::vector<WCP_Matrices> copiedTemp(8000);
+			memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			myModel->GetDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 			myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
@@ -169,7 +172,7 @@ void MainDisplayApp::Frame() {
 		pointRenderingPass.EndFXAARender();
 		Graphics::EndRender();
 
-		treeInstancePositionsLastFrame.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
+		treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
 	}
 	else {
 		InstancingInfo instancingInfo;

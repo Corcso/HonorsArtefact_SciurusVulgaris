@@ -33,8 +33,8 @@ public:
 		CreateFrameBuffer();
 		//CreatePipeline();
 		CreateTAAResources();
-		pointsToGBuffer_GP.CreateDescriptorLayout();
-		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
+		//pointsToGBuffer_GP.CreateDescriptorLayout();
+		//pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
 		pointsToGBufferMeshShade_GP.CreateDescriptorLayout();
 		pointsToGBufferMeshShade_GP.CreatePipeline(vkRenderPass);
 		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
