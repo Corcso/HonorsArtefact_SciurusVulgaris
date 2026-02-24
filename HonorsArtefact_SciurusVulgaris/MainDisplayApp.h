@@ -25,6 +25,7 @@ private:
 
 	PointTreeMesh* myModel;
 	InstancedWCPHelper treeInstancePositions;
+	InstancedWCPHelper treeInstancePositionsLastFrame;
 	char modelPath[256] = "./models/output.tree";
 	float angle;
 	

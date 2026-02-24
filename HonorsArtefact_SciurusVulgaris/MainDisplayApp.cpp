@@ -37,6 +37,7 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
 	treeInstancePositions.ApplyRandomRotation();
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	treeInstancePositionsLastFrame.matrices = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
@@ -74,7 +75,10 @@ void MainDisplayApp::Frame() {
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 			treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
-			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			std::vector<WCP_Matrices> copiedTemp(8000);
+			memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
@@ -164,6 +168,8 @@ void MainDisplayApp::Frame() {
 		Graphics::FinishImGuiRender();
 		pointRenderingPass.EndFXAARender();
 		Graphics::EndRender();
+
+		treeInstancePositionsLastFrame.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
 	}
 	else {
 		InstancingInfo instancingInfo;

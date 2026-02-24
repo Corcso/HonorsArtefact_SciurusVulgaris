@@ -23,6 +23,7 @@ struct WCPMatrices{
 
 layout(binding = 1) readonly buffer UniformBufferObject {
     WCPMatrices matrices[4000];
+    WCPMatrices lastMatrices[4000];
 } transformation;
 
 layout(binding = 2) uniform InstancingInfo {
@@ -38,6 +39,7 @@ layout(binding = 5) uniform TAAInfo {
 layout(location = 0) out vec3 outWorldPos[];
 layout(location = 1) out vec4 outColor[];
 layout(location = 2) out vec3 outNormal[];
+layout(location = 3) out vec2 outVelocity[];
 
 struct MyPayloadStruct {
     uint instanceIndex;
@@ -47,6 +49,20 @@ taskPayloadSharedEXT MyPayloadStruct payload;
 
 const vec3[] debugColors = {vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 1.0), vec3(1.0, 0.0, 1.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 1.0, 1.0)};
 
+// (Lee, 2021)
+vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
+{
+    oldPos /= oldPos.w;
+    oldPos.xy = (oldPos.xy+1)/2.0f;
+    oldPos.y = 1 - oldPos.y;
+    
+    newPos /= newPos.w;
+    newPos.xy = (newPos.xy+1)/2.0f;
+    newPos.y = 1 - newPos.y;
+    
+    return (newPos - oldPos).xy;
+}
+
 void main(){
 	uint instanceID = payload.instanceIndex;
 	uint pointDataIndex = gl_GlobalInvocationID.x;// % (instanceInfo.instanceStride * 64);
@@ -55,6 +71,8 @@ void main(){
 
 	// Vertices position
 	vec4 screenSpacePosition =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	vec4 lastScreenSpacePosition =  transformation.lastMatrices[instanceID].proj * transformation.lastMatrices[instanceID].view * transformation.lastMatrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	outVelocity[gl_LocalInvocationID.x] = CalcVelocity(screenSpacePosition, lastScreenSpacePosition);
 	// Apply TAA Jitter
 	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w, 0, 0);
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position = screenSpacePosition;

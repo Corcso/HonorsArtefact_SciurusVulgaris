@@ -95,6 +95,7 @@ private:
 	Image positionImage;
 	Image normalImage;
 	Image depthImage;
+	Image velocityImage;
 	VkFramebuffer vkFrameBuffer;
 	VkSampler vkSampler; // Nearest Sampler (As Should be pixel = pixel) for performance.
 

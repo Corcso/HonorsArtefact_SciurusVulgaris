@@ -19,6 +19,9 @@ void InstancedTreeRenderPass::CreateImages() {
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
 
+    velocityImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+    velocityImage.CreateImageView();
+
     colorImageFinal.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     colorImageFinal.CreateImageView();
 
@@ -93,13 +96,13 @@ void InstancedTreeRenderPass::CreateSampler() {
 
 void InstancedTreeRenderPass::CreateFrameBuffer() {
     {
-        VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), normalImage.GetImageView(), depthImage.GetImageView() };
+        VkImageView imageViewList[]{ colorImage.GetImageView(), positionImage.GetImageView(), normalImage.GetImageView(), velocityImage.GetImageView(), depthImage.GetImageView() };
 
         VkFramebufferCreateInfo frameBufferCreateInfo{};
         frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         frameBufferCreateInfo.width = colorImage.GetImageExtent().width;
         frameBufferCreateInfo.height = colorImage.GetImageExtent().height;
-        frameBufferCreateInfo.attachmentCount = 4;
+        frameBufferCreateInfo.attachmentCount = 5;
         frameBufferCreateInfo.pAttachments = imageViewList;
         frameBufferCreateInfo.renderPass = vkRenderPass;
         frameBufferCreateInfo.layers = 1;
@@ -157,7 +160,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 3;
+        depthAttachmentRef.attachment = 4;
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         // Position buffer attachment image
@@ -188,11 +191,25 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         normalAttachmentRef.attachment = 2;
         normalAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        VkAttachmentReference colorAttachments[3]{ colorAttachmentRef, positionAttachmentRef, normalAttachmentRef };
+        // Velocity buffer attachment image
+        VkAttachmentDescription velocityAttachment{};
+        velocityAttachment.format = normalImage.GetImageFormat();
+        velocityAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        velocityAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        velocityAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        velocityAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        velocityAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        velocityAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        velocityAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        VkAttachmentReference velocityAttachmentRef{};
+        velocityAttachmentRef.attachment = 3;
+        velocityAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference colorAttachments[4]{ colorAttachmentRef, positionAttachmentRef, normalAttachmentRef, velocityAttachmentRef };
 
         VkSubpassDescription subpass{};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 3;
+        subpass.colorAttachmentCount = 4;
         subpass.pColorAttachments = colorAttachments;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
