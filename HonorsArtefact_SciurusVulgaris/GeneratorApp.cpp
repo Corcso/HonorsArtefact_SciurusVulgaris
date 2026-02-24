@@ -14,7 +14,7 @@ void GeneratorApp::Initialize(){
 	meshRenderingPipeline.CreateAll();
 	debugPointRenderer.CreateAll();
 	imguiRenderPass.CreateAll(); // Not needed but just incase stuff is added later
-	descriptorSizes = { sizeof(WCP_Matrices), 0 };
+	descriptorSizes = { sizeof(WCP_Matrices), 0, sizeof(TAAInfo)};
 	liveColorOut = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(meshRenderingPipeline.GetSampler(), meshRenderingPipeline.GetColorImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
 	
@@ -106,6 +106,9 @@ void GeneratorApp::Frame() {
 		for (int i = 0; i < loadedModel.size(); i++) {
 			loadedModel[i].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
 			loadedModel[i].GetDescriptorSet()->UpdateImageSampler(1, &loadedImages[i], meshRenderingPipeline.GetSampler());
+			// Disable TAA
+			TAAInfo taaInfo{ HMM_V2(0, 0), HMM_V2(0, 0), false };
+			loadedModel[i].GetDescriptorSet()->UpdateUniformBufferData(2, &taaInfo);
 		}
 	}
 	if (ImGui::Button("Execute Point Generation")) {

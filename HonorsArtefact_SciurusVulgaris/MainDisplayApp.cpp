@@ -30,7 +30,7 @@ void MainDisplayApp::Initialize() {
 	terrain->CopyPointsToVRAM();
 	terrainTexture.CreateAndLoadImageFromFile("./models/Terrain004 - Lennart Demes/color.jpg", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
-	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0 };
+	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
@@ -152,6 +152,7 @@ void MainDisplayApp::Frame() {
 			}
 		};
 		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+		pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2);
 		Graphics::PopMetricRange();
 		pointRenderingPass.SwitchToTraditionalMeshPipeline();
 		Graphics::PushMetricRange("Terrain Mesh Render");

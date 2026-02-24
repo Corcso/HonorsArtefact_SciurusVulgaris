@@ -18,6 +18,12 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 projLast;
 } ubo;
 
+layout(binding = 2) uniform TAAInfo {
+	vec2 currentJitter;
+    vec2 inverseScreenSize;
+	bool enabled;
+} taaInfo; 
+
 // (Lee, 2021) Used for TAA
 vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 {
@@ -37,6 +43,9 @@ void main() {
     gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0);
     vec4 lastScreenSpacePosition = ubo.projLast * ubo.viewLast * ubo.worldLast * vec4(inPosition, 1.0);
     outVelocity = CalcVelocity(gl_Position, lastScreenSpacePosition);
+
+    // Apply TAA Jitter (if enabled)
+    if(taaInfo.enabled) gl_Position += vec4(taaInfo.currentJitter * gl_Position.w, 0, 0);
 
     outWorldPos = (ubo.world * vec4(inPosition, 1.0)).xyz;
     outNormal = normalize((ubo.world * vec4(inNormal, 0.0)).xyz);
