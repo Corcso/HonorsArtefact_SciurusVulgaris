@@ -688,9 +688,9 @@ void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
     VulkanUtility::TransitionImageLayout(commandBuffer, TAAOutputImage.GetImage(), TAAOutputImage.GetImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
 }
 
-void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding)
+void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled)
 {
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), true}; // TODO Stop Force True.
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled };
     descriptor->UpdateUniformBufferData(binding, &data);
 }
 

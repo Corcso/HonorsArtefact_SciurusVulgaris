@@ -36,5 +36,5 @@ struct FXAAInfo {
 struct TAAInfo {
 	HMM_Vec2 currentJitter;
 	HMM_Vec2 inverseImageSize;
-	bool enabled;
+	uint32_t enabled;
 };

@@ -79,7 +79,7 @@ public:
 
 	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
-	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding);
+	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled);
 
 private:
 	// First Pass

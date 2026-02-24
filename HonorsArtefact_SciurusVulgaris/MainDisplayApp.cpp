@@ -131,7 +131,7 @@ void MainDisplayApp::Frame() {
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
 			myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
-			pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5);
+			pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5, taaEnabled);
 
 			//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
 			pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
@@ -152,7 +152,7 @@ void MainDisplayApp::Frame() {
 			}
 		};
 		terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
-		pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2);
+		pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled);
 		Graphics::PopMetricRange();
 		pointRenderingPass.SwitchToTraditionalMeshPipeline();
 		Graphics::PushMetricRange("Terrain Mesh Render");
@@ -170,7 +170,7 @@ void MainDisplayApp::Frame() {
 		pointRenderingPass.EndSecondRender();
 		Graphics::PopMetricRange();
 		Graphics::PushMetricRange("Anti Aliasing");
-		pointRenderingPass.ExecuteTAARender(true);
+		pointRenderingPass.ExecuteTAARender(taaEnabled);
 		pointRenderingPass.EndTAARender();
 
 		pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
@@ -292,6 +292,7 @@ void MainDisplayApp::RenderImGuiControls()
 		}
 	}
 	ImGui::Checkbox("FXAA", &fxaaEnabled);
+	ImGui::Checkbox("TAA", &taaEnabled);
 	ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);

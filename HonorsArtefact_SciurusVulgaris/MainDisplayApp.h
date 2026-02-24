@@ -41,6 +41,7 @@ private:
 	LightShadow_RP lightShadow_RP;
 
 	bool fxaaEnabled;
+	bool taaEnabled;
 	void RenderImGuiControls();
 
 	bool meshRenderOn;
