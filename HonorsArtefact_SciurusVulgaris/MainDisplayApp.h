@@ -41,7 +41,7 @@ private:
 	LightShadow_RP lightShadow_RP;
 
 	bool fxaaEnabled;
-	bool taaEnabled;
+	bool taaEnabled; bool taaLogarithmicColorSpace;
 	void RenderImGuiControls();
 
 	bool meshRenderOn;

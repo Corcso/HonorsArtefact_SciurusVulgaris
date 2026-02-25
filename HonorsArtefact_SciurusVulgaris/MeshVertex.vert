@@ -22,6 +22,7 @@ layout(binding = 2) uniform TAAInfo {
 	vec2 currentJitter;
     vec2 inverseScreenSize;
 	bool enabled;
+    bool logarithmicColorSpace;
 } taaInfo; 
 
 // (Lee, 2021) Used for TAA

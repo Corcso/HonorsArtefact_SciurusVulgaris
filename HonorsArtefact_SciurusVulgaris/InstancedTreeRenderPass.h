@@ -65,7 +65,7 @@ public:
 	void ExecuteFXAARender(bool enabled, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndFXAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
-	void ExecuteTAARender(bool enabled, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void ExecuteTAARender(bool enabled, bool logarithmicColorSpace, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndTAARender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return pointsToGBuffer_GP.vkDescriptorSetLayout; }
@@ -79,7 +79,7 @@ public:
 
 	VulkanObjectDescriptorSet* GetQuadDescriptorSet() { return fullScreenQuad->GetDescriptorSet(); }
 
-	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled);
+	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled, bool logarithmicColorSpace);
 
 private:
 	// First Pass

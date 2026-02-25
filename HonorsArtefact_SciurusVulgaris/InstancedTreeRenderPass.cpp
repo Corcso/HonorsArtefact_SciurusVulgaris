@@ -64,7 +64,7 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
     fxaaInfo.inverseImageSize = HMM_V2(1.0f / TAAOutputImage.GetImageExtent().width, 1.0f / TAAOutputImage.GetImageExtent().height);
     fxaaDescriptor.UpdateUniformBufferData(1, &fxaaInfo);
 
-    size_t taaSizes[4]{ 0, 0, 0, sizeof(TAAInfo) };
+    size_t taaSizes[5]{ 0, 0, 0, sizeof(TAAInfo), 0 };
     taaDescriptor.Create(taa_GP.vkDescriptorSetLayout, taa_GP.vkDescriptorSetLayoutInfo, taaSizes);
     taaDescriptor.UpdateImageSampler(0, &colorImageFinal, Graphics::GetBasicNearestSampler());
     taaDescriptor.UpdateImageSampler(1, &TAAHistoryImage, Graphics::GetBasicLinearSampler());
@@ -607,7 +607,7 @@ void InstancedTreeRenderPass::EndFXAARender(VkCommandBuffer commandBuffer)
     vkCmdEndRenderPass(commandBuffer);
 }
 
-void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, VkCommandBuffer commandBuffer)
+void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, bool logarithmicColorSpace, VkCommandBuffer commandBuffer)
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -646,7 +646,7 @@ void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, VkCommandBuffer com
 
     vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled };
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled, logarithmicColorSpace };
 
     taaDescriptor.UpdateUniformBufferData(3, &data);
 
@@ -663,7 +663,6 @@ void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
     vkCmdEndRenderPass(commandBuffer);
 
     VulkanUtility::TransitionImageLayout(commandBuffer, TAAHistoryImage.GetImage(), TAAHistoryImage.GetImageFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, false);
-
 
     VkImageCopy region{};
 
@@ -688,9 +687,9 @@ void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
     VulkanUtility::TransitionImageLayout(commandBuffer, TAAOutputImage.GetImage(), TAAOutputImage.GetImageFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, false);
 }
 
-void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled)
+void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled, bool logarithmicColorSpace)
 {
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled };
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled, logarithmicColorSpace };
     descriptor->UpdateUniformBufferData(binding, &data);
 }
 

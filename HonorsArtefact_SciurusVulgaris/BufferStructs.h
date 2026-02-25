@@ -37,4 +37,5 @@ struct TAAInfo {
 	HMM_Vec2 currentJitter;
 	HMM_Vec2 inverseImageSize;
 	uint32_t enabled;
+	uint32_t logarithmicColorSpace;
 };

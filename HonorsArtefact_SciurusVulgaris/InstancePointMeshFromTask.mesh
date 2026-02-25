@@ -35,6 +35,7 @@ layout(binding = 5) uniform TAAInfo {
 	vec2 currentJitter;
     vec2 inverseScreenSize;
 	bool enabled;
+    bool logarithmicColorSpace;
 } taaInfo; 
 
 layout(location = 0) out vec3 outWorldPos[];
@@ -75,7 +76,7 @@ void main(){
 	vec4 lastScreenSpacePosition =  transformation.lastMatrices[instanceID].proj * transformation.lastMatrices[instanceID].view * transformation.lastMatrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
 	outVelocity[gl_LocalInvocationID.x] = CalcVelocity(screenSpacePosition, lastScreenSpacePosition);
 	// Apply TAA Jitter
-	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w, 0, 0);
+	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w * 1.2f, 0, 0);
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position = screenSpacePosition;
 
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 1;
