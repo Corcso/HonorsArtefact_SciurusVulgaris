@@ -310,22 +310,22 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
 void InstancedTreeRenderPass::CreateTAAResources()
 {
     // (Lee, 2021) Halton sequence
-    TAAJitterValues[0] = HMM_V2(0.500000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.333333f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[1] = HMM_V2(0.250000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.666667f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[2] = HMM_V2(0.750000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.111111f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[3] = HMM_V2(0.125000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.444444f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[4] = HMM_V2(0.625000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.777778f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[5] = HMM_V2(0.375000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.222222f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[6] = HMM_V2(0.875000f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.555556f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[7] = HMM_V2(0.062500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.888889f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[8] = HMM_V2(0.562500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.037037f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[9] = HMM_V2(0.312500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.370370f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[10] = HMM_V2(0.812500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.703704f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[11] = HMM_V2(0.187500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.148148f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[12] = HMM_V2(0.687500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.481481f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[13] = HMM_V2(0.437500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.814815f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[14] = HMM_V2(0.937500f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.259259f / static_cast<float>(Graphics::GetSwapChainExtent().height));
-    TAAJitterValues[15] = HMM_V2(0.031250f / static_cast<float>(Graphics::GetSwapChainExtent().width), 0.592593f / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[0] = HMM_V2((0.500000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.333333f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[1] = HMM_V2((0.250000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.666667f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[2] = HMM_V2((0.750000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.111111f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[3] = HMM_V2((0.125000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.444444f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[4] = HMM_V2((0.625000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.777778f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[5] = HMM_V2((0.375000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.222222f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[6] = HMM_V2((0.875000f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.555556f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[7] = HMM_V2((0.062500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.888889f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[8] = HMM_V2((0.562500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.037037f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[9] = HMM_V2((0.312500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.370370f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[10] = HMM_V2((0.812500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.703704f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[11] = HMM_V2((0.187500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.148148f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[12] = HMM_V2((0.687500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.481481f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[13] = HMM_V2((0.437500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.814815f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[14] = HMM_V2((0.937500f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.259259f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
+    TAAJitterValues[15] = HMM_V2((0.031250f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().width), (0.592593f - 0.5f) / static_cast<float>(Graphics::GetSwapChainExtent().height));
 
     // Create Images
     TAAOutputImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
@@ -646,7 +646,7 @@ void InstancedTreeRenderPass::ExecuteTAARender(bool enabled, VkCommandBuffer com
 
     vkCmdBindIndexBuffer(commandBuffer, fullScreenQuad->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), true };
+    TAAInfo data{ TAAJitterValues[Clock::GetCurrentFrameNumber() % 16], HMM_V2(1.0f / (float)TAAOutputImage.GetImageExtent().width, 1.0f / (float)TAAOutputImage.GetImageExtent().height), enabled };
 
     taaDescriptor.UpdateUniformBufferData(3, &data);
 
