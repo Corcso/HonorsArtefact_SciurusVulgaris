@@ -59,6 +59,18 @@
         return memoryPools[block.poolID][block.location.poolIndex];
     }
 
+    void VulkanMemoryAllocator::FlushMappedBlock(VkDevice device, VulkanMemoryAllocator::VulkanMemoryBlock block)
+    {
+        VkMappedMemoryRange mappedRange{};
+        mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+        mappedRange.memory = memoryPools[block.poolID][block.location.poolIndex];
+        mappedRange.offset = block.location.offset;
+        mappedRange.pNext = nullptr;
+        mappedRange.size = block.poolID.blockSize;
+
+        vkFlushMappedMemoryRanges(device, 1, &mappedRange);
+    }
+
     void VulkanMemoryAllocator::RenderMemoryUsageStat()
     {
         ImGui::Begin("Vulkan VRAM Alloc");

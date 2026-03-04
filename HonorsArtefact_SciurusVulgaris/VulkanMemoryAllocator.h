@@ -59,6 +59,8 @@
 		/// <returns>Block's memory allocation</returns>
 		VkDeviceMemory GetBlockMemoryAllocation(VulkanMemoryAllocator::VulkanMemoryBlock block);
 
+		void FlushMappedBlock(VkDevice device, VulkanMemoryAllocator::VulkanMemoryBlock block);
+
 		void RenderMemoryUsageStat();
 
 		void FreeAllPools(VkDevice* device);

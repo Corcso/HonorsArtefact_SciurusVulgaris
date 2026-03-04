@@ -27,6 +27,7 @@
 
 		void UpdateUniformBufferData(uint32_t bindingIndex, void* data);
 		void UpdateStorageBufferData(uint32_t bindingIndex, void* data);
+		void FlushBuffer(uint32_t bindingIndex);
 		void UpdateImageSampler(uint32_t bindingIndex, Image* image, VkSampler sampler);
 
 		void CleanupDescriptor();

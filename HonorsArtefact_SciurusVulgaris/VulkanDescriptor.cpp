@@ -203,6 +203,14 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 		memcpy(descriptors[bindingIndex].openMapMemoryLocation, data, descriptors[bindingIndex].bufferSize);
 	}
 
+	void VulkanObjectDescriptorSet::FlushBuffer(uint32_t bindingIndex)
+	{
+		if (bindingIndex >= descriptors.size()) return;
+		// Storage and Uniform Only
+		if (descriptors[bindingIndex].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER && descriptors[bindingIndex].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER) return;
+		Graphics::GetMemoryAllocator().FlushMappedBlock(Graphics::GetVkDevice(), descriptors[bindingIndex].bufferMemory);
+	}
+
 	void VulkanObjectDescriptorSet::UpdateImageSampler(uint32_t bindingIndex, Image* image, VkSampler sampler)
 	{
 		if (bindingIndex >= descriptors.size()) return;

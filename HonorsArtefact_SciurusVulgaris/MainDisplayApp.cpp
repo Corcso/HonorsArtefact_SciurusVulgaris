@@ -87,7 +87,7 @@ void MainDisplayApp::Frame() {
 
 			instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
 
-
+			myModel->GetShadowDescriptorSet()->FlushBuffer(1);
 
 
 			lightShadow_RP.RenderPointTree(myModel, instancingInfo);
