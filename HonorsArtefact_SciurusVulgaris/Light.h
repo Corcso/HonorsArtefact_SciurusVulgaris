@@ -46,6 +46,7 @@ public:
 	void ShutdownShadowResources();
 
 	Image* GetShadowImage() { return &shadowImage; }
+	ImTextureID GetShadowImageImGuiTex() { return shadowImageImGuiTex; }
 	VkFramebuffer GetShadowFrameBuffer() { return shadowFrameBuffer; }
 
 private:
@@ -58,6 +59,7 @@ private:
 	float intensity;
 
 	Image shadowImage;
+	ImTextureID shadowImageImGuiTex;
 	VkFramebuffer shadowFrameBuffer;
 
 	HMM_Mat4 viewMatrix;

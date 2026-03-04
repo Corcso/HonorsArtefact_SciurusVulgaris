@@ -23,6 +23,10 @@ public:
 	//void RenderTraditionalMesh(TriListMesh* mesh, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
+
+	VkDescriptorSetLayout GetShadowSetLayout() { return pointsToShadowMeshShade_GP.vkDescriptorSetLayout; }
+	VkDescriptorSetLayoutCreateInfo GetShadowSetLayoutInfo() { return pointsToShadowMeshShade_GP.vkDescriptorSetLayoutInfo; }
+
 	void Shutdown();
 
 	VkRenderPass GetRenderPass() { return vkRenderPass; }

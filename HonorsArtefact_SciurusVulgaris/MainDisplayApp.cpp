@@ -37,7 +37,7 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
 	treeInstancePositions.ApplyRandomRotation();
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
-	treeInstancePositionsLastFrame.matrices = treeInstancePositions.matrices;
+	treeInstancePositionsLastFrame.matrices.resize(4000);// = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
@@ -56,8 +56,11 @@ void MainDisplayApp::Frame() {
 	ImageCaptureSequence();
 
 	if (!meshRenderOn) {
+
 		InstancingInfo instancingInfo;
 		LODDataBuffer lodData;
+
+		cameraTransform.CaptureControls();
 
 		Graphics::BeginRender();
 		Graphics::PushMetricRange("Shadow Map Render");
@@ -77,7 +80,8 @@ void MainDisplayApp::Frame() {
 			treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
 			std::vector<WCP_Matrices> copiedTemp(8000);
 			memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
-			memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			memcpy(copiedTemp.data() + 4000, treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
+			//ZeroMemory(copiedTemp.data() + 4000, sizeof(WCP_Matrices) * 4000);
 			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
@@ -96,7 +100,7 @@ void MainDisplayApp::Frame() {
 		Graphics::PushMetricRange("Render Point Trees");
 		pointRenderingPass.BeginRender(HMM_V4(0, 0, 0, 1));
 
-		cameraTransform.CaptureControls();
+		
 		if (myModel != nullptr) {
 
 			//std::vector<WCP_Matrices> dataForUBO(400);
@@ -256,7 +260,7 @@ void MainDisplayApp::RenderImGuiControls()
 		//myModel->CopyPointsToVRAM();
 		descriptorSizes[0] = myModel->GetPointsArraySize(true);
 		myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
-		myModel->CreateShadowDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+		myModel->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
 		myModel->CopyPointsToVRAMMeshBuffer(0);
 
 		MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
@@ -321,6 +325,10 @@ void MainDisplayApp::RenderImGuiControls()
 		ImGui::DragFloat("Decay", &myModel->continousLOD_decay, 0.1f, 1, 5);
 	}
 
+	ImGui::End();
+
+	ImGui::Begin("Shadow Map");
+	ImGui::Image(sun.GetShadowImageImGuiTex(), ImVec2(800, 800));
 	ImGui::End();
 
 	sun.RenderImGuiMenu(true);

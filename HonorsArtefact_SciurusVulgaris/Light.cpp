@@ -39,6 +39,10 @@ void Light::CreateShadowResources(VkRenderPass vkRenderPass)
 {
     shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 2048, 2048, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     shadowImage.CreateImageView(true);
+
+    shadowImageImGuiTex = reinterpret_cast<ImTextureID>(
+        ImGui_ImplVulkan_AddTexture(Graphics::GetBasicLinearSampler(), shadowImage.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+    );
    
     VkImageView imageViewList[]{ shadowImage.GetImageView() };
 

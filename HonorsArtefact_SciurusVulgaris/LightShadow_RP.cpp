@@ -85,6 +85,9 @@ void LightShadow_RP::BeginRender(Light* light, VkCommandBuffer commandBuffer) {
 void LightShadow_RP::RenderPointTree(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer ){
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
+    TAAInfo taaInfo{ HMM_V2(0,0), HMM_V2(0,0), false, false };
+    points->GetShadowDescriptorSet()->UpdateUniformBufferData(5, &taaInfo);
+
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToShadowMeshShade_GP.vkPipelineLayout, 0, 1,
         points->GetShadowDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
