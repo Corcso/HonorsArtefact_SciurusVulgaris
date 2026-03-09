@@ -5,26 +5,56 @@
 
 void PointsToGBuffer_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[6]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     // Only using this in vertex shader
-    uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
     // Not used for images
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
     uboLayoutBindings[1].binding = 1;
-    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[1].descriptorCount = 1;
     // Only using this in vertex shader
-    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
     // Not used for images
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[2].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
+    // Not used for images
+    uboLayoutBindings[2].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[3].binding = 3;
+    uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[3].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
+    // Not used for images
+    uboLayoutBindings[3].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[4].binding = 4;
+    uboLayoutBindings[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[4].descriptorCount = 1;
+    // Only using this in vertex shader
+    uboLayoutBindings[4].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
+    // Not used for images
+    uboLayoutBindings[4].pImmutableSamplers = nullptr;
+
+    uboLayoutBindings[5].binding = 5; // TAA Info
+    uboLayoutBindings[5].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[5].descriptorCount = 1;
+    uboLayoutBindings[5].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBindings[5].pImmutableSamplers = nullptr;
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 2;
+    vkDescriptorSetLayoutInfo.bindingCount = 6;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {

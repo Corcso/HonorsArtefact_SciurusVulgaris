@@ -19,7 +19,17 @@ public:
 	virtual void Initialize() final;
 	virtual void Frame() final;
 	virtual void Shutdown() final;
+
+	void FrameMeshShaded();
+	void FrameVertexShaded();
+	void FrameMeshTrue();
+
 private:
+	enum class RendererType : int {
+		MESH_TRUE, MESH_SHADED_POINTS, VERTEX_SHADED_POINTS
+	};
+	RendererType currentRendererType;
+
 	InstancedTreeRenderPass pointRenderingPass;
 	std::vector<size_t> descriptorSizes;
 

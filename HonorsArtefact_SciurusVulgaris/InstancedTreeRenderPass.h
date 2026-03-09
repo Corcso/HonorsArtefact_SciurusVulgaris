@@ -33,8 +33,8 @@ public:
 		CreateFrameBuffer();
 		//CreatePipeline();
 		CreateTAAResources();
-		//pointsToGBuffer_GP.CreateDescriptorLayout();
-		//pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
+		pointsToGBuffer_GP.CreateDescriptorLayout();
+		pointsToGBuffer_GP.CreatePipeline(vkRenderPass);
 		pointsToGBufferMeshShade_GP.CreateDescriptorLayout();
 		pointsToGBufferMeshShade_GP.CreatePipeline(vkRenderPass);
 		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
@@ -52,8 +52,9 @@ public:
 	}
 	void Shutdown();
 
-	void BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void RenderPointTree(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void BeginRenderMeshShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void BeginRenderVertexShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	void RenderPointTree(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void RenderPointTreeViaMeshShader(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void SwitchToTraditionalMeshPipeline(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void RenderTraditionalMesh(TriListMesh* mesh, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);

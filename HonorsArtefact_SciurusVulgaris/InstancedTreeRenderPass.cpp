@@ -9,24 +9,31 @@
 void InstancedTreeRenderPass::CreateImages() {
     colorImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     colorImage.CreateImageView();
+    colorImage.DebugNameImage("G Buffer Color");
 
     positionImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     positionImage.CreateImageView();
+    positionImage.DebugNameImage("G Buffer Position");
 
     normalImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     normalImage.CreateImageView();
+    normalImage.DebugNameImage("G Buffer Normal");
 
     depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
+    depthImage.DebugNameImage("G Buffer Depth");
 
     velocityImage.CreateImage(VK_FORMAT_R32G32B32A32_SFLOAT, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     velocityImage.CreateImageView();
+    velocityImage.DebugNameImage("G Buffer Velocity");
 
     colorImageFinal.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     colorImageFinal.CreateImageView();
+    colorImageFinal.DebugNameImage("TAA Out Color");
 
     depthImageFinal.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImageFinal.CreateImageView(true);
+    depthImageFinal.DebugNameImage("TAA Out Depth");
 }
 
 void InstancedTreeRenderPass::CreateUniqueMeshData()
@@ -401,7 +408,7 @@ void InstancedTreeRenderPass::CreateTAAResources()
     
 }
 
-void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer) {
+void InstancedTreeRenderPass::BeginRenderMeshShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -434,7 +441,41 @@ void InstancedTreeRenderPass::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer c
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, uint32_t pointCountOverride, VkCommandBuffer commandBuffer) {
+void InstancedTreeRenderPass::BeginRenderVertexShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer)
+{
+    if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = vkRenderPass;
+    renderPassInfo.framebuffer = vkFrameBuffer;
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = colorImage.GetImageExtent();
+
+    std::vector<VkClearValue> clearColors = { {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {{0, 0, 0, 0}}, {1.0f, 0} };
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
+    renderPassInfo.pClearValues = clearColors.data();
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipeline);
+
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(colorImage.GetImageExtent().width);
+    viewport.height = static_cast<float>(colorImage.GetImageExtent().height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+    VkRect2D scissor{};
+    scissor.offset = { 0, 0 };
+    scissor.extent = colorImage.GetImageExtent();
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+}
+
+void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     VkBuffer vertexBuffers[] = { points->pointBuffer };
@@ -452,7 +493,7 @@ void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, uint32_t po
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    vkCmdDraw(commandBuffer, HMM_MIN(pointCountOverride, points->points.size()), 4000, 0, 0);
+    vkCmdDraw(commandBuffer, points->points.size(), instancingInfo.numberOfInstances, 0, 0);
 }
 
 void InstancedTreeRenderPass::RenderPointTreeViaMeshShader(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer)

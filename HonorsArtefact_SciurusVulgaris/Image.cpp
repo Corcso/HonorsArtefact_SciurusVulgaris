@@ -52,6 +52,12 @@ void Image::CreateImageView(bool isDepth)
     vkCreateImageView(Graphics::GetVkDevice(), &imageViewCreateInfo, nullptr, &vkImageView);
 }
 
+void Image::DebugNameImage(std::string name)
+{
+    if (hasImage) VulkanUtility::DebugNameObject(name + " Image", (uint64_t)vkImage, VK_OBJECT_TYPE_IMAGE);
+    if (hasImageView) VulkanUtility::DebugNameObject(name + " Image", (uint64_t)vkImageView, VK_OBJECT_TYPE_IMAGE_VIEW);
+}
+
 bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage)
 {
     // (Overvoorde, no date) https://vulkan-tutorial.com/Texture_mapping/Images

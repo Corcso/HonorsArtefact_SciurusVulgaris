@@ -9,6 +9,7 @@ public:
 
 	void CreateImage(VkFormat format, uint32_t width, uint32_t height, VkImageUsageFlags usage);
 	void CreateImageView(bool isDepth = false);
+	void DebugNameImage(std::string name); 
 
 	bool CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage);
 	bool LoadImageFromFile(std::string path);

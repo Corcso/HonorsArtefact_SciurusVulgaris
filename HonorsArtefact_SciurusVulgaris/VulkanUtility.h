@@ -7,7 +7,7 @@
 	class VulkanUtility
 	{
 	public:
-        //static void DebugNameObject(std::string name, uint64_t handle, VkObjectType type);
+        static void DebugNameObject(std::string name, uint64_t handle, VkObjectType type);
 
 		static VkShaderModule CreateShaderModule(VkDevice device, const std::vector<char>& code);
 

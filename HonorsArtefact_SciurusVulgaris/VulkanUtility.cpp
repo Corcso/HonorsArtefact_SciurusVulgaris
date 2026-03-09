@@ -3,16 +3,16 @@
 #include "VulkanUtility.h"
 #include "Graphics.h"
 
-//void VulkanUtility::DebugNameObject(std::string name, uint64_t handle, VkObjectType type)
-//{
-//    VkDebugUtilsObjectNameInfoEXT info;
-//    info.objectHandle = handle;
-//    info.objectType = type;
-//    info.pObjectName = name.c_str();
-//    info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-//    info.pNext = nullptr;
-//    vkSetDebugUtilsObjectNameEXT(Graphics::GetVkDevice(), &info);
-//}
+void VulkanUtility::DebugNameObject(std::string name, uint64_t handle, VkObjectType type)
+{
+    VkDebugUtilsObjectNameInfoEXT info;
+    info.objectHandle = handle;
+    info.objectType = type;
+    info.pObjectName = name.c_str();
+    info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+    info.pNext = nullptr;
+    ((PFN_vkSetDebugUtilsObjectNameEXT)vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkSetDebugUtilsObjectNameEXT"))(Graphics::GetVkDevice(), &info);
+}
 
 VkShaderModule VulkanUtility::CreateShaderModule(VkDevice device, const std::vector<char>& code)
 {
