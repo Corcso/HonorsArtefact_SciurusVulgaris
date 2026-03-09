@@ -1,6 +1,7 @@
 #include "PCH.h"
 #include "Light.h"
 #include "Graphics.h"
+#include "VulkanUtility.h"
 #include "VulkanSetup.h"
 
 HMM_Mat4 Light::GetProjectionMatrix(float radius, float backFactor, float forwardsFactor)
@@ -40,6 +41,9 @@ void Light::CreateShadowResources(VkRenderPass vkRenderPass)
 {
     shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 2048, 2048, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     shadowImage.CreateImageView(true);
+    shadowImage.DebugNameImage(name + " light");
+
+    //VulkanUtility::TransitionImageLayout(shadowImage.GetImage(), VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, true);
 
     shadowImageImGuiTex = reinterpret_cast<ImTextureID>(
         ImGui_ImplVulkan_AddTexture(Graphics::GetBasicLinearSampler(), shadowImage.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)

@@ -337,9 +337,12 @@ void InstancedTreeRenderPass::CreateTAAResources()
     // Create Images
     TAAOutputImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
     TAAOutputImage.CreateImageView();
+    TAAOutputImage.DebugNameImage("TAA Output");
 
     TAAHistoryImage.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
     TAAHistoryImage.CreateImageView();
+    TAAHistoryImage.DebugNameImage("TAA History"); 
+    VulkanUtility::TransitionImageLayout(TAAHistoryImage.GetImage(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     // Create Render Pass
     VkAttachmentDescription colorAttachment{};
@@ -750,6 +753,11 @@ void InstancedTreeRenderPass::Shutdown() {
     depthImage.Destroy();
     positionImage.Destroy();
     normalImage.Destroy();
+    velocityImage.Destroy();
+    colorImageFinal.Destroy();
+    depthImageFinal.Destroy();
+    TAAOutputImage.Destroy();
+    TAAHistoryImage.Destroy();
 
     // Destroy Sampler
     vkDestroySampler(Graphics::GetVkDevice(), vkSampler, nullptr);

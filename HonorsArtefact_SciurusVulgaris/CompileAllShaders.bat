@@ -10,6 +10,7 @@ C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedQuad.vert -o ./COMPILEDSHADER_Defere
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedTree.frag -o ./COMPILEDSHADER_DeferedTree.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferedPoint.frag -o ./COMPILEDSHADER_DeferedPoint.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferredMesh.frag -o ./COMPILEDSHADER_DeferredMesh.spv
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe DeferredMeshNoVelocity.frag -o ./COMPILEDSHADER_DeferredMeshNoVelocity.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe FXAAFrag.frag -o ./COMPILEDSHADER_FXAAFrag.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe TAAFrag.frag -o ./COMPILEDSHADER_TAAFrag.spv
 

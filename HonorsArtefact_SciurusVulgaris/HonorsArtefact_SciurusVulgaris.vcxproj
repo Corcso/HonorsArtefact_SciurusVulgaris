@@ -369,6 +369,7 @@
     <None Include="DeferedQuad.vert" />
     <None Include="DeferedTree.frag" />
     <None Include="DeferredMesh.frag" />
+    <None Include="DeferredMeshNoVelocity.frag" />
     <None Include="FXAAFrag.frag" />
     <None Include="InstanceMeshVertex.vert" />
     <None Include="InstancePointMesh.mesh" />

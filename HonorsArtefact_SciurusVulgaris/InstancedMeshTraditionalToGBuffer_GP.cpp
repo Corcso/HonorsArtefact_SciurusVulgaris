@@ -33,7 +33,7 @@ void InstancedMeshTraditionalToGBuffer_GP::CreatePipeline(const VkRenderPass& vk
     // Get shader code
 
     auto vertShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_InstanceMeshVertex.spv");
-    auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferredMesh.spv");
+    auto fragShaderCode = VulkanUtility::ReadFile("./COMPILEDSHADER_DeferredMeshNoVelocity.spv");
 
     VkShaderModule vertShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), vertShaderCode);
     VkShaderModule fragShaderModule = VulkanUtility::CreateShaderModule(Graphics::GetVkDevice(), fragShaderCode);

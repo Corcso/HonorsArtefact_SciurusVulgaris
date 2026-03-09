@@ -377,5 +377,8 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="TAAFrag.frag" />
+    <None Include="DeferredMeshNoVelocity.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

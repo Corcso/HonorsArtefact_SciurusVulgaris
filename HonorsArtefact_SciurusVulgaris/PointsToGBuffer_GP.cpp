@@ -207,13 +207,13 @@ void PointsToGBuffer_GP::CreatePipeline(const VkRenderPass& vkRenderPass)
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
-    VkPipelineColorBlendAttachmentState blendStateAttachmentList[3] = { colorBlendAttachment , colorBlendAttachment, colorBlendAttachment };
+    VkPipelineColorBlendAttachmentState blendStateAttachmentList[4] = { colorBlendAttachment , colorBlendAttachment, colorBlendAttachment, colorBlendAttachment };
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 3;
+    colorBlending.attachmentCount = 4;
     colorBlending.pAttachments = blendStateAttachmentList;
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional

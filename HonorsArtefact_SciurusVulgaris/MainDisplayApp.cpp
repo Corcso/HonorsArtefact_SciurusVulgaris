@@ -51,7 +51,7 @@ void MainDisplayApp::Initialize() {
 	captureUnderway = false;
 	renderImGui = true;
 
-	currentRendererType = RendererType::VERTEX_SHADED_POINTS;
+	currentRendererType = RendererType::MESH_SHADED_POINTS;
 }
 
 void MainDisplayApp::Frame() {
@@ -75,6 +75,7 @@ void MainDisplayApp::Shutdown() {
 	if (myModel != nullptr) delete myModel;
 	delete terrain;
 	terrainTexture.Destroy();
+	sun.ShutdownShadowResources();
 	pointRenderingPass.Shutdown();
 }
 
