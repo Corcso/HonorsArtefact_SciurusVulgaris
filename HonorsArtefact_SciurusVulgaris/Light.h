@@ -11,6 +11,7 @@ public:
 		float intensity;
 		HMM_Mat4 viewMatrix;
 		HMM_Mat4 projMatrix;
+		uint32_t shadowEnabled;
 	};
 
 	enum class Type {
@@ -23,6 +24,7 @@ public:
 		direction = HMM_V3(-0.707, -0.707, 0);
 		color = HMM_V3(1, 1, 1);
 		intensity = 1;
+		shadowEnabled = false;
 	}
 
 	void SetName(std::string name) { this->name = name; }
@@ -64,5 +66,7 @@ private:
 
 	HMM_Mat4 viewMatrix;
 	HMM_Mat4 projMatrix;
+
+	bool shadowEnabled;
 };
 

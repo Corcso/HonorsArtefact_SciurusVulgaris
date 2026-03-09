@@ -10,6 +10,7 @@ layout(binding = 3) uniform LightBuffer{
     float intensity;
     mat4 viewMatrix;
     mat4 projMatrix;
+    uint shadowEnabled;
 } light;
 
 layout(binding = 4) uniform sampler2D lightShadowMap;
@@ -54,7 +55,7 @@ void main() {
     float diffuseStrengthBack = dot(normalize(-normal.xyz), normalize(-light.direction)) * 0.5;
     if(color.y < 0.5) diffuseStrengthBack = 0;
     float diffuseStrength = max(diffuseStrengthFront, diffuseStrengthBack) * light.intensity;
-    if(IsInShadow(position.xyz)) diffuseStrength = 0;
+    if(IsInShadow(position.xyz) && light.shadowEnabled > 0.0) diffuseStrength = 0.1;
     diffuseStrength = max(diffuseStrength, 0.1);
     vec3 diffuseColor = light.color * diffuseStrength;
 
