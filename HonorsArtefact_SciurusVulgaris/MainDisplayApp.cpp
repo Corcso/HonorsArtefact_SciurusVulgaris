@@ -35,18 +35,18 @@ void MainDisplayApp::Initialize() {
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
-	treeInstancePositions.ApplyRandomRotation();
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
-	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation();
 	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	treeInstancePositionsLastFrame.matrices.resize(4000);// = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
 	instancedMeshTree_RP.CreateAll();
 	treeMeshInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
-	treeMeshInstancePositions.ApplyRandomRotation();
-	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	treeMeshInstancePositions.ApplyRandomRotation(chosenSeed);
+	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
 

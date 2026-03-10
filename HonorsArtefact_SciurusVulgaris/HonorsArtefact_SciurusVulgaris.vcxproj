@@ -297,7 +297,13 @@
     <ClCompile Include="InstancedWCPHelper.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightShadow_RP.cpp" />
+    <None Include="MeshFragmentPhotogrammetric.frag">
+      <FileType>CppCode</FileType>
+    </None>
     <ClCompile Include="MeshTraditionalToGBuffer_GP.cpp" />
+    <None Include="MeshVertexPhotogrammetric.vert">
+      <FileType>CppCode</FileType>
+    </None>
     <ClCompile Include="OLDentry.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">true</ExcludedFromBuild>

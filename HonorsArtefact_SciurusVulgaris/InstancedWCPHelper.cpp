@@ -1,5 +1,6 @@
 #include "PCH.h"
 #include "InstancedWCPHelper.h"
+#include <random>
 
 void InstancedWCPHelper::LoadFromFile(std::string path)
 {
@@ -51,9 +52,14 @@ void InstancedWCPHelper::ApplyAlternateTransform(HMM_Mat4 transform)
     }
 }
 
-void InstancedWCPHelper::ApplyRandomRotation()
+uint64_t InstancedWCPHelper::ApplyRandomRotation(uint64_t seed)
 {
+    std::random_device rd;
+    uint64_t chosenSeed = seed == 0 ? rd() : seed;
+    std::mt19937 chooseRand(chosenSeed);
     for (auto& WCP : matrices) {
-        WCP.world = WCP.world * HMM_Rotate_LH(rand(), HMM_V3(0, 1, 0));
+        WCP.world = WCP.world * HMM_Rotate_LH(chooseRand(), HMM_V3(0, 1, 0));
     }
+
+    return chosenSeed;
 }

@@ -107,8 +107,8 @@ void GeneratorApp::Frame() {
 			loadedModel[i].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
 			loadedModel[i].GetDescriptorSet()->UpdateImageSampler(1, &loadedImages[i], meshRenderingPipeline.GetSampler());
 			// Disable TAA
-			TAAInfo taaInfo{ HMM_V2(0, 0), HMM_V2(0, 0), false };
-			loadedModel[i].GetDescriptorSet()->UpdateUniformBufferData(2, &taaInfo);
+			/*TAAInfo taaInfo{ HMM_V2(0, 0), HMM_V2(0, 0), false };
+			loadedModel[i].GetDescriptorSet()->UpdateUniformBufferData(2, &taaInfo);*/
 		}
 	}
 	if (ImGui::Button("Execute Point Generation")) {

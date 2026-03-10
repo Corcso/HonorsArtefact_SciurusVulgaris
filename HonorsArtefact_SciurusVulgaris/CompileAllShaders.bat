@@ -1,3 +1,7 @@
+:: Photogrammetric Generation Shaders
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshVertexPhotogrammetric.vert -o ./COMPILEDSHADER_MeshVertexPhotogrammetric.spv
+C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshFragmentPhotogrammetric.frag -o ./COMPILEDSHADER_MeshFragmentPhotogrammetric.spv
+:: 
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe PointVertex.vert -o ./COMPILEDSHADER_PointVertex.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointVertex.vert -o ./COMPILEDSHADER_InstancePointPointVertex.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe PointFragment.frag -o ./COMPILEDSHADER_PointFragment.spv

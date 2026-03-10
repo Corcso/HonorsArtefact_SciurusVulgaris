@@ -388,5 +388,11 @@
     <None Include="TAAFrag.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="MeshVertexPhotogrammetric.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="MeshFragmentPhotogrammetric.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
