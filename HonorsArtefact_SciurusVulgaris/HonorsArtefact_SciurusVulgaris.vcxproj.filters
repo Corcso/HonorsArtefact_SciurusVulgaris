@@ -192,6 +192,9 @@
     <ClInclude Include="ImGuiHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Skybox_GP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">
@@ -335,6 +338,9 @@
     <ClCompile Include="ImGuiHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Skybox_GP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CompileAllShaders.bat">
@@ -392,6 +398,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="MeshFragmentPhotogrammetric.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Skybox.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

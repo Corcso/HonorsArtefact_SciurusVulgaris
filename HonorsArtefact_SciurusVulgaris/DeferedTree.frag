@@ -10,6 +10,8 @@ layout(binding = 3) uniform LightBuffer{
     float intensity;
     mat4 viewMatrix;
     mat4 projMatrix;
+    vec3 ambientColor; 
+    float ambientIntensity;
     uint shadowEnabled;
 } light;
 
@@ -55,11 +57,12 @@ void main() {
     float diffuseStrengthBack = dot(normalize(-normal.xyz), normalize(-light.direction)) * 0.5;
     if(color.y < 0.5) diffuseStrengthBack = 0;
     float diffuseStrength = max(diffuseStrengthFront, diffuseStrengthBack) * light.intensity;
-    if(IsInShadow(position.xyz) && light.shadowEnabled > 0.0) diffuseStrength = 0.1;
-    diffuseStrength = max(diffuseStrength, 0.1);
+    if(IsInShadow(position.xyz) && light.shadowEnabled > 0.0) diffuseStrength = 0;
+    //diffuseStrength = max(diffuseStrength, 0.1);
     vec3 diffuseColor = light.color * diffuseStrength;
+    vec3 ambientColor = light.ambientColor * light.ambientIntensity;
 
     // Return ambient + diffuse + specular
-    outColor = vec4(color.rgb * diffuseColor, 1.0);
+    outColor = vec4(color.rgb * (diffuseColor + ambientColor), 1.0);
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
 }

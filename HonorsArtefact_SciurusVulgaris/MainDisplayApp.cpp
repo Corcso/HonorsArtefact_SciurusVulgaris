@@ -59,6 +59,8 @@ void MainDisplayApp::Initialize() {
 void MainDisplayApp::Frame() {
 	ImageCaptureSequence();
 
+	cameraTransform.CaptureControls();
+
 	switch (currentRendererType) {
 	case RendererType::MESH_TRUE:
 		FrameMeshTrue();
@@ -88,8 +90,6 @@ void MainDisplayApp::FrameMeshShaded()
 {
 	InstancingInfo instancingInfo;
 	LODDataBuffer lodData;
-
-	cameraTransform.CaptureControls();
 
 	Graphics::BeginRender();
 	Graphics::PushMetricRange("Shadow Map Render");
@@ -127,6 +127,8 @@ void MainDisplayApp::FrameMeshShaded()
 	Graphics::PopMetricRange();
 	// Render logic
 	Graphics::PushMetricRange("Render Point Trees");
+
+	pointRenderingPass.UpdateCameraInfoForSkybox(cameraTransform);
 	pointRenderingPass.BeginRenderMeshShade(HMM_V4(0, 0, 0, 1));
 
 
@@ -220,8 +222,6 @@ void MainDisplayApp::FrameVertexShaded()
 	InstancingInfo instancingInfo;
 	LODDataBuffer lodData;
 
-	cameraTransform.CaptureControls();
-
 	Graphics::BeginRender();
 
 	// Render logic
@@ -313,8 +313,6 @@ void MainDisplayApp::FrameMeshTrue()
 
 	// Render logic
 	instancedMeshTree_RP.BeginRender();
-
-	cameraTransform.CaptureControls();
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
@@ -471,7 +469,10 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Image(sun.GetShadowImageImGuiTex(), ImVec2(800, 800));
 	ImGui::End();
 
-	sun.RenderImGuiMenu(true);
+	ImGui::Begin("Lighting");
+	ImGui::Checkbox("Enable Skybox", &pointRenderingPass.enableSkybox);
+	sun.RenderImGuiMenu(false);
+	ImGui::End();
 }
 
 void MainDisplayApp::ImageCaptureSequence()

@@ -9,6 +9,8 @@
 #include "PointsToGBufferMeshShade_GP.h"
 #include "FXAA_GP.h"
 #include "TAA_GP.h"
+#include "Skybox_GP.h"
+#include "Transform.h"
 
 class InstancedTreeRenderPass
 {
@@ -39,6 +41,9 @@ public:
 		pointsToGBufferMeshShade_GP.CreatePipeline(vkRenderPass);
 		meshTraditionalToGBuffer_GP.CreateDescriptorLayout();
 		meshTraditionalToGBuffer_GP.CreatePipeline(vkRenderPass);
+		skybox_GP.CreateDescriptorLayout();
+		skybox_GP.CreatePipeline(vkSecondRenderPass);
+		CreateSkyboxMeshAndImage();
 		gBufferToOutput_GP.CreateDescriptorLayout();
 		gBufferToOutput_GP.CreatePipeline(vkSecondRenderPass);
 		fxaa_GP.CreateDescriptorLayout();
@@ -52,6 +57,7 @@ public:
 	}
 	void Shutdown();
 
+	void UpdateCameraInfoForSkybox(CameraTransform cameraTransform);
 	void BeginRenderMeshShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void BeginRenderVertexShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 	void RenderPointTree(PointTreeMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
@@ -82,6 +88,7 @@ public:
 
 	void UpdateTAADescriptor(VulkanObjectDescriptorSet* descriptor, uint32_t binding, bool enabled, bool logarithmicColorSpace);
 
+	bool enableSkybox;
 private:
 	// First Pass
 	VkRenderPass vkRenderPass;
@@ -89,6 +96,7 @@ private:
 	GBufferToOutput_GP gBufferToOutput_GP;
 	MeshTraditionalToGBuffer_GP meshTraditionalToGBuffer_GP;
 	PointsToGBufferMeshShade_GP pointsToGBufferMeshShade_GP;
+	Skybox_GP skybox_GP;
 	//VkDescriptorSetLayout vkDescriptorSetLayout;
 	//VkDescriptorSetLayoutCreateInfo vkDescriptorSetLayoutInfo;
 
@@ -126,5 +134,10 @@ private:
 	Image TAAOutputImage;
 	VkFramebuffer TAAOutputImageFrameBuffer;
 	VkRenderPass TAARenderPass;
+
+	// Skybox
+	Image activeSkyboxImage;
+	TriListMesh* skyboxMesh;
+	void CreateSkyboxMeshAndImage();
 };
 

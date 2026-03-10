@@ -21,7 +21,7 @@ HMM_Mat4 Light::GetViewMatrix(HMM_Vec3 focusPoint)
 Light::BufferStruct Light::GetBufferData()
 {
 	return {
-		direction, 0, color, intensity, viewMatrix, projMatrix, shadowEnabled
+		direction, 0, color, intensity, viewMatrix, projMatrix, ambientColor, ambientIntensity, shadowEnabled
 	};
 }
 
@@ -33,6 +33,8 @@ void Light::RenderImGuiMenu(bool createWindow)
 	ImGui::DragFloat3("Direction", reinterpret_cast<float*>(&direction), 0.05, -1.0, 1.0);
 	ImGui::ColorPicker3("Color", reinterpret_cast<float*>(&color));
 	ImGui::DragFloat("Intensity", &intensity, 0.05, 0.0, 100.0);
+    ImGui::ColorPicker3("Ambient Color", reinterpret_cast<float*>(&ambientColor));
+    ImGui::DragFloat("Ambient Intensity", &ambientIntensity, 0.005, 0.0, 100.0);
 
 	if (createWindow) ImGui::End();
 }

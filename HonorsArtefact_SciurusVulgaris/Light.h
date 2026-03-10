@@ -11,6 +11,8 @@ public:
 		float intensity;
 		HMM_Mat4 viewMatrix;
 		HMM_Mat4 projMatrix;
+		HMM_Vec3 ambientColor;
+		float ambientIntensity;
 		uint32_t shadowEnabled;
 	};
 
@@ -24,6 +26,8 @@ public:
 		direction = HMM_V3(-0.707, -0.707, 0);
 		color = HMM_V3(1, 1, 1);
 		intensity = 1;
+		ambientColor = HMM_V3(1, 1, 1);
+		ambientIntensity = 0.1;
 		shadowEnabled = false;
 	}
 
@@ -59,6 +63,8 @@ private:
 	HMM_Vec3 direction;
 	HMM_Vec3 color;
 	float intensity;
+	HMM_Vec3 ambientColor;
+	float ambientIntensity;
 
 	Image shadowImage;
 	ImTextureID shadowImageImGuiTex;

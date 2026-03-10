@@ -411,6 +411,22 @@ void InstancedTreeRenderPass::CreateTAAResources()
     
 }
 
+void InstancedTreeRenderPass::UpdateCameraInfoForSkybox(CameraTransform cameraTransform)
+{
+    WCP_Matrices skyboxBufferWCP[2] = { {
+        HMM_Translate(cameraTransform.position),
+        cameraTransform.viewMatrix,
+        HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+        },
+        {
+        HMM_Translate(cameraTransform.position),
+        cameraTransform.viewMatrix,
+        HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+        }
+    };
+    skyboxMesh->GetDescriptorSet()->UpdateUniformBufferData(0, skyboxBufferWCP);
+}
+
 void InstancedTreeRenderPass::BeginRenderMeshShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer) {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -427,8 +443,6 @@ void InstancedTreeRenderPass::BeginRenderMeshShade(HMM_Vec4 clearColor, VkComman
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBufferMeshShade_GP.vkPipeline);
-
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -442,6 +456,9 @@ void InstancedTreeRenderPass::BeginRenderMeshShade(HMM_Vec4 clearColor, VkComman
     scissor.offset = { 0, 0 };
     scissor.extent = colorImage.GetImageExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    // Bind Point Pipeline
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBufferMeshShade_GP.vkPipeline);
 }
 
 void InstancedTreeRenderPass::BeginRenderVertexShade(HMM_Vec4 clearColor, VkCommandBuffer commandBuffer)
@@ -557,8 +574,6 @@ void InstancedTreeRenderPass::ExecuteSecondRender(VkCommandBuffer commandBuffer)
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipeline);
-
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -572,6 +587,24 @@ void InstancedTreeRenderPass::ExecuteSecondRender(VkCommandBuffer commandBuffer)
     scissor.offset = { 0, 0 };
     scissor.extent = colorImageFinal.GetImageExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+    // Render Skybox
+    if (enableSkybox) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_GP.vkPipeline);
+
+        VkBuffer vertexBuffers[] = { skyboxMesh->vertexBuffer };
+        VkDeviceSize offsets[] = { 0 };
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+        vkCmdBindIndexBuffer(commandBuffer, skyboxMesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_GP.vkPipelineLayout, 0, 1,
+            skyboxMesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
+
+        vkCmdDrawIndexed(commandBuffer, skyboxMesh->indices.size(), 1, 0, 0, 0);
+    }
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gBufferToOutput_GP.vkPipeline);
 
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
@@ -737,6 +770,24 @@ void InstancedTreeRenderPass::UpdateTAADescriptor(VulkanObjectDescriptorSet* des
     descriptor->UpdateUniformBufferData(binding, &data);
 }
 
+void InstancedTreeRenderPass::CreateSkyboxMeshAndImage()
+{
+    skyboxMesh = new TriListMesh();
+    skyboxMesh->LoadFile("./models/Skybox/Skybox.obj", 0);
+    skyboxMesh->CopyPointsToVRAM();
+
+    activeSkyboxImage.CreateAndLoadImageFromFile("./models/Skybox/Texture1.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    activeSkyboxImage.CreateImageView();
+    
+    size_t sizes[3] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
+    skyboxMesh->CreateDescriptorSet(skybox_GP.vkDescriptorSetLayout, skybox_GP.vkDescriptorSetLayoutInfo, sizes);
+
+    skyboxMesh->GetDescriptorSet()->UpdateImageSampler(1, &activeSkyboxImage, Graphics::GetBasicLinearSampler());
+
+    TAAInfo skyboxTAAInfo{ HMM_V2(0, 0), HMM_V2(0, 0), false };
+    skyboxMesh->GetDescriptorSet()->UpdateUniformBufferData(2, &skyboxTAAInfo);
+}
+
 void InstancedTreeRenderPass::Shutdown() {
     // Destroy Pipeline
     gBufferToOutput_GP.Shutdown();
@@ -749,6 +800,11 @@ void InstancedTreeRenderPass::Shutdown() {
     // Destroy AA descriptors
     fxaaDescriptor.CleanupDescriptor();
     taaDescriptor.CleanupDescriptor();
+
+    // Skybox
+    delete skyboxMesh;
+    activeSkyboxImage.Destroy();
+    skybox_GP.Shutdown();
 
     // Destroy Render Pass
     vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);
