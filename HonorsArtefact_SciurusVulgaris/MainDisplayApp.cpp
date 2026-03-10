@@ -37,6 +37,8 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
 	treeInstancePositions.ApplyRandomRotation();
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	treeInstancePositionsLastFrame.matrices.resize(4000);// = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
@@ -393,32 +395,27 @@ void MainDisplayApp::RenderImGuiControls()
 			treeMesh[i].GetDescriptorSet()->UpdateImageSampler(1, &treeMeshTextures[i], Graphics::GetBasicLinearSampler());
 		}
 	}*/
-	ImGui::PushID("TriangleMeshTreeLoader");
-	triangleMeshTreeLoader.Display([&](TriListMesh* mesh, Image* texture) {
-			mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
-			mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
-		});
-	ImGui::PopID();
+	
 
-	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points"};
-	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
+	
 
-	ImGui::SliderAngle("Angle", &angle);
-	if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
-	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
-	if (myModel != nullptr) {
-		if (ImGui::Button("Shuffle")) {
-			std::random_device rd;
-			std::mt19937 g(rd());
+	//ImGui::SliderAngle("Angle", &angle);
+	//if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
+	//
+	//if (myModel != nullptr) {
+	//	if (ImGui::Button("Shuffle")) {
+	//		std::random_device rd;
+	//		std::mt19937 g(rd());
 
-			std::shuffle(myModel->points.begin(), myModel->points.end(), g);
-			myModel->CopyPointsToVRAM();
-		}
-	}
-	ImGui::Checkbox("FXAA", &fxaaEnabled);
-	ImGui::Checkbox("TAA", &taaEnabled);
-	ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
-	ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
+	//		std::shuffle(myModel->points.begin(), myModel->points.end(), g);
+	//		myModel->CopyPointsToVRAM();
+	//	}
+	//}
+	
+	//ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
+	ImGui::End();
+
+	ImGui::Begin("Meterage");
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
 #ifdef NV_PERF_METER
@@ -435,6 +432,27 @@ void MainDisplayApp::RenderImGuiControls()
 		captureUnderway = true;
 		stageImagesSaved = -1;
 	}
+	ImGui::End();
+
+	ImGui::Begin("Triangle Model");
+	triangleMeshTreeLoader.Display([&](TriListMesh* mesh, Image* texture) {
+		mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+		mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
+		});
+	ImGui::End();
+
+	ImGui::Begin("Render Method");
+	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points" };
+	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
+
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS) ImGui::Checkbox("FXAA", &fxaaEnabled);
+	else ImGui::Text("FXAA Not Available");
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS) ImGui::Checkbox("TAA", &taaEnabled);
+	else ImGui::Text("TAA Not Available");
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
+
+	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
+	else ImGui::Text("Please load a model to instance items");
 	ImGui::End();
 
 	ImGui::Begin("Live LOD Edits");
