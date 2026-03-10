@@ -233,6 +233,7 @@
     <ClInclude Include="imconfig.h" />
     <ClInclude Include="imgui.h" />
     <ClInclude Include="ImGuiBlankRenderPass.h" />
+    <ClInclude Include="ImGuiHelpers.h" />
     <ClInclude Include="imgui_impl_vulkan.h" />
     <ClInclude Include="imgui_impl_win32.h" />
     <ClInclude Include="imgui_internal.h" />
@@ -278,6 +279,7 @@
     <ClCompile Include="entry.cpp" />
     <ClCompile Include="FXAA_GP.cpp" />
     <ClCompile Include="GBufferToOutput_GP.cpp" />
+    <ClCompile Include="ImGuiHelpers.cpp" />
     <ClCompile Include="implot\implot.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">NotUsing</PrecompiledHeader>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

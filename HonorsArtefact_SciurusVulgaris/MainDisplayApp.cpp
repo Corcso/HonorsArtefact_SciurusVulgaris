@@ -73,9 +73,8 @@ void MainDisplayApp::Frame() {
 void MainDisplayApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
 	if (myModel != nullptr) delete myModel;
-	treeMesh.clear();
+	triangleMeshTreeLoader.Cleanup();
 	delete terrain; // Always loaded
-	for (auto& texture : treeMeshTextures) texture.Destroy();
 	terrainTexture.Destroy();
 	sun.ShutdownShadowResources();
 	pointRenderingPass.Shutdown();
@@ -314,18 +313,18 @@ void MainDisplayApp::FrameMeshTrue()
 	instancedMeshTree_RP.BeginRender();
 
 	cameraTransform.CaptureControls();
-	if (treeMesh.size() > 0) {
+	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
-		for (int i = 0; i < treeMesh.size(); i++) {
-			treeMesh[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+		for (int i = 0; i < triangleMeshTreeLoader.GetMeshVector()->size(); i++) {
+			(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			InstancingInfo instancingInfo{ instanceCount, 0 };
 
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
-			instancedMeshTree_RP.RenderMeshTree(&treeMesh[i], instancingInfo);
+			instancedMeshTree_RP.RenderMeshTree(&(*triangleMeshTreeLoader.GetMeshVector())[i], instancingInfo);
 		}
 	}
 
@@ -377,7 +376,7 @@ void MainDisplayApp::RenderImGuiControls()
 		MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 	}
-	ImGui::InputText("Mesh Model Path", meshModelPath, 256);
+	/*ImGui::InputText("Mesh Model Path", meshModelPath, 256);
 	if (ImGui::Button("Load Mesh")) {
 		if (treeMesh.size() > 0) treeMesh.clear();
 
@@ -393,14 +392,20 @@ void MainDisplayApp::RenderImGuiControls()
 			treeMesh[i].CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
 			treeMesh[i].GetDescriptorSet()->UpdateImageSampler(1, &treeMeshTextures[i], Graphics::GetBasicLinearSampler());
 		}
-	}
+	}*/
+	ImGui::PushID("TriangleMeshTreeLoader");
+	triangleMeshTreeLoader.Display([&](TriListMesh* mesh, Image* texture) {
+			mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+			mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
+		});
+	ImGui::PopID();
 
 	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points"};
 	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
 
 	ImGui::SliderAngle("Angle", &angle);
 	if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
-	if (myModel != nullptr || treeMesh.size() > 0) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
+	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
 	if (myModel != nullptr) {
 		if (ImGui::Button("Shuffle")) {
 			std::random_device rd;

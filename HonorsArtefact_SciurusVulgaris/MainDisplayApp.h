@@ -9,6 +9,8 @@
 #include "LightShadow_RP.h"
 #include "InstancedMeshTree_RP.h"
 
+#include "ImGuiHelpers.h"
+
 
 class MainDisplayApp :
     public App
@@ -57,9 +59,7 @@ private:
 	bool meshRenderOn;
 	std::vector<size_t> descriptorSizesMesh;
 	InstancedMeshTree_RP instancedMeshTree_RP;
-	std::vector<TriListMesh> treeMesh;
-	std::vector<Image> treeMeshTextures;
-	char meshModelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
+	ImGuiHelpers::MultiTriListMeshLoader triangleMeshTreeLoader;
 
 	InstancedWCPHelper treeMeshInstancePositions;
 	// For Image Capture

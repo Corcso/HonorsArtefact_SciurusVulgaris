@@ -168,15 +168,6 @@
     <ClInclude Include="LightShadow_RP.h">
       <Filter>Renderers\Passes</Filter>
     </ClInclude>
-    <ClInclude Include="InstancedMeshTree_RP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InstancedMeshTraditionalToGBuffer_GP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FXAA_GP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="implot\implot.h">
       <Filter>ImPlot</Filter>
     </ClInclude>
@@ -186,7 +177,19 @@
     <ClInclude Include="csv2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InstancedMeshTree_RP.h">
+      <Filter>Renderers\Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancedMeshTraditionalToGBuffer_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
     <ClInclude Include="TAA_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="FXAA_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -195,9 +198,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="OLDentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsInitialize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui.cpp">
@@ -308,15 +308,6 @@
     <ClCompile Include="LightShadow_RP.cpp">
       <Filter>Renderers\Passes</Filter>
     </ClCompile>
-    <ClCompile Include="InstancedMeshTree_RP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FXAA_GP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="implot\implot_items.cpp">
       <Filter>ImPlot</Filter>
     </ClCompile>
@@ -327,6 +318,21 @@
       <Filter>ImPlot</Filter>
     </ClCompile>
     <ClCompile Include="TAA_GP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancedMeshTraditionalToGBuffer_GP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="FXAA_GP.cpp">
+      <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancedMeshTree_RP.cpp">
+      <Filter>Renderers\Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsInitialize.cpp">
+      <Filter>Singletons</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiHelpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -376,8 +382,10 @@
     <None Include="FXAAFrag.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="TAAFrag.frag" />
     <None Include="DeferredMeshNoVelocity.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="TAAFrag.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
