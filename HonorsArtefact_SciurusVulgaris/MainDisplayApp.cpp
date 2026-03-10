@@ -444,12 +444,14 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Begin("Render Method");
 	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points" };
 	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
+	if((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && myModel == nullptr) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "No Point Mesh Tree Loaded");
+	else if (currentRendererType == RendererType::MESH_TRUE && !triangleMeshTreeLoader.IsMeshLoaded()) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "No Triangle Mesh Tree Loaded");
 
-	if (currentRendererType == RendererType::MESH_SHADED_POINTS) ImGui::Checkbox("FXAA", &fxaaEnabled);
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("FXAA", &fxaaEnabled);
 	else ImGui::Text("FXAA Not Available");
-	if (currentRendererType == RendererType::MESH_SHADED_POINTS) ImGui::Checkbox("TAA", &taaEnabled);
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("TAA", &taaEnabled);
 	else ImGui::Text("TAA Not Available");
-	if (currentRendererType == RendererType::MESH_SHADED_POINTS && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
+	if ((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
 
 	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
 	else ImGui::Text("Please load a model to instance items");
