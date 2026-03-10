@@ -78,4 +78,9 @@ void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 		{ "./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", },
 		{ true, true, false, false, false, false, false, false }
 	};
+	presetDictionary[AVAILABLE_PRESETS[1] /*Autumn Bubble*/] = {
+		"./models/SpeedTrees/SpeedTree.obj",
+		{ "./models/SpeedTrees/singleAColor_autumn.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", },
+		{ true, true, false, false, false, false, false, false }
+	};
 }

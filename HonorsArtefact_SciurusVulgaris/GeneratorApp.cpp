@@ -51,7 +51,7 @@ void GeneratorApp::Frame() {
 	// Render logic
 	Graphics::BeginRender();
 	meshRenderingPipeline.BeginRender(HMM_V4(0, 0, 0, 1));
-	for (auto& mesh : loadedModel) {
+	for (auto& mesh : *treeMeshLoader.GetMeshVector()) {
 		WCP_Matrices dataForUBO;
 		if (isTopView) {
 			dataForUBO = {
@@ -77,40 +77,11 @@ void GeneratorApp::Frame() {
 	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
 
 	ImGui::Begin("Model Selection");
-	ImGui::InputText("Model Path", modelPath, 256);
-	ImGui::Text("Textures");
-	for (int i = 0; i < 8; i++) {
-		ImGui::PushID(i);
-		ImGui::PushID(1);
-		ImGui::Checkbox("", &imageActive[i]);
-		ImGui::PopID();
-		ImGui::SameLine();
-		ImGui::PushID(2);
-		ImGui::InputText("", texturePaths[i], 256);
-		ImGui::PopID();
-		ImGui::PopID();
-	}
-	if (ImGui::Button("Load")) {
-		loadedModel.clear();
-		loadedImages.clear();
-		loadedImages.resize(8);
+	treeMeshLoader.Display([&](TriListMesh* mesh, Image* texture) {
+		mesh->CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
+		mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, meshRenderingPipeline.GetSampler());
+	});
 
-		for (int i = 0; i < 8; i++) {
-			if (imageActive[i]) {
-				loadedImages[i].CreateAndLoadImageFromFile(texturePaths[i], VK_IMAGE_USAGE_SAMPLED_BIT);
-				loadedImages[i].CreateImageView();
-			}
-		}
-
-		loadedModel = TriListMesh::LoadMultiMeshFile(modelPath);
-		for (int i = 0; i < loadedModel.size(); i++) {
-			loadedModel[i].CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
-			loadedModel[i].GetDescriptorSet()->UpdateImageSampler(1, &loadedImages[i], meshRenderingPipeline.GetSampler());
-			// Disable TAA
-			/*TAAInfo taaInfo{ HMM_V2(0, 0), HMM_V2(0, 0), false };
-			loadedModel[i].GetDescriptorSet()->UpdateUniformBufferData(2, &taaInfo);*/
-		}
-	}
 	if (ImGui::Button("Execute Point Generation")) {
 		extractPointsAtEndOfThisFrame = true;
 	}
@@ -137,27 +108,27 @@ void GeneratorApp::Frame() {
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, 5), HMM_V3(0, 0, 10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(-5, 0, 0), HMM_V3(-10, 0, 0), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(5, 0, 0), HMM_V3(10, 0, 0), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		dataForUBO = {
 				HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, -5, 0), HMM_V3(0, -10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
-		meshRenderingPipeline.ExtractPointsNew(&loadedModel, dataForUBO);
+		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
 		//meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
 		
 		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
@@ -176,7 +147,8 @@ void GeneratorApp::Shutdown() {
 	for (int i = 0; i < 16; i++) {
 		LODViewDescriptors[i].CleanupDescriptor();
 	}
-	for (auto& texture : loadedImages) texture.Destroy();
+	//for (auto& texture : loadedImages) texture.Destroy();
+	treeMeshLoader.Cleanup();
 }
 
 void GeneratorApp::RenderLODPagePrerequisites()

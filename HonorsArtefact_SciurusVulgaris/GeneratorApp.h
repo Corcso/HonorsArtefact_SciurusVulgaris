@@ -6,7 +6,7 @@
 #include "DebugPointRenderer.h"
 
 #include "Transform.h"
-
+#include "ImGuiHelpers.h"
 
 class GeneratorApp : public App
 {
@@ -21,17 +21,13 @@ private:
 	ImGuiBlankRenderPass imguiRenderPass;
 	std::vector<size_t> descriptorSizes;
 
-	std::vector<TriListMesh> loadedModel;
-	std::vector<Image> loadedImages;
+	ImGuiHelpers::MultiTriListMeshLoader treeMeshLoader;
 	Transform loadedModelTransform;
 
 	ImTextureID liveColorOut;
 
 	// Imgui Controls
 	std::string loadStatus;
-	char modelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
-	bool imageActive[8]{ true, true, false, false, false, false, false, false };
-	char texturePaths[8][256]{ "./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", };
 	bool isTopView = false;
 
 	bool extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 

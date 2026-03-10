@@ -34,9 +34,9 @@ namespace ImGuiHelpers {
 		};
 		std::map<std::string, TriListMeshPathPreset> presetDictionary;
 
-		static const uint16_t AVAILABLE_PRESET_COUNT = 1;
+		static const uint16_t AVAILABLE_PRESET_COUNT = 2;
 		const char* AVAILABLE_PRESETS[AVAILABLE_PRESET_COUNT]{
-			"Summer Bubble", 
+			"Summer Bubble", "Autumn Bubble"
 		};
 
 		void SetupPresetDictionary();
