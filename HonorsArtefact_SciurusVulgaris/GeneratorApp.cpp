@@ -176,6 +176,7 @@ void GeneratorApp::Shutdown() {
 	for (int i = 0; i < 16; i++) {
 		LODViewDescriptors[i].CleanupDescriptor();
 	}
+	for (auto& texture : loadedImages) texture.Destroy();
 }
 
 void GeneratorApp::RenderLODPagePrerequisites()

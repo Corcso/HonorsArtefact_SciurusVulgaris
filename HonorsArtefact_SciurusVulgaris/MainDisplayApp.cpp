@@ -74,9 +74,11 @@ void MainDisplayApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
 	if (myModel != nullptr) delete myModel;
 	delete terrain;
+	for (auto& texture : treeMeshTextures) texture.Destroy();
 	terrainTexture.Destroy();
 	sun.ShutdownShadowResources();
 	pointRenderingPass.Shutdown();
+	instancedMeshTree_RP.Shutdown();
 }
 
 void MainDisplayApp::FrameMeshShaded()

@@ -464,9 +464,10 @@ void Graphics::Shutdown()
     // Destroy Command pool & buffers
     vkDestroyCommandPool(instance.vkDevice, instance.vkCommandPool, nullptr);
 
-    // Destroy Pipeline
-    //vkDestroyPipeline(instance.vkDevice, instance.vkMainPipeline, nullptr);
-    //vkDestroyPipelineLayout(instance.vkDevice, instance.vkMainPipelineLayout, nullptr);
+    // Destroy Helpers
+    instance.noShadowMapImage.Destroy();
+    vkDestroySampler(instance.vkDevice, instance.basicLinearSampler, nullptr);
+    vkDestroySampler(instance.vkDevice, instance.basicNearestSampler, nullptr);
 
     // Destroy Frame Buffers
     for(auto& thisFrameBuffer : instance.vkSwapChainFrameBuffers) vkDestroyFramebuffer(instance.vkDevice, thisFrameBuffer, nullptr);
@@ -480,9 +481,6 @@ void Graphics::Shutdown()
     vkDestroyImageView(instance.vkDevice, instance.vkDepthImageView, nullptr);
     vkDestroyImage(instance.vkDevice, instance.vkDepthImage, nullptr);
     vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
-
-    // Destroy Utility Sampler
-    vkDestroySampler(instance.vkDevice, instance.basicLinearSampler, nullptr);
 
     // Destroy descriptors
     /*for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
