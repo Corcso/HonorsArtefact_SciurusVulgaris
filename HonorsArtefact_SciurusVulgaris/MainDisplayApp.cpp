@@ -73,7 +73,8 @@ void MainDisplayApp::Frame() {
 void MainDisplayApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
 	if (myModel != nullptr) delete myModel;
-	delete terrain;
+	treeMesh.clear();
+	delete terrain; // Always loaded
 	for (auto& texture : treeMeshTextures) texture.Destroy();
 	terrainTexture.Destroy();
 	sun.ShutdownShadowResources();
