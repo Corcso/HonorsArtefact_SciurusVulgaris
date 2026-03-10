@@ -62,6 +62,7 @@ void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("PointsToGBufferMeshShade_GP_DescriptorSetLayout", reinterpret_cast<uint64_t>(vkDescriptorSetLayout), VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT);
 }
 
 void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPass)
@@ -242,6 +243,7 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
     if (vkCreatePipelineLayout(Graphics::GetVkDevice(), &pipelineLayoutInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("PointsToGBufferMeshShade_GP_PipelineLayout", reinterpret_cast<uint64_t>(vkPipelineLayout), VK_OBJECT_TYPE_PIPELINE_LAYOUT);
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -268,6 +270,7 @@ void PointsToGBufferMeshShade_GP::CreatePipeline(const VkRenderPass& vkRenderPas
     if (vkCreateGraphicsPipelines(Graphics::GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("PointsToGBufferMeshShade_GP_Pipeline", reinterpret_cast<uint64_t>(vkPipeline), VK_OBJECT_TYPE_PIPELINE);
 
     vkDestroyShaderModule(Graphics::GetVkDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(Graphics::GetVkDevice(), meshShaderModule, nullptr);

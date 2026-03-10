@@ -743,12 +743,22 @@ void InstancedTreeRenderPass::Shutdown() {
     pointsToGBuffer_GP.Shutdown();
     meshTraditionalToGBuffer_GP.Shutdown();
     pointsToGBufferMeshShade_GP.Shutdown();
+    fxaa_GP.Shutdown();
+    taa_GP.Shutdown();
+
+    // Destroy AA descriptors
+    fxaaDescriptor.CleanupDescriptor();
+    taaDescriptor.CleanupDescriptor();
 
     // Destroy Render Pass
     vkDestroyRenderPass(Graphics::GetVkDevice(), vkRenderPass, nullptr);
+    vkDestroyRenderPass(Graphics::GetVkDevice(), vkSecondRenderPass, nullptr);
+    vkDestroyRenderPass(Graphics::GetVkDevice(), TAARenderPass, nullptr);
 
     // Destroy Frame Buffer & Images
     vkDestroyFramebuffer(Graphics::GetVkDevice(), vkFrameBuffer, nullptr);
+    vkDestroyFramebuffer(Graphics::GetVkDevice(), vkFrameBufferFinal, nullptr);
+    vkDestroyFramebuffer(Graphics::GetVkDevice(), TAAOutputImageFrameBuffer, nullptr);
     colorImage.Destroy();
     depthImage.Destroy();
     positionImage.Destroy();

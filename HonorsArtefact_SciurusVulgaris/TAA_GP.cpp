@@ -207,6 +207,7 @@ void TAA_GP::CreatePipeline(const VkRenderPass& vkRenderPass)
     if (vkCreatePipelineLayout(Graphics::GetVkDevice(), &pipelineLayoutInfo, nullptr, &vkPipelineLayout) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("TAA_GP_PipelineLayout", reinterpret_cast<uint64_t>(vkPipelineLayout), VK_OBJECT_TYPE_PIPELINE_LAYOUT);
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -233,6 +234,7 @@ void TAA_GP::CreatePipeline(const VkRenderPass& vkRenderPass)
     if (vkCreateGraphicsPipelines(Graphics::GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkPipeline) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("TAA_GP_Pipeline", reinterpret_cast<uint64_t>(vkPipeline), VK_OBJECT_TYPE_PIPELINE);
 
     vkDestroyShaderModule(Graphics::GetVkDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(Graphics::GetVkDevice(), vertShaderModule, nullptr);

@@ -384,6 +384,7 @@ void MeshRenderer::CreatePipeline()
     if (vkCreatePipelineLayout(Graphics::GetVkDevice(), &pipelineLayoutInfo, nullptr, &vkMainPipelineLayout) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("MeshRenderer_UGP_PipelineLayout", reinterpret_cast<uint64_t>(vkMainPipelineLayout), VK_OBJECT_TYPE_PIPELINE_LAYOUT);
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -410,6 +411,7 @@ void MeshRenderer::CreatePipeline()
     if (vkCreateGraphicsPipelines(Graphics::GetVkDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &vkMainPipeline) != VK_SUCCESS) {
         throw - 1;
     }
+    VulkanUtility::DebugNameObject("MeshRenderer_UGP_Pipeline", reinterpret_cast<uint64_t>(vkMainPipeline), VK_OBJECT_TYPE_PIPELINE);
 
     vkDestroyShaderModule(Graphics::GetVkDevice(), fragShaderModule, nullptr);
     vkDestroyShaderModule(Graphics::GetVkDevice(), vertShaderModule, nullptr);

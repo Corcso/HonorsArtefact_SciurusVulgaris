@@ -79,6 +79,7 @@ void MainDisplayApp::Shutdown() {
 	sun.ShutdownShadowResources();
 	pointRenderingPass.Shutdown();
 	instancedMeshTree_RP.Shutdown();
+	lightShadow_RP.Shutdown();
 }
 
 void MainDisplayApp::FrameMeshShaded()
