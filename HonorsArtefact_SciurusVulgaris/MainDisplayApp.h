@@ -43,6 +43,7 @@ private:
 	
 	TriListMesh* terrain;
 	Image terrainTexture;
+	bool terrainEnabled;
 
 	CameraTransform cameraTransform;
 

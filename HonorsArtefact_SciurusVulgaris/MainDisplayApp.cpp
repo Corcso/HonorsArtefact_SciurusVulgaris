@@ -17,7 +17,8 @@ void MainDisplayApp::Initialize() {
 	angle = 0;
 
 	cameraTransform.speed = 0.5f;
-	cameraTransform.position = HMM_V3(0, 0, -5);
+	cameraTransform.position = HMM_V3(0, 30, 0);
+	cameraTransform.euler = HMM_V3(-45, 0, 0);
 
 	pointToRenderCount = 0;
 	
@@ -189,10 +190,11 @@ void MainDisplayApp::FrameMeshShaded()
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
 	pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
 	Graphics::PopMetricRange();
-	pointRenderingPass.SwitchToTraditionalMeshPipeline();
 	Graphics::PushMetricRange("Terrain Mesh Render");
-	pointRenderingPass.RenderTraditionalMesh(terrain);
-
+	if (terrainEnabled) {
+		pointRenderingPass.SwitchToTraditionalMeshPipeline();
+		pointRenderingPass.RenderTraditionalMesh(terrain);
+	}
 	pointRenderingPass.EndRender();
 	Graphics::PopMetricRange();
 	RenderImGuiControls();
@@ -276,10 +278,11 @@ void MainDisplayApp::FrameVertexShaded()
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
 	pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
 	Graphics::PopMetricRange();
-	pointRenderingPass.SwitchToTraditionalMeshPipeline();
 	Graphics::PushMetricRange("Terrain Mesh Render");
-	pointRenderingPass.RenderTraditionalMesh(terrain);
-
+	if (terrainEnabled) {
+		pointRenderingPass.SwitchToTraditionalMeshPipeline();
+		pointRenderingPass.RenderTraditionalMesh(terrain);
+	}
 	pointRenderingPass.EndRender();
 	Graphics::PopMetricRange();
 	RenderImGuiControls();
@@ -453,6 +456,9 @@ void MainDisplayApp::RenderImGuiControls()
 
 	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
 	else ImGui::Text("Please load a model to instance items");
+
+	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);
+	else ImGui::Text("Terrain Not Available");
 	ImGui::End();
 
 	ImGui::Begin("Live LOD Edits");
