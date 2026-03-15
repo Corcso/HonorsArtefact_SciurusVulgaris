@@ -19,7 +19,7 @@ void InstancedTreeRenderPass::CreateImages() {
     normalImage.CreateImageView();
     normalImage.DebugNameImage("G Buffer Normal");
 
-    depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    depthImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImage.CreateImageView(true);
     depthImage.DebugNameImage("G Buffer Depth");
 
@@ -58,11 +58,12 @@ void InstancedTreeRenderPass::CreateUniqueMeshData()
     fullScreenQuad->indices = { 0, 2, 1, 2, 3, 1 };
                   
     fullScreenQuad->CopyPointsToVRAM();
-    size_t sizes[] = { 0, 0, 0, sizeof(Light::BufferStruct) };
+    size_t sizes[] = { 0, 0, 0, sizeof(Light::BufferStruct), 0, 0 };
     fullScreenQuad->CreateDescriptorSet(gBufferToOutput_GP.vkDescriptorSetLayout, gBufferToOutput_GP.vkDescriptorSetLayoutInfo, sizes);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(0, &colorImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(1, &positionImage, vkSampler);
     fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(2, &normalImage, vkSampler);
+    fullScreenQuad->GetDescriptorSet()->UpdateImageSampler(5, &depthImage, vkSampler);
 
     size_t fxaaSizes[] = { 0, sizeof(FXAAInfo) };
     fxaaDescriptor.Create(fxaa_GP.vkDescriptorSetLayout, fxaa_GP.vkDescriptorSetLayoutInfo, fxaaSizes);
@@ -162,11 +163,11 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         depthAttachment.format = VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice());
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         VkAttachmentReference depthAttachmentRef{};
         depthAttachmentRef.attachment = 4;
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

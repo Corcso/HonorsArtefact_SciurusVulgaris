@@ -5,7 +5,7 @@
 
 void GBufferToOutput_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[5]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[6]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -36,9 +36,15 @@ void GBufferToOutput_GP::CreateDescriptorLayout()
     uboLayoutBindings[4].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[4].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[5].binding = 5;
+    uboLayoutBindings[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    uboLayoutBindings[5].descriptorCount = 1;
+    uboLayoutBindings[5].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    uboLayoutBindings[5].pImmutableSamplers = nullptr;
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 5;
+    vkDescriptorSetLayoutInfo.bindingCount = 6;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {

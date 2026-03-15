@@ -3,6 +3,7 @@
 layout(binding = 0) uniform sampler2D colorBuffer;
 layout(binding = 1) uniform sampler2D positionBuffer;
 layout(binding = 2) uniform sampler2D normalBuffer;
+layout(binding = 5) uniform sampler2D depthBuffer;
 
 layout(binding = 3) uniform LightBuffer{
     vec3 direction;
@@ -48,6 +49,7 @@ void main() {
     vec4 color = texture(colorBuffer, inTex);
     vec4 position = texture(positionBuffer, inTex);
     vec4 normal = texture(normalBuffer, inTex);
+    float depth = (texture(depthBuffer, inTex).r - 0.99998) / (1.0f - 0.99998); 
 
     if(color.a == 0) discard;
 
@@ -61,8 +63,10 @@ void main() {
     //diffuseStrength = max(diffuseStrength, 0.1);
     vec3 diffuseColor = light.color * diffuseStrength;
     vec3 ambientColor = light.ambientColor * light.ambientIntensity;
+    vec3 fogColor = vec3(0.3f, 0.3f, 0.32f);
 
     // Return ambient + diffuse + specular
-    outColor = vec4(color.rgb * (diffuseColor + ambientColor), 1.0);
+    outColor = vec4(mix(color.rgb * (diffuseColor + ambientColor), fogColor, 0.0f /*depth*/), 0);
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
+    //outColor = vec4(depth, depth, depth , 1.0);
 }
