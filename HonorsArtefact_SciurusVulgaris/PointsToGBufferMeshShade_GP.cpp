@@ -56,7 +56,7 @@ void PointsToGBufferMeshShade_GP::CreateDescriptorLayout()
     uboLayoutBindings[6].binding = 6; // View and Projection Matrix
     uboLayoutBindings[6].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[6].descriptorCount = 1;
-    uboLayoutBindings[6].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT;
+    uboLayoutBindings[6].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[6].pImmutableSamplers = nullptr;
 
     vkDescriptorSetLayoutInfo = {};

@@ -24,7 +24,7 @@ layout(binding = 1) readonly buffer UniformBufferObject {
     mat4 worldMatrices[1024000];
 } transformation;
 
-layout(binding = 6) uniform CPMatricesObject {
+layout(binding = 6) uniform VPMatricesObject {
 	VPMatrices thisFrame;
 	VPMatrices lastFrame;
 } camProjMatrices;
