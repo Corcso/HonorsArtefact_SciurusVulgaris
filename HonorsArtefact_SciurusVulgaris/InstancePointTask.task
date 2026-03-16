@@ -11,8 +11,8 @@ struct WCPMatrices{
 };
 
 layout(binding = 1) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[4000];
-    WCPMatrices lastMatrices[4000];
+    WCPMatrices matrices[128000];
+    WCPMatrices lastMatrices[128000];
 } transformation;
 
 layout(binding = 2) uniform InstancingInfo {

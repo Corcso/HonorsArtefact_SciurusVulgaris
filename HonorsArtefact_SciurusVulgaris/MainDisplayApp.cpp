@@ -9,7 +9,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { 0, sizeof(WCP_Matrices) * 8000, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
+	descriptorSizes = { 0, sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS * 2, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
 	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
@@ -40,8 +40,8 @@ void MainDisplayApp::Initialize() {
 	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations128K.obj");
 	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation();
 	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.9, 0.9, 0.9)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Scale(HMM_V3(0.05, 0.05, 0.05)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
 	treeInstancePositionsLastFrame.matrices = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
@@ -110,9 +110,9 @@ void MainDisplayApp::FrameMeshShaded()
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150));
-		std::vector<WCP_Matrices> copiedTemp(8000);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
-		memcpy(copiedTemp.data() + 4000, treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
+		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
+		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
+		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
 		//ZeroMemory(copiedTemp.data() + 4000, sizeof(WCP_Matrices) * 4000);
 		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
@@ -158,9 +158,9 @@ void MainDisplayApp::FrameMeshShaded()
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
-		std::vector<WCP_Matrices> copiedTemp(8000);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
-		memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
+		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
+		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
+		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
@@ -245,9 +245,9 @@ void MainDisplayApp::FrameVertexShaded()
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
-		std::vector<WCP_Matrices> copiedTemp(8000);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
-		memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
+		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
+		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
+		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
 		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
@@ -459,7 +459,7 @@ void MainDisplayApp::RenderImGuiControls()
 	else ImGui::Text("TAA Not Available");
 	if ((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
 
-	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, HMM_MIN(treeInstancePositions.matrices.size(), 4000));
+	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, HMM_MIN(treeInstancePositions.matrices.size(), MAX_INSTANCE_POSITIONS),"%d", ImGuiSliderFlags_Logarithmic);
 	else ImGui::Text("Please load a model to instance items");
 
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);

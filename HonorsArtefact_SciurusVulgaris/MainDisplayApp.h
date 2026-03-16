@@ -38,6 +38,7 @@ private:
 	PointTreeMesh* myModel;
 	InstancedWCPHelper treeInstancePositions;
 	InstancedWCPHelper treeInstancePositionsLastFrame;
+	const int MAX_INSTANCE_POSITIONS = 128000;
 	char modelPath[256] = "./models/output.tree";
 	float angle;
 	
