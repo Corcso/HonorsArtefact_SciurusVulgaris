@@ -27,7 +27,8 @@ void MainDisplayApp::Initialize() {
 	sun.CreateShadowResources(lightShadow_RP.GetRenderPass());
 
 	terrain = new TriListMesh();
-	terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
+	//terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
+	terrain->LoadFile("./models/ChinaValley/ChinaValley.fbx", 0);
 	terrain->CopyPointsToVRAM();
 	terrainTexture.CreateAndLoadImageFromFile("./models/Terrain004 - Lennart Demes/color.jpg", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
@@ -35,11 +36,12 @@ void MainDisplayApp::Initialize() {
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
-	treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
+	//treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
+	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations128K.obj");
 	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation();
 	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.9, 0.9, 0.9)));
+	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Scale(HMM_V3(0.05, 0.05, 0.05)));
 	treeInstancePositionsLastFrame.matrices = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
@@ -105,9 +107,9 @@ void MainDisplayApp::FrameMeshShaded()
 		lodData.continousStart = myModel->continousLOD_start;
 		lodData.continousShallowness = myModel->continousLOD_shallowness;
 		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(100, 50, 50));
+		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150));
 		std::vector<WCP_Matrices> copiedTemp(8000);
 		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
 		memcpy(copiedTemp.data() + 4000, treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
@@ -155,7 +157,7 @@ void MainDisplayApp::FrameMeshShaded()
 		//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		std::vector<WCP_Matrices> copiedTemp(8000);
 		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
 		memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
@@ -177,12 +179,12 @@ void MainDisplayApp::FrameMeshShaded()
 
 
 	WCP_Matrices terrainBufferData[2] = { {
-		HMM_Translate(HMM_V3(-50, 0, 50)),
+		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
 		},
 		{
-		HMM_Translate(HMM_V3(-50, 0, 50)),
+		HMM_Translate(HMM_V3(0, 0, 0)),
 		treeInstancePositionsLastFrame.matrices[0].camera,
 		treeInstancePositionsLastFrame.matrices[0].projection
 		}
@@ -216,7 +218,7 @@ void MainDisplayApp::FrameMeshShaded()
 	pointRenderingPass.EndFXAARender();
 	Graphics::EndRender();
 
-	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 }
 
 void MainDisplayApp::FrameVertexShaded()
@@ -242,7 +244,7 @@ void MainDisplayApp::FrameVertexShaded()
 		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		std::vector<WCP_Matrices> copiedTemp(8000);
 		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * 4000);
 		memcpy(copiedTemp.data() + 4000, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * 4000);
@@ -265,12 +267,12 @@ void MainDisplayApp::FrameVertexShaded()
 
 
 	WCP_Matrices terrainBufferData[2] = { {
-		HMM_Translate(HMM_V3(-50, 0, 50)),
+		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
 		},
 		{
-		HMM_Translate(HMM_V3(-50, 0, 50)),
+		HMM_Translate(HMM_V3(0, 0, 0)),
 		treeInstancePositionsLastFrame.matrices[0].camera,
 		treeInstancePositionsLastFrame.matrices[0].projection
 		}
@@ -304,7 +306,7 @@ void MainDisplayApp::FrameVertexShaded()
 	pointRenderingPass.EndFXAARender();
 	Graphics::EndRender();
 
-	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 }
 
 void MainDisplayApp::FrameMeshTrue()
@@ -319,7 +321,7 @@ void MainDisplayApp::FrameMeshTrue()
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100));
+		treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		for (int i = 0; i < triangleMeshTreeLoader.GetMeshVector()->size(); i++) {
 			(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
@@ -335,9 +337,9 @@ void MainDisplayApp::FrameMeshTrue()
 
 
 	WCP_Matrices terrainBufferData = {
-		HMM_Translate(HMM_V3(-50, 0, 50)),
+		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.001, 100)
+		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
 	};
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
 	/*instancedMeshTree_RP.SwitchToTraditionalMeshPipeline();
@@ -364,7 +366,10 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
 	if (ImGui::Button("Load")) {
-		if (myModel != nullptr) delete myModel;
+		if (myModel != nullptr) {
+			Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
+			delete myModel;
+		}
 
 		myModel = new PointTreeMesh();
 
@@ -454,7 +459,7 @@ void MainDisplayApp::RenderImGuiControls()
 	else ImGui::Text("TAA Not Available");
 	if ((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
 
-	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, treeInstancePositions.matrices.size());
+	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::SliderInt("N Instances", &instanceCount, 0, HMM_MIN(treeInstancePositions.matrices.size(), 4000));
 	else ImGui::Text("Please load a model to instance items");
 
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);
