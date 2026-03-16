@@ -66,7 +66,7 @@ void main() {
     vec3 fogColor = vec3(0.3f, 0.3f, 0.32f);
 
     // Return ambient + diffuse + specular
-    outColor = vec4(mix(color.rgb * (diffuseColor + ambientColor), fogColor, 0.0f /*depth*/), 0);
+    outColor = vec4(mix(color.rgb * (diffuseColor + ambientColor), fogColor, /*depth*/0.0f), /*1.0f - depth*/1.0f);
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
     //outColor = vec4(depth, depth, depth , 1.0);
 }
