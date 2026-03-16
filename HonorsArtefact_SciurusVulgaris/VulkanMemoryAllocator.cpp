@@ -50,7 +50,8 @@
         else {
             // Drop the custom size pool
             vkFreeMemory(device, memoryPools[block.poolID][block.location.poolIndex], nullptr);
-            memoryPools[block.poolID].erase(memoryPools[block.poolID].begin() + block.location.poolIndex);
+            //memoryPools[block.poolID].erase(memoryPools[block.poolID].begin() + block.location.poolIndex); Cant delete it so just mark is as VK_NULL_HANDLE (Does cause slight memory leak as vector expands
+            memoryPools[block.poolID][block.location.poolIndex] = VK_NULL_HANDLE;
         }
     }
 
@@ -81,7 +82,12 @@
                 
                 uint32_t totalBlocksInUse = 0;
                 uint32_t totalBlocks = 0;
+                uint32_t totalNullBlocks = 0;
                 for (int i = 0; i < poolList.second.size(); i++) {
+                    if (poolList.second[i] == VK_NULL_HANDLE) {
+                        totalNullBlocks++;
+                        continue;
+                    }
                     if (sizeToBlockCountPerAlloc.find(poolList.first.blockSize) != sizeToBlockCountPerAlloc.end()) {
                         // Check how full the pool is
                         uint32_t poolMaxBlocks = sizeToBlockCountPerAlloc[poolList.first.blockSize];
@@ -99,7 +105,7 @@
                         totalBlocks++;
                     }
                 }
-                if (poolList.second.size() == 0) ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "All Pools Closed");
+                if (poolList.second.size() - totalNullBlocks == 0) ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "All Pools Closed");
 
                 else { 
                     if (totalBlocks * poolList.first.blockSize < 1024) {
