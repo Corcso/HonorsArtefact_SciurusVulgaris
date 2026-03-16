@@ -4,15 +4,14 @@
 
 layout(local_size_x = 1) in;
 
-struct WCPMatrices{
-    mat4 world;
-    mat4 view;
-    mat4 proj;
-};
+//struct WCPMatrices{
+//    mat4 world;
+//    mat4 view;
+//    mat4 proj;
+//};
 
 layout(binding = 1) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[128000];
-    WCPMatrices lastMatrices[128000];
+    mat4 worldMatrices[1024000];
 } transformation;
 
 layout(binding = 2) uniform InstancingInfo {
@@ -40,7 +39,7 @@ taskPayloadSharedEXT MyPayloadStruct payload;
 
 void main(){
     uint instanceID = gl_GlobalInvocationID.x;
-    vec3 instancePosition = (transformation.matrices[instanceID].world * vec4(0, 0, 0, 1)).xyz;
+    vec3 instancePosition = (transformation.worldMatrices[instanceID] * vec4(0, 0, 0, 1)).xyz;
     vec3 cameraPosition = levelOfDetailData.cameraPosition.xyz; // Assumed for now
 
     float distanceToInstance = length(instancePosition - cameraPosition);

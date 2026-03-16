@@ -7,6 +7,11 @@ struct WCP_Matrices {
 	HMM_Mat4 projection;
 };
 
+struct VP_Matrices {
+	HMM_Mat4 camera;
+	HMM_Mat4 projection;
+};
+
 struct InstancingInfo {
 	uint32_t numberOfInstances;
 	uint32_t instanceStride;

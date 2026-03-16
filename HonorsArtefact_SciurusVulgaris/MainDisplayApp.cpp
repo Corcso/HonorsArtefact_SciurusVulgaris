@@ -9,7 +9,7 @@
 void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
-	descriptorSizes = { 0, sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS * 2, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo)};
+	descriptorSizes = { 0, sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo), sizeof(VP_Matrices) * 2};
 	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
@@ -37,12 +37,11 @@ void MainDisplayApp::Initialize() {
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
 	//treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
-	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations128K.obj");
+	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
 	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation();
 	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
-	treeInstancePositionsLastFrame.matrices = treeInstancePositions.matrices;
 
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
@@ -109,17 +108,13 @@ void MainDisplayApp::FrameMeshShaded()
 		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150));
-		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		//ZeroMemory(copiedTemp.data() + 4000, sizeof(WCP_Matrices) * 4000);
-		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
+		VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
+		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
 		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
 
-		myModel->GetShadowDescriptorSet()->FlushBuffer(1);
+		//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
 
 
 		lightShadow_RP.RenderPointTree(myModel, instancingInfo);
@@ -157,11 +152,8 @@ void MainDisplayApp::FrameMeshShaded()
 		//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
-		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
+		treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
@@ -185,8 +177,8 @@ void MainDisplayApp::FrameMeshShaded()
 		},
 		{
 		HMM_Translate(HMM_V3(0, 0, 0)),
-		treeInstancePositionsLastFrame.matrices[0].camera,
-		treeInstancePositionsLastFrame.matrices[0].projection
+		treeInstanceViewProjThisAndLastFrame[1].camera,
+		treeInstanceViewProjThisAndLastFrame[1].projection
 		}
 	};
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
@@ -218,7 +210,7 @@ void MainDisplayApp::FrameMeshShaded()
 	pointRenderingPass.EndFXAARender();
 	Graphics::EndRender();
 
-	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
+	treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
 }
 
 void MainDisplayApp::FrameVertexShaded()
@@ -244,11 +236,8 @@ void MainDisplayApp::FrameVertexShaded()
 		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
-		std::vector<WCP_Matrices> copiedTemp(MAX_INSTANCE_POSITIONS * 2);
-		memcpy(copiedTemp.data(), treeInstancePositions.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		memcpy(copiedTemp.data() + MAX_INSTANCE_POSITIONS, treeInstancePositionsLastFrame.matrices.data(), sizeof(WCP_Matrices) * MAX_INSTANCE_POSITIONS);
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, copiedTemp.data());
+		treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
+		myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
@@ -273,8 +262,8 @@ void MainDisplayApp::FrameVertexShaded()
 		},
 		{
 		HMM_Translate(HMM_V3(0, 0, 0)),
-		treeInstancePositionsLastFrame.matrices[0].camera,
-		treeInstancePositionsLastFrame.matrices[0].projection
+		treeInstanceViewProjThisAndLastFrame[1].camera,
+		treeInstanceViewProjThisAndLastFrame[1].projection
 		}
 	};
 	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
@@ -306,7 +295,7 @@ void MainDisplayApp::FrameVertexShaded()
 	pointRenderingPass.EndFXAARender();
 	Graphics::EndRender();
 
-	treeInstancePositionsLastFrame.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
+	treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
 }
 
 void MainDisplayApp::FrameMeshTrue()
@@ -380,6 +369,11 @@ void MainDisplayApp::RenderImGuiControls()
 		myModel->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
 		myModel->CopyPointsToVRAMMeshBuffer(0);
 		myModel->CopyPointsToVRAM();
+
+		// Copy instance positions
+		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		
 
 		MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
 		myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);

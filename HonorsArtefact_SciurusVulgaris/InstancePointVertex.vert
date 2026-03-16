@@ -9,16 +9,25 @@ layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec3 outNormal;
 layout(location = 3) out vec2 outVelocity;
 
-struct WCPMatrices{
-    mat4 world;
+//struct WCPMatrices{
+//    mat4 world;
+//    mat4 view;
+//    mat4 proj;
+//};
+
+struct VPMatrices{
     mat4 view;
     mat4 proj;
 };
 
 layout(binding = 1) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[4000];
-    WCPMatrices lastMatrices[4000];
+    mat4 worldMatrices[1024000];
 } transformation;
+
+layout(binding = 6) uniform CPMatricesObject {
+	VPMatrices thisFrame;
+	VPMatrices lastFrame;
+} camProjMatrices;
 
 layout(binding = 2) uniform InstancingInfo {
     uint instanceCount;
@@ -60,7 +69,7 @@ void main() {
     uint instanceID = gl_InstanceIndex;
 
     // Calculate LOD
-    vec3 instancePosition = (transformation.matrices[instanceID].world * vec4(0, 0, 0, 1)).xyz;
+    vec3 instancePosition = (transformation.worldMatrices[instanceID] * vec4(0, 0, 0, 1)).xyz;
     vec3 cameraPosition = levelOfDetailData.cameraPosition.xyz; 
 
     float distanceToInstance = length(instancePosition - cameraPosition);
@@ -81,8 +90,8 @@ void main() {
     }
 
 	// Vertices position
-	vec4 screenSpacePosition =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(inPosition, 1.0); 
-	vec4 lastScreenSpacePosition =  transformation.lastMatrices[instanceID].proj * transformation.lastMatrices[instanceID].view * transformation.lastMatrices[instanceID].world * vec4(inPosition, 1.0); 
+	vec4 screenSpacePosition =  camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[instanceID] * vec4(inPosition, 1.0); 
+	vec4 lastScreenSpacePosition =  camProjMatrices.lastFrame.proj * camProjMatrices.lastFrame.view * transformation.worldMatrices[instanceID] * vec4(inPosition, 1.0); 
 	outVelocity = CalcVelocity(screenSpacePosition, lastScreenSpacePosition);
 	// Apply TAA Jitter
 	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w * 1.2f, 0, 0);
@@ -90,9 +99,9 @@ void main() {
 
 	gl_PointSize = 1;
 
-	outWorldPos = (transformation.matrices[instanceID].world * vec4(inPosition, 1.0)).xyz;
+	outWorldPos = (transformation.worldMatrices[instanceID] * vec4(inPosition, 1.0)).xyz;
 
-	outNormal = (transformation.matrices[instanceID].world * vec4(inNormal, 0.0)).xyz;
+	outNormal = (transformation.worldMatrices[instanceID] * vec4(inNormal, 0.0)).xyz;
 
 	// Vertices color
 	outColor = vec4(inColor, 1.0);

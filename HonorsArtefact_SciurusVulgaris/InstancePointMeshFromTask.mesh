@@ -15,16 +15,25 @@ layout(binding = 0) buffer readonly PointData{
 	Point pointArray[];
 } pointsData;
 
-struct WCPMatrices{
-    mat4 world;
+//struct WCPMatrices{
+//    mat4 world;
+//    mat4 view;
+//    mat4 proj;
+//};
+
+struct VPMatrices{
     mat4 view;
     mat4 proj;
 };
 
 layout(binding = 1) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[128000];
-    WCPMatrices lastMatrices[128000];
+    mat4 worldMatrices[1024000];
 } transformation;
+
+layout(binding = 6) uniform VPMatricesObject {
+	VPMatrices thisFrame;
+	VPMatrices lastFrame;
+} camProjMatrices;
 
 layout(binding = 2) uniform InstancingInfo {
     uint instanceCount;
@@ -72,8 +81,8 @@ void main(){
 	
 
 	// Vertices position
-	vec4 screenSpacePosition =  transformation.matrices[instanceID].proj * transformation.matrices[instanceID].view * transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
-	vec4 lastScreenSpacePosition =  transformation.lastMatrices[instanceID].proj * transformation.lastMatrices[instanceID].view * transformation.lastMatrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	vec4 screenSpacePosition =  camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
+	vec4 lastScreenSpacePosition =  camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
 	outVelocity[gl_LocalInvocationID.x] = CalcVelocity(screenSpacePosition, lastScreenSpacePosition);
 	// Apply TAA Jitter
 	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w * 1.2f, 0, 0);
@@ -81,9 +90,9 @@ void main(){
 
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 1;
 
-	outWorldPos[gl_LocalInvocationID.x] = (transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].position, 1.0)).xyz;
+	outWorldPos[gl_LocalInvocationID.x] = (transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0)).xyz;
 
-	outNormal[gl_LocalInvocationID.x] = (transformation.matrices[instanceID].world * vec4(pointsData.pointArray[pointDataIndex].normal, 0.0)).xyz;
+	outNormal[gl_LocalInvocationID.x] = (transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].normal, 0.0)).xyz;
 
 	// Vertices color
 	outColor[gl_LocalInvocationID.x] = vec4(pointsData.pointArray[pointDataIndex].color, 1.0);

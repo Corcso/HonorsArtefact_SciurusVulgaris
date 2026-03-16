@@ -36,9 +36,9 @@ private:
 	std::vector<size_t> descriptorSizes;
 
 	PointTreeMesh* myModel;
-	InstancedWCPHelper treeInstancePositions;
-	InstancedWCPHelper treeInstancePositionsLastFrame;
-	const int MAX_INSTANCE_POSITIONS = 128000;
+	InstancedWorldMatrixHelper treeInstancePositions;
+	VP_Matrices treeInstanceViewProjThisAndLastFrame[2]; // This index = 0, last index = 1
+	const int MAX_INSTANCE_POSITIONS = 1024000;
 	char modelPath[256] = "./models/output.tree";
 	float angle;
 	
