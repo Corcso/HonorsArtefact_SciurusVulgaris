@@ -517,7 +517,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		{"DownTheValley32kMeshShade", [&]() {
 			instanceCount = 32000;
 		} },
-		{"DownTheValley64kMeshShade", [&]() {
+		/*{"DownTheValley64kMeshShade", [&]() {
 			instanceCount = 64000;
 		} },
 		{"DownTheValley128kMeshShade", [&]() {
@@ -544,7 +544,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		} },
 		{"DownTheValley64kVertShade", [&]() {
 			instanceCount = 64000;
-		} },
+		} },*/
 		/*{"DownTheValley128kVertShade", [&]() {
 			instanceCount = 128000;
 		} },
@@ -557,25 +557,26 @@ void MainDisplayApp::ImageCaptureSequence()
 		{"DownTheValley1024kVertShade", [&]() {
 			instanceCount = 1024000;
 		} },*/
-		{"DownTheValley4True", [&]() {
-			instanceCount = 4;
-			currentRendererType = RendererType::MESH_TRUE;
-		} },
-		{"DownTheValley16True", [&]() {
-			instanceCount = 16;
-		} },
-		{"DownTheValley32True", [&]() {
-			instanceCount = 32;
-		} },
-		{"DownTheValley64True", [&]() {
-			instanceCount = 64;
-		} },
-		{"DownTheValley128True", [&]() {
-			instanceCount = 128;
-		} },
-		{"DownTheValley256True", [&]() {
-			instanceCount = 256;
-		} },/*
+		//{"DownTheValley4True", [&]() {
+		//	instanceCount = 4;
+		//	currentRendererType = RendererType::MESH_TRUE;
+		//} },
+		//{"DownTheValley16True", [&]() {
+		//	instanceCount = 16;
+		//} },
+		//{"DownTheValley32True", [&]() {
+		//	instanceCount = 32;
+		//} },
+		//{"DownTheValley64True", [&]() {
+		//	instanceCount = 64;
+		//} },
+		//{"DownTheValley128True", [&]() {
+		//	instanceCount = 128;
+		//} },
+		//{"DownTheValley256True", [&]() {
+		//	instanceCount = 256;
+		//} },
+		/*
 		{"DownTheValley512kTrue", [&]() {
 			instanceCount = 512;
 		} },
@@ -800,7 +801,7 @@ void MainDisplayApp::ImageCaptureSequence()
 	for (int i = 0; i < rules.size(); i++) {
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
-				Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i].name + ".bmp");
+				if(i > 0) Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
 			#ifdef NV_PERF_METER
 				Graphics::nvperf_InitiateReport(rules[i].name);
 			#endif // NV_PERF_METER
@@ -813,8 +814,9 @@ void MainDisplayApp::ImageCaptureSequence()
 		}
 	}
 	if (imageSequenceTimer > (float)rules.size()) {
-		Graphics::SaveSwapChainImageToFile("./Render003.bmp");
-		stageImagesSaved++;
+		Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
+		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
+		//stageImagesSaved++;
 		captureUnderway = false;
 		renderImGui = true;
 
