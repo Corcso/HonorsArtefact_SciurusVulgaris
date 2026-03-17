@@ -492,56 +492,91 @@ void MainDisplayApp::ImageCaptureSequence()
 	if (!captureUnderway) return;
 
 	std::vector<ImageCaptureRule> rules{
-		{"Render001a", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
+		{"DownTheValley4kMeshShade", [&]() {
+			cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
+			cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
 			instanceCount = 4000;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+			fxaaEnabled = false;
+			taaEnabled = false;
+			terrainEnabled = false;
+			sun.SetShadowEnabled(false);
+			pointRenderingPass.enableSkybox = false;
+			myModel->continousLOD_start = 512.0f;
+			myModel->continousLOD_shallowness = 12.5f;
+			myModel->continousLOD_decay = 1.5f;
 		} },
-		{"Render001b", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
+		{"DownTheValley16kMeshShade", [&]() {
+			instanceCount = 16000;
+		} },
+		{"DownTheValley32kMeshShade", [&]() {
+			instanceCount = 32000;
+		} },
+		{"DownTheValley64kMeshShade", [&]() {
+			instanceCount = 64000;
+		} },
+		{"DownTheValley128kMeshShade", [&]() {
+			instanceCount = 128000;
+		} },
+		{"DownTheValley256kMeshShade", [&]() {
+			instanceCount = 256000;
+		} },
+		{"DownTheValley512kMeshShade", [&]() {
+			instanceCount = 512000;
+		} },
+		{"DownTheValley1024kMeshShade", [&]() {
+			instanceCount = 1024000;
+		} },
+		{"DownTheValley4kVertShade", [&]() {
 			instanceCount = 4000;
+			currentRendererType = RendererType::VERTEX_SHADED_POINTS;
 		} },
-		{"Render001c", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		{"DownTheValley16kVertShade", [&]() {
+			instanceCount = 16000;
 		} },
-		{"Render001d", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		{"DownTheValley32kVertShade", [&]() {
+			instanceCount = 32000;
 		} },
-		{"Render001e", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		{"DownTheValley64kVertShade", [&]() {
+			instanceCount = 64000;
 		} },
-		{"Render001f", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		/*{"DownTheValley128kVertShade", [&]() {
+			instanceCount = 128000;
 		} },
-		{"Render001g", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		{"DownTheValley256kVertShade", [&]() {
+			instanceCount = 256000;
 		} },
-		{"Render001h", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 0, 0);
-			instanceCount = 4000;
+		{"DownTheValley512kVertShade", [&]() {
+			instanceCount = 512000;
 		} },
-		{"Render002", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, -90, 0);
-			instanceCount = 1000;
+		{"DownTheValley1024kVertShade", [&]() {
+			instanceCount = 1024000;
+		} },*/
+		{"DownTheValley4True", [&]() {
+			instanceCount = 4;
+			currentRendererType = RendererType::MESH_TRUE;
 		} },
-		{"Render003", [&]() {
-			cameraTransform.position = HMM_V3(0, 30, 0);
-			cameraTransform.euler = HMM_V3(-45, 90, 0);
-			instanceCount = 100;
+		{"DownTheValley16True", [&]() {
+			instanceCount = 16;
 		} },
+		{"DownTheValley32True", [&]() {
+			instanceCount = 32;
+		} },
+		{"DownTheValley64True", [&]() {
+			instanceCount = 64;
+		} },
+		{"DownTheValley128True", [&]() {
+			instanceCount = 128;
+		} },
+		{"DownTheValley256True", [&]() {
+			instanceCount = 256;
+		} },/*
+		{"DownTheValley512kTrue", [&]() {
+			instanceCount = 512;
+		} },
+		{"DownTheValley1024kTrue", [&]() {
+			instanceCount = 1024;
+		} }*/
 
 	};
 

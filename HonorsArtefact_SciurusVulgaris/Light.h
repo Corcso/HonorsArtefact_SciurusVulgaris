@@ -55,6 +55,7 @@ public:
 	ImTextureID GetShadowImageImGuiTex() { return shadowImageImGuiTex; }
 	VkFramebuffer GetShadowFrameBuffer() { return shadowFrameBuffer; }
 
+	void SetShadowEnabled(bool enabled) { this->shadowEnabled = enabled; }
 private:
 	Type myType;
 
