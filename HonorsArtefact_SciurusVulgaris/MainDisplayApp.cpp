@@ -511,13 +511,13 @@ void MainDisplayApp::ImageCaptureSequence()
 			myModel->continousLOD_shallowness = 12.5f;
 			myModel->continousLOD_decay = 1.5f;
 		} },
-		{"DownTheValley16kMeshShade", [&]() {
+		/*{"DownTheValley16kMeshShade", [&]() {
 			instanceCount = 16000;
 		} },
 		{"DownTheValley32kMeshShade", [&]() {
 			instanceCount = 32000;
 		} },
-		/*{"DownTheValley64kMeshShade", [&]() {
+		{"DownTheValley64kMeshShade", [&]() {
 			instanceCount = 64000;
 		} },
 		{"DownTheValley128kMeshShade", [&]() {
@@ -545,7 +545,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		{"DownTheValley64kVertShade", [&]() {
 			instanceCount = 64000;
 		} },*/
-		/*{"DownTheValley128kVertShade", [&]() {
+		/*{"DownTheValley128kVertShade", [&]() {TOO SLOW ON 2060
 			instanceCount = 128000;
 		} },
 		{"DownTheValley256kVertShade", [&]() {
@@ -577,12 +577,30 @@ void MainDisplayApp::ImageCaptureSequence()
 		//	instanceCount = 256;
 		//} },
 		/*
-		{"DownTheValley512kTrue", [&]() {
+		{"DownTheValley512kTrue", [&]() { TOO SLOW ON 2060
 			instanceCount = 512;
 		} },
 		{"DownTheValley1024kTrue", [&]() {
 			instanceCount = 1024;
 		} }*/
+		{"RenderComparisonCloseTrue", [&]() {
+			currentRendererType = RendererType::MESH_TRUE;
+			myModel->continousLOD_start = myModel->points.size(); // Disable LOD
+			myModel->continousLOD_decay = 1.0f;
+			instanceCount = 100; // To get the two trees next to eachother
+			cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
+			cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
+		} },
+		{"RenderComparisonClosePoint", [&]() {
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{"RenderComparisonFarTrue", [&]() {
+			currentRendererType = RendererType::MESH_TRUE;
+			cameraTransform.position = HMM_V3(-27, -9.3, -24.1);
+		} },
+		{"RenderComparisonFarPoint", [&]() {
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
 
 	};
 
