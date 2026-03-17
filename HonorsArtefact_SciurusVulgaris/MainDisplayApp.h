@@ -63,7 +63,7 @@ private:
 	InstancedMeshTree_RP instancedMeshTree_RP;
 	ImGuiHelpers::MultiTriListMeshLoader triangleMeshTreeLoader;
 
-	InstancedWCPHelper treeMeshInstancePositions;
+	InstancedWorldMatrixHelper treeMeshInstancePositions;
 	// For Image Capture
 	struct ImageCaptureRule {
 		std::string name;

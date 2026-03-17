@@ -8,25 +8,25 @@ layout(location = 0) out vec3 outWorldPos;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outTex;
 
-struct WCPMatrices{
-    mat4 world;
+struct VPMatrices{
     mat4 view;
     mat4 proj;
 };
 
 layout(binding = 0) readonly buffer UniformBufferObject {
-    WCPMatrices matrices[400];
-} ubo;
+    mat4 worldMatrices[1024000];
+} transformation;
 
-//layout(set = 1, binding = 1) uniform LightInfo {
-//    float intensity;
-//} li;
+layout(binding = 2) uniform VPMatricesObject {
+	VPMatrices thisFrame;
+	VPMatrices lastFrame;
+} camProjMatrices;
 
 void main() {
 
-    gl_Position = ubo.matrices[gl_InstanceIndex].proj * ubo.matrices[gl_InstanceIndex].view * ubo.matrices[gl_InstanceIndex].world * vec4(inPosition, 1.0);
+    gl_Position = camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[gl_InstanceIndex] * vec4(inPosition, 1.0);
    
-    outWorldPos = (ubo.matrices[gl_InstanceIndex].world * vec4(inPosition, 1.0)).xyz;
-    outNormal = normalize((ubo.matrices[gl_InstanceIndex].world * vec4(inNormal, 0.0)).xyz);
+    outWorldPos = (transformation.worldMatrices[gl_InstanceIndex] * vec4(inPosition, 1.0)).xyz;
+    outNormal = normalize((transformation.worldMatrices[gl_InstanceIndex] * vec4(inNormal, 0.0)).xyz);
     outTex = inTex;
 }

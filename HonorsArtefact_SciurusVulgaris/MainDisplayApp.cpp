@@ -10,7 +10,7 @@ void MainDisplayApp::Initialize() {
 
 	pointRenderingPass.CreateAll();
 	descriptorSizes = { 0, sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo), sizeof(VP_Matrices) * 2};
-	descriptorSizesMesh = { sizeof(WCP_Matrices) * 4000, 0};
+	descriptorSizesMesh = { sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, 0, sizeof(VP_Matrices) * 2 };
 	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
 
 	myModel = nullptr;
@@ -46,10 +46,10 @@ void MainDisplayApp::Initialize() {
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
 	instancedMeshTree_RP.CreateAll();
-	treeMeshInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
+	treeMeshInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
 	treeMeshInstancePositions.ApplyRandomRotation(chosenSeed);
 	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
-	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
+	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
 
 	captureUnderway = false;
@@ -310,14 +310,15 @@ void MainDisplayApp::FrameMeshTrue()
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
+		//treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		for (int i = 0; i < triangleMeshTreeLoader.GetMeshVector()->size(); i++) {
-			(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+			//(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			InstancingInfo instancingInfo{ instanceCount, 0 };
+			VP_Matrices viewCamMatrices = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
 
-			//myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+			(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateUniformBufferData(2, &viewCamMatrices); // Only 1/2 of buffer update but second half not used.
 			instancedMeshTree_RP.RenderMeshTree(&(*triangleMeshTreeLoader.GetMeshVector())[i], instancingInfo);
 		}
 	}
@@ -437,6 +438,7 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Begin("Triangle Model");
 	triangleMeshTreeLoader.Display([&](TriListMesh* mesh, Image* texture) {
 		mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+		mesh->GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
 		mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
 		});
 	ImGui::End();

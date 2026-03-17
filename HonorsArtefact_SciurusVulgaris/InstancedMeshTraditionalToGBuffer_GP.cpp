@@ -5,7 +5,7 @@
 
 void InstancedMeshTraditionalToGBuffer_GP::CreateDescriptorLayout()
 {
-    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
+    VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[3]; // Freed upon shutdown
     uboLayoutBindings[0].binding = 0;
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
@@ -18,9 +18,15 @@ void InstancedMeshTraditionalToGBuffer_GP::CreateDescriptorLayout()
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
+    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBindings[2].descriptorCount = 1;
+    uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBindings[2].pImmutableSamplers = nullptr;
+
     vkDescriptorSetLayoutInfo = {};
     vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    vkDescriptorSetLayoutInfo.bindingCount = 2;
+    vkDescriptorSetLayoutInfo.bindingCount = 3;
     vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
 
     if (vkCreateDescriptorSetLayout(Graphics::GetVkDevice(), &vkDescriptorSetLayoutInfo, nullptr, &vkDescriptorSetLayout) != VK_SUCCESS) {
