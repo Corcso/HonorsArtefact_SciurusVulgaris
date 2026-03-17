@@ -476,6 +476,11 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Image(sun.GetShadowImageImGuiTex(), ImVec2(800, 800));
 	ImGui::End();
 
+	ImGui::Begin("Camera Position Information");
+	ImGui::Text("Pos: %f %f %f", cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z);
+	ImGui::Text("Rot: %f %f %f", cameraTransform.euler.X, cameraTransform.euler.Y, cameraTransform.euler.Z);
+	ImGui::End();
+
 	ImGui::Begin("Lighting");
 	ImGui::Checkbox("Enable Skybox", &pointRenderingPass.enableSkybox);
 	sun.RenderImGuiMenu(false);
