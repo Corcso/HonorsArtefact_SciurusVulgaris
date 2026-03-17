@@ -94,35 +94,37 @@ void MainDisplayApp::FrameMeshShaded()
 	LODDataBuffer lodData;
 
 	Graphics::BeginRender();
-	Graphics::PushMetricRange("Shadow Map Render");
-	lightShadow_RP.BeginRender(&sun);
-	if (myModel != nullptr) {
+	if (sun.IsShadowEnabled()) {
+		Graphics::PushMetricRange("Shadow Map Render");
+		lightShadow_RP.BeginRender(&sun);
+		if (myModel != nullptr) {
 
-		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+			for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+				lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+			}
+			lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+			lodData.continousDecay = myModel->continousLOD_decay;
+			lodData.continousStart = myModel->continousLOD_start;
+			lodData.continousShallowness = myModel->continousLOD_shallowness;
+			lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
+
+			VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
+			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
+			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+
+			instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+
+			//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
+
+
+			lightShadow_RP.RenderPointTree(myModel, instancingInfo);
+
+
 		}
-		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.continousDecay = myModel->continousLOD_decay;
-		lodData.continousStart = myModel->continousLOD_start;
-		lodData.continousShallowness = myModel->continousLOD_shallowness;
-		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
-
-		VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
-		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
-		myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
-
-		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
-
-		//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
-
-
-		lightShadow_RP.RenderPointTree(myModel, instancingInfo);
-
-
+		lightShadow_RP.EndRender();
+		Graphics::PopMetricRange();
 	}
-	lightShadow_RP.EndRender();
-	Graphics::PopMetricRange();
 	// Render logic
 	Graphics::PushMetricRange("Render Point Trees");
 

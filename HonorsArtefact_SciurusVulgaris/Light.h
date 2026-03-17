@@ -56,6 +56,7 @@ public:
 	VkFramebuffer GetShadowFrameBuffer() { return shadowFrameBuffer; }
 
 	void SetShadowEnabled(bool enabled) { this->shadowEnabled = enabled; }
+	bool IsShadowEnabled() { return shadowEnabled; }
 private:
 	Type myType;
 
