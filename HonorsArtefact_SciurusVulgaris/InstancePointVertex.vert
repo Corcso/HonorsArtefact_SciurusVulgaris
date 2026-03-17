@@ -84,6 +84,9 @@ void main() {
         pointsMaxToDraw = uint((levelOfDetailData.continousStart * pow(levelOfDetailData.continousDecay, -distanceToInstance * (1.0f / levelOfDetailData.continousShallowness))));
     }
 
+    // For mesh shader parity, round up to the nearest 128
+    pointsMaxToDraw = uint(ceil(float(pointsMaxToDraw) / 128.0f) * 128.0f);
+
     if(pointsMaxToDraw < gl_VertexIndex){
         gl_Position = vec4(0, 0, -2, 1);
         return;

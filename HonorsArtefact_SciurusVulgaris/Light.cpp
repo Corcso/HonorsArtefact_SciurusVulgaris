@@ -45,7 +45,7 @@ void Light::CreateShadowResources(VkRenderPass vkRenderPass)
     shadowImage.CreateImageView(true);
     shadowImage.DebugNameImage(name + " light");
 
-    //VulkanUtility::TransitionImageLayout(shadowImage.GetImage(), VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, true);
+    VulkanUtility::TransitionImageLayout(shadowImage.GetImage(), VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, true);
 
     shadowImageImGuiTex = reinterpret_cast<ImTextureID>(
         ImGui_ImplVulkan_AddTexture(Graphics::GetBasicLinearSampler(), shadowImage.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
