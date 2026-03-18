@@ -83,4 +83,9 @@ void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 		{ "./models/SpeedTrees/singleAColor_autumn.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", },
 		{ true, true, false, false, false, false, false, false }
 	};
+	presetDictionary[AVAILABLE_PRESETS[2] /*512 Triangle Plane*/] = {
+		"./models/Testing/512TrianglePlane.obj",
+		{ "./models/SpeedTrees/singleAColor.png", "", "", "",  "",  "",  "",  "", },
+		{ true, false, false, false, false, false, false, false }
+	};
 }

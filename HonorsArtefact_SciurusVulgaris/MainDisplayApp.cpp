@@ -583,23 +583,78 @@ void MainDisplayApp::ImageCaptureSequence()
 		{"DownTheValley1024kTrue", [&]() {
 			instanceCount = 1024;
 		} }*/
-		{"RenderComparisonCloseTrue", [&]() {
-			currentRendererType = RendererType::MESH_TRUE;
-			myModel->continousLOD_start = myModel->points.size(); // Disable LOD
+		//{"RenderComparisonCloseTrue", [&]() {
+		//	currentRendererType = RendererType::MESH_TRUE;
+		//	myModel->continousLOD_start = myModel->points.size(); // Disable LOD
+		//	myModel->continousLOD_decay = 1.0f;
+		//	instanceCount = 100; // To get the two trees next to eachother
+		//	cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
+		//	cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
+		//} },
+		//{"RenderComparisonClosePoint", [&]() {
+		//	currentRendererType = RendererType::MESH_SHADED_POINTS;
+		//} },
+		//{"RenderComparisonFarTrue", [&]() {
+		//	currentRendererType = RendererType::MESH_TRUE;
+		//	cameraTransform.position = HMM_V3(-27, -9.3, -24.1);
+		//} },
+		//{"RenderComparisonFarPoint", [&]() {
+		//	currentRendererType = RendererType::MESH_SHADED_POINTS;
+		//} },
+		//{ "DownTheValley4kTrue512", [&]() {
+		//	cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
+		//	cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
+		//	instanceCount = 4000;
+		//	currentRendererType = RendererType::MESH_TRUE;
+		//} },
+		//{ "DownTheValley16kTrue512", [&]() {
+		//	instanceCount = 16000;
+		//} },
+		//{ "DownTheValley32kTrue512", [&]() {
+		//	instanceCount = 32000;
+		//} },
+		//{ "DownTheValley64kTrue512", [&]() {
+		//	instanceCount = 64000;
+		//} },
+		//{ "DownTheValley128kTrue512", [&]() {
+		//	instanceCount = 128000;
+		//} },
+		//{ "DownTheValley256kTrue512", [&]() {
+		//	instanceCount = 256000;
+		//} },
+		//{ "DownTheValley512kTrue512", [&]() {
+		//	instanceCount = 512000;
+		//} }, 
+		//{ "DownTheValley1024kTrue512", [&]() {
+		//	instanceCount = 1024000;
+		//} },
+		{ "DownTheValley4kMeshShade512", [&]() {
+			instanceCount = 4000;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+			myModel->continousLOD_start = 512.0f;
+			myModel->continousLOD_shallowness = 12.5f;
 			myModel->continousLOD_decay = 1.0f;
-			instanceCount = 100; // To get the two trees next to eachother
-			cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
-			cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
 		} },
-		{"RenderComparisonClosePoint", [&]() {
-			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		{ "DownTheValley16kMeshShade512", [&]() {
+			instanceCount = 16000;
 		} },
-		{"RenderComparisonFarTrue", [&]() {
-			currentRendererType = RendererType::MESH_TRUE;
-			cameraTransform.position = HMM_V3(-27, -9.3, -24.1);
+		{ "DownTheValley32kMeshShade512", [&]() {
+			instanceCount = 32000;
 		} },
-		{"RenderComparisonFarPoint", [&]() {
-			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		{ "DownTheValley64kMeshShade512", [&]() {
+			instanceCount = 64000;
+		} },
+		{ "DownTheValley128kMeshShade512", [&]() {
+			instanceCount = 128000;
+		} },
+		{ "DownTheValley256kMeshShade512", [&]() {
+			instanceCount = 256000;
+		} },
+		{ "DownTheValley512kMeshShade512", [&]() {
+			instanceCount = 512000;
+		} },
+		{ "DownTheValley1024kMeshShade512", [&]() {
+			instanceCount = 1024000;
 		} },
 
 	};
@@ -816,7 +871,7 @@ void MainDisplayApp::ImageCaptureSequence()
 //	}
 
 
-	for (int i = 0; i < rules.size(); i++) {
+	for (int i = 0; i < /*rules.size()*/0; i++) {
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
 				if(i > 0) Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
@@ -832,7 +887,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		}
 	}
 	if (imageSequenceTimer > (float)rules.size()) {
-		Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
+		//Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
 		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
 		//stageImagesSaved++;
 		captureUnderway = false;
