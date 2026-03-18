@@ -56,6 +56,49 @@ void MainDisplayApp::Initialize() {
 	renderImGui = true;
 
 	currentRendererType = RendererType::MESH_SHADED_POINTS;
+
+	// If we are doing a full capture run, load the relevant models
+	if (Graphics::IsFullCaptureRunActive()) {
+		// Use default paths
+		// Load Point Mesh
+		std::cout << "Loading Point Tree (Summer Bubble)...\n";
+		{
+			if (myModel != nullptr) {
+				Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
+				delete myModel;
+			}
+
+			myModel = new PointTreeMesh();
+
+			myModel->LoadFromTreeFile(modelPath);
+			//myModel->CopyPointsToVRAM();
+			descriptorSizes[0] = myModel->GetPointsArraySize(true);
+			myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+			myModel->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
+			myModel->CopyPointsToVRAMMeshBuffer(0);
+			myModel->CopyPointsToVRAM();
+
+			// Copy instance positions
+			myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+
+
+			MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
+			myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+		}
+		// Load mesh
+		std::cout << "Loading Full Tree (Summer Bubble)... This can take some time.\n";
+		triangleMeshTreeLoader.LoadNow([&](TriListMesh* mesh, Image* texture) {
+			mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+			mesh->GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+			mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
+			});
+
+		// Begin Capture
+		imageSequenceTimer = 0;
+		captureUnderway = true;
+		stageImagesSaved = -1;
+	}
 }
 
 void MainDisplayApp::Frame() {
@@ -309,9 +352,10 @@ void MainDisplayApp::FrameMeshTrue()
 	LODDataBuffer lodData;
 
 	Graphics::BeginRender();
-
+	
 	// Render logic
 	instancedMeshTree_RP.BeginRender();
+	Graphics::PushMetricRange("Render Mesh Trees");
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
@@ -327,18 +371,7 @@ void MainDisplayApp::FrameMeshTrue()
 			instancedMeshTree_RP.RenderMeshTree(&(*triangleMeshTreeLoader.GetMeshVector())[i], instancingInfo);
 		}
 	}
-
-
-
-
-	WCP_Matrices terrainBufferData = {
-		HMM_Translate(HMM_V3(0, 0, 0)),
-		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
-	};
-	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
-	/*instancedMeshTree_RP.SwitchToTraditionalMeshPipeline();
-	instancedMeshTree_RP.RenderTraditionalMesh(terrain);*/
+	Graphics::PopMetricRange();
 
 	instancedMeshTree_RP.EndRender();
 
@@ -347,7 +380,7 @@ void MainDisplayApp::FrameMeshTrue()
 	Light::BufferStruct rawSunData = sun.GetBufferData();
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
-
+	Graphics::PushMetricRange("Colour Deferred");
 	instancedMeshTree_RP.ExecuteSecondRender();
 	Graphics::FinishImGuiRender();
 	instancedMeshTree_RP.EndSecondRender();
@@ -497,6 +530,7 @@ void MainDisplayApp::ImageCaptureSequence()
 	if (!captureUnderway) return;
 
 	std::vector<ImageCaptureRule> rules{
+		// STANDARD MESH SHADER POINTS
 		{"DownTheValley4kMeshShade", [&]() {
 			cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
 			cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
@@ -511,7 +545,7 @@ void MainDisplayApp::ImageCaptureSequence()
 			myModel->continousLOD_shallowness = 12.5f;
 			myModel->continousLOD_decay = 1.5f;
 		} },
-		/*{"DownTheValley16kMeshShade", [&]() {
+		{"DownTheValley16kMeshShade", [&]() {
 			instanceCount = 16000;
 		} },
 		{"DownTheValley32kMeshShade", [&]() {
@@ -532,6 +566,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		{"DownTheValley1024kMeshShade", [&]() {
 			instanceCount = 1024000;
 		} },
+		// STANDARD VERTEX SHADER POINTS
 		{"DownTheValley4kVertShade", [&]() {
 			instanceCount = 4000;
 			currentRendererType = RendererType::VERTEX_SHADED_POINTS;
@@ -544,90 +579,103 @@ void MainDisplayApp::ImageCaptureSequence()
 		} },
 		{"DownTheValley64kVertShade", [&]() {
 			instanceCount = 64000;
-		} },*/
+		} },
 		/*{"DownTheValley128kVertShade", [&]() {TOO SLOW ON 2060
 			instanceCount = 128000;
 		} },
-		{"DownTheValley256kVertShade", [&]() {
+		{"DownTheValley256kVertShade", [&]() {TOO SLOW ON 2060
 			instanceCount = 256000;
 		} },
-		{"DownTheValley512kVertShade", [&]() {
+		{"DownTheValley512kVertShade", [&]() {TOO SLOW ON 2060
 			instanceCount = 512000;
 		} },
-		{"DownTheValley1024kVertShade", [&]() {
+		{"DownTheValley1024kVertShade", [&]() {TOO SLOW ON 2060
 			instanceCount = 1024000;
 		} },*/
-		//{"DownTheValley4True", [&]() {
-		//	instanceCount = 4;
-		//	currentRendererType = RendererType::MESH_TRUE;
-		//} },
-		//{"DownTheValley16True", [&]() {
-		//	instanceCount = 16;
-		//} },
-		//{"DownTheValley32True", [&]() {
-		//	instanceCount = 32;
-		//} },
-		//{"DownTheValley64True", [&]() {
-		//	instanceCount = 64;
-		//} },
-		//{"DownTheValley128True", [&]() {
-		//	instanceCount = 128;
-		//} },
-		//{"DownTheValley256True", [&]() {
-		//	instanceCount = 256;
-		//} },
+		// STANDARD FULL MESH TRUE
+		{"DownTheValley4True", [&]() {
+			instanceCount = 4;
+			currentRendererType = RendererType::MESH_TRUE;
+		} },
+		{"DownTheValley16True", [&]() {
+			instanceCount = 16;
+		} },
+		{"DownTheValley32True", [&]() {
+			instanceCount = 32;
+		} },
+		{"DownTheValley64True", [&]() {
+			instanceCount = 64;
+		} },
+		{"DownTheValley128True", [&]() {
+			instanceCount = 128;
+		} },
+		{"DownTheValley256True", [&]() {
+			instanceCount = 256;
+		} },
 		/*
-		{"DownTheValley512kTrue", [&]() { TOO SLOW ON 2060
+		{"DownTheValley512True", [&]() { TOO SLOW ON 2060
 			instanceCount = 512;
 		} },
-		{"DownTheValley1024kTrue", [&]() {
+		{"DownTheValley1024True", [&]() { TOO SLOW ON 2060
 			instanceCount = 1024;
 		} }*/
-		//{"RenderComparisonCloseTrue", [&]() {
-		//	currentRendererType = RendererType::MESH_TRUE;
-		//	myModel->continousLOD_start = myModel->points.size(); // Disable LOD
-		//	myModel->continousLOD_decay = 1.0f;
-		//	instanceCount = 100; // To get the two trees next to eachother
-		//	cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
-		//	cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
-		//} },
-		//{"RenderComparisonClosePoint", [&]() {
-		//	currentRendererType = RendererType::MESH_SHADED_POINTS;
-		//} },
-		//{"RenderComparisonFarTrue", [&]() {
-		//	currentRendererType = RendererType::MESH_TRUE;
-		//	cameraTransform.position = HMM_V3(-27, -9.3, -24.1);
-		//} },
-		//{"RenderComparisonFarPoint", [&]() {
-		//	currentRendererType = RendererType::MESH_SHADED_POINTS;
-		//} },
-		//{ "DownTheValley4kTrue512", [&]() {
-		//	cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
-		//	cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
-		//	instanceCount = 4000;
-		//	currentRendererType = RendererType::MESH_TRUE;
-		//} },
-		//{ "DownTheValley16kTrue512", [&]() {
-		//	instanceCount = 16000;
-		//} },
-		//{ "DownTheValley32kTrue512", [&]() {
-		//	instanceCount = 32000;
-		//} },
-		//{ "DownTheValley64kTrue512", [&]() {
-		//	instanceCount = 64000;
-		//} },
-		//{ "DownTheValley128kTrue512", [&]() {
-		//	instanceCount = 128000;
-		//} },
-		//{ "DownTheValley256kTrue512", [&]() {
-		//	instanceCount = 256000;
-		//} },
-		//{ "DownTheValley512kTrue512", [&]() {
+		// VISUAL COMPARISON
+		{"RenderComparisonCloseTrue", [&]() {
+			currentRendererType = RendererType::MESH_TRUE;
+			myModel->continousLOD_start = myModel->points.size(); // Disable LOD
+			myModel->continousLOD_decay = 1.0f;
+			instanceCount = 100; // To get the two trees next to eachother
+			cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
+			cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
+		} },
+		{"RenderComparisonClosePoint", [&]() {
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{"RenderComparisonFarTrue", [&]() {
+			currentRendererType = RendererType::MESH_TRUE;
+			cameraTransform.position = HMM_V3(-27, -9.3, -24.1);
+		} },
+		{"RenderComparisonFarPoint", [&]() {
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		// 512 Comparisons | Triangles vs Points 
+		{ "DownTheValley4kTrue512", [&]() {
+			cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
+			cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
+			instanceCount = 4000;
+			currentRendererType = RendererType::MESH_TRUE;
+
+			if (triangleMeshTreeLoader.WhatIsLoaded() != "./models/Testing/512TrianglePlane.obj") {
+				triangleMeshTreeLoader.SwapToPreset("512 Triangle Plane");
+				triangleMeshTreeLoader.LoadNow([&](TriListMesh* mesh, Image* texture) {
+					mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+					mesh->GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+					mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
+					});
+			}
+		} },
+		{ "DownTheValley16kTrue512", [&]() {
+			instanceCount = 16000;
+		} },
+		{ "DownTheValley32kTrue512", [&]() {
+			instanceCount = 32000;
+		} },
+		{ "DownTheValley64kTrue512", [&]() {
+			instanceCount = 64000;
+		} },
+		{ "DownTheValley128kTrue512", [&]() {
+			instanceCount = 128000;
+		} },
+		{ "DownTheValley256kTrue512", [&]() {
+			instanceCount = 256000;
+		} },
+		//{ "DownTheValley512kTrue512", [&]() { TOO SLOW ON 2060
 		//	instanceCount = 512000;
 		//} }, 
-		//{ "DownTheValley1024kTrue512", [&]() {
+		//{ "DownTheValley1024kTrue512", [&]() { TOO SLOW ON 2060
 		//	instanceCount = 1024000;
 		//} },
+		// Points of that 
 		{ "DownTheValley4kMeshShade512", [&]() {
 			instanceCount = 4000;
 			currentRendererType = RendererType::MESH_SHADED_POINTS;
@@ -638,24 +686,24 @@ void MainDisplayApp::ImageCaptureSequence()
 		{ "DownTheValley16kMeshShade512", [&]() {
 			instanceCount = 16000;
 		} },
-		//{ "DownTheValley32kMeshShade512", [&]() {
-		//	instanceCount = 32000;
-		//} },
-		//{ "DownTheValley64kMeshShade512", [&]() {
-		//	instanceCount = 64000;
-		//} },
-		//{ "DownTheValley128kMeshShade512", [&]() {
-		//	instanceCount = 128000;
-		//} },
-		//{ "DownTheValley256kMeshShade512", [&]() {
-		//	instanceCount = 256000;
-		//} },
-		//{ "DownTheValley512kMeshShade512", [&]() {
-		//	instanceCount = 512000;
-		//} },
-		//{ "DownTheValley1024kMeshShade512", [&]() {
-		//	instanceCount = 1024000;
-		//} },
+		{ "DownTheValley32kMeshShade512", [&]() {
+			instanceCount = 32000;
+		} },
+		{ "DownTheValley64kMeshShade512", [&]() {
+			instanceCount = 64000;
+		} },
+		{ "DownTheValley128kMeshShade512", [&]() {
+			instanceCount = 128000;
+		} },
+		{ "DownTheValley256kMeshShade512", [&]() {
+			instanceCount = 256000;
+		} },
+		{ "DownTheValley512kMeshShade512", [&]() {
+			instanceCount = 512000;
+		} },
+		{ "DownTheValley1024kMeshShade512", [&]() {
+			instanceCount = 1024000;
+		} },
 
 	};
 
@@ -874,7 +922,10 @@ void MainDisplayApp::ImageCaptureSequence()
 	for (int i = 0; i < rules.size(); i++) {
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
-				if(i > 0) Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
+				if (i > 0) {
+					Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
+					std::cout << "Completed " << rules[i - 1].name << "\n";
+				}
 			#ifdef NV_PERF_METER
 				Graphics::nvperf_InitiateReport(rules[i].name);
 			#endif // NV_PERF_METER
@@ -888,10 +939,13 @@ void MainDisplayApp::ImageCaptureSequence()
 	}
 	if (imageSequenceTimer > (float)rules.size()) {
 		Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
+		std::cout << "Completed " << rules[rules.size() - 1].name << "\n";
 		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
 		//stageImagesSaved++;
 		captureUnderway = false;
 		renderImGui = true;
+
+		if (Graphics::IsFullCaptureRunActive()) Input::QuitMainLoop();
 
 #ifdef NV_PERF_METER
 		// Combine CSVS

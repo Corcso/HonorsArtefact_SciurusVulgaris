@@ -8,6 +8,8 @@
 #include "MainDisplayApp.h"
 
 int main() {
+	srand(time(0));
+
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"Artefact");
 	Clock::FullReset();
@@ -15,7 +17,7 @@ int main() {
 	// GENERATOR
 	GeneratorApp generator;
 	generator.Initialize();
-	while (true) {
+	while (true && !Graphics::IsFullCaptureRunActive()) { // Skip if capture
 		Input::Update();
 		if (Input::ProcessEvents()) break;
 

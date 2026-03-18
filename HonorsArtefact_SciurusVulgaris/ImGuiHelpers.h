@@ -12,6 +12,10 @@ namespace ImGuiHelpers {
 
 		void Cleanup();
 
+		std::string WhatIsLoaded();
+		void SwapToPreset(std::string presetName);
+		void LoadNow(std::function<void(TriListMesh*, Image*)> setupDescriptors);
+
 		bool IsMeshLoaded() { return mesh.size() > 0; }
 
 		std::vector<TriListMesh>* GetMeshVector() { return &mesh; }

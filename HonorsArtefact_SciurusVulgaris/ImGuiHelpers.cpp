@@ -71,6 +71,39 @@ void ImGuiHelpers::MultiTriListMeshLoader::Cleanup()
 	textures.clear();
 }
 
+std::string ImGuiHelpers::MultiTriListMeshLoader::WhatIsLoaded()
+{
+	return meshPathCurrentlyLoaded;
+}
+
+void ImGuiHelpers::MultiTriListMeshLoader::SwapToPreset(std::string presetName)
+{
+	meshPath = presetDictionary[presetName].meshPath;
+	texturePaths = presetDictionary[presetName].texturePaths;
+	texturesEnabled = presetDictionary[presetName].texturesEnabled;
+}
+
+void ImGuiHelpers::MultiTriListMeshLoader::LoadNow(std::function<void(TriListMesh*, Image*)> setupDescriptors)
+{
+	mesh.clear();
+	textures.clear();
+	textures.resize(8);
+
+	for (int i = 0; i < 8; i++) {
+		if (texturesEnabled[i]) {
+			textures[i].CreateAndLoadImageFromFile(texturePaths[i], VK_IMAGE_USAGE_SAMPLED_BIT);
+			textures[i].CreateImageView();
+		}
+	}
+
+	mesh = TriListMesh::LoadMultiMeshFile(meshPath);
+	for (int i = 0; i < mesh.size(); i++) {
+		setupDescriptors(&mesh[i], texturesEnabled[i] ? &textures[i] : nullptr);
+	}
+
+	meshPathCurrentlyLoaded = meshPath;
+}
+
 void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 {
 	presetDictionary[AVAILABLE_PRESETS[0] /*Summer Bubble*/] = {

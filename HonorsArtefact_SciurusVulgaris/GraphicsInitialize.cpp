@@ -385,6 +385,17 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.noShadowMapImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 #ifdef NV_PERF_METER
+
+    std::cout << "Would you like a full runthrough capture? (Y/N) : ";
+    std::string runthroughCaptureAnswer;
+    std::cin >> runthroughCaptureAnswer;
+    if (runthroughCaptureAnswer == "Y" || runthroughCaptureAnswer == "y") {
+        instance.fullCaptureModeEnabled = true;
+        std::cout << "The program will now preform a full capture run. Please make sure Summer Bubble is your generated point mesh with at least 512 points. (This is the default when first downloading the application.\n";
+        std::cout << "Also please close combined.csv if you already have it open!\nSit back, relax, and enjoy the capture : )\n";
+        std::cout << "\nRenders will be saved to imageout/XXXXX.bmp, metrics to nvperfout/combined.csv\n\n";
+    }
+
     nv::perf::InitializeNvPerf();
     instance.nvperf_reportGenerator.additionalMetrics = { "crop__write_throughput" };
     instance.nvperf_reportGenerator.InitializeReportGenerator(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
@@ -400,8 +411,13 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     std::cout << "Would you like live statistics? (Y/N) : ";
     std::string liveStatisticsEnabled;
-    std::cin >> liveStatisticsEnabled;
-
+    if(instance.fullCaptureModeEnabled){
+        std::cout << "N\n";
+        liveStatisticsEnabled == "N";
+    }
+    else {
+        std::cin >> liveStatisticsEnabled;
+    }
     // LIVE STATS
     if (liveStatisticsEnabled == "Y" || liveStatisticsEnabled == "y") {
         instance.nvperf_liveMode = true;

@@ -49,6 +49,8 @@ public:
 	static void SaveSwapChainImageToFile(std::string path);
 	//static void AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout);
 
+	static bool IsFullCaptureRunActive() { return instance.fullCaptureModeEnabled; }
+
 	static void CheckVulkanResult(VkResult res)
 	{
 		if (res == VK_SUCCESS)
@@ -114,6 +116,8 @@ private:
 	uint8_t currentFrame;
 	uint32_t thisRenderImageIndex;
 	uint64_t thisFramesDrawCall;
+
+	bool fullCaptureModeEnabled = false; // Polled by other parts of the application to initiate a full capture then close the application. 
 #ifdef NV_PERF_METER
 	nv::perf::profiler::ReportGeneratorVulkan nvperf_reportGenerator;
 
