@@ -638,24 +638,24 @@ void MainDisplayApp::ImageCaptureSequence()
 		{ "DownTheValley16kMeshShade512", [&]() {
 			instanceCount = 16000;
 		} },
-		{ "DownTheValley32kMeshShade512", [&]() {
-			instanceCount = 32000;
-		} },
-		{ "DownTheValley64kMeshShade512", [&]() {
-			instanceCount = 64000;
-		} },
-		{ "DownTheValley128kMeshShade512", [&]() {
-			instanceCount = 128000;
-		} },
-		{ "DownTheValley256kMeshShade512", [&]() {
-			instanceCount = 256000;
-		} },
-		{ "DownTheValley512kMeshShade512", [&]() {
-			instanceCount = 512000;
-		} },
-		{ "DownTheValley1024kMeshShade512", [&]() {
-			instanceCount = 1024000;
-		} },
+		//{ "DownTheValley32kMeshShade512", [&]() {
+		//	instanceCount = 32000;
+		//} },
+		//{ "DownTheValley64kMeshShade512", [&]() {
+		//	instanceCount = 64000;
+		//} },
+		//{ "DownTheValley128kMeshShade512", [&]() {
+		//	instanceCount = 128000;
+		//} },
+		//{ "DownTheValley256kMeshShade512", [&]() {
+		//	instanceCount = 256000;
+		//} },
+		//{ "DownTheValley512kMeshShade512", [&]() {
+		//	instanceCount = 512000;
+		//} },
+		//{ "DownTheValley1024kMeshShade512", [&]() {
+		//	instanceCount = 1024000;
+		//} },
 
 	};
 
@@ -871,7 +871,7 @@ void MainDisplayApp::ImageCaptureSequence()
 //	}
 
 
-	for (int i = 0; i < /*rules.size()*/0; i++) {
+	for (int i = 0; i < rules.size(); i++) {
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
 				if(i > 0) Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
@@ -887,7 +887,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		}
 	}
 	if (imageSequenceTimer > (float)rules.size()) {
-		//Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
+		Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
 		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
 		//stageImagesSaved++;
 		captureUnderway = false;
@@ -940,4 +940,5 @@ void MainDisplayApp::ImageCaptureSequence()
 	}
 
 	if (!pauseTimer) imageSequenceTimer += Clock::DeltaTime();
+	guffer.SayGuff(Clock::DeltaTime());
 }

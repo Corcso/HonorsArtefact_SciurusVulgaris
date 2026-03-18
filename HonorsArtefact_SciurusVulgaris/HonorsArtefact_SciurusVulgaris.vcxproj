@@ -228,6 +228,7 @@
     <ClInclude Include="GBufferToOutput_GP.h" />
     <ClInclude Include="GeneratorApp.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Guffer.hpp" />
     <ClInclude Include="HandmadeMath.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="imconfig.h" />

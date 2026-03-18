@@ -195,6 +195,9 @@
     <ClInclude Include="Skybox_GP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Guffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCH.cpp">

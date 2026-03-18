@@ -10,6 +10,7 @@
 #include "InstancedMeshTree_RP.h"
 
 #include "ImGuiHelpers.h"
+#include "Guffer.hpp"
 
 
 class MainDisplayApp :
@@ -74,6 +75,7 @@ private:
 	bool captureUnderway;
 	float imageSequenceTimer;
 	int stageImagesSaved;
+	Guffer guffer;
 	void ImageCaptureSequence();
 };
 
