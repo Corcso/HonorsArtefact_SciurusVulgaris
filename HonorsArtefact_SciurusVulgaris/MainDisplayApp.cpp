@@ -38,7 +38,7 @@ void MainDisplayApp::Initialize() {
 
 	//treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
 	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
-	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation();
+	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation(Graphics::IsFullCaptureRunActive() ? 1 : 0);
 	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
 	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
@@ -923,7 +923,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
 				if (i > 0) {
-					Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[i - 1].name + ".bmp");
+					Graphics::SaveSwapChainImageToFile("./imagesout/" + rules[i - 1].name + ".bmp");
 					std::cout << "Completed " << rules[i - 1].name << "\n";
 				}
 			#ifdef NV_PERF_METER
@@ -938,7 +938,7 @@ void MainDisplayApp::ImageCaptureSequence()
 		}
 	}
 	if (imageSequenceTimer > (float)rules.size()) {
-		Graphics::SaveSwapChainImageToFile("imagesout\\" + rules[rules.size() - 1].name + ".bmp");
+		Graphics::SaveSwapChainImageToFile(".\\imagesout\\" + rules[rules.size() - 1].name + ".bmp");
 		std::cout << "Completed " << rules[rules.size() - 1].name << "\n";
 		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
 		//stageImagesSaved++;
@@ -969,7 +969,7 @@ void MainDisplayApp::ImageCaptureSequence()
 			csv2::trim_policy::trim_whitespace> csv;
 
 		for (auto& rule : rules) {
-			if (csv.mmap("nvperfout\\"+ rule.name +"\\nvperf_metrics_summary.csv")) {
+			if (csv.mmap("nvperfout\\"+ rule.name +"\\nvperf_metrics.csv")) {
 				const auto header = csv.header();
 				for (const auto& row : csv) {
 					outRows.push_back(std::vector<std::string>());

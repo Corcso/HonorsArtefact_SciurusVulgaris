@@ -184,13 +184,13 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\VulkanSDK\NvPerf\bin\x64;$(SolutionDir)/lib;C:\VulkanSDK\1.4.321.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;nvperf_grfx_host.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;nvperf_grfx_host.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PreBuildEvent>
-      <Command>call "$(ProjectDir)CompileAllShaders.bat"</Command>
+      <Command>call "$(ProjectDir)CompileAllShadersRelease.bat"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -215,7 +215,7 @@
       <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>call "$(ProjectDir)CompileAllShaders.bat"</Command>
+      <Command>call "$(ProjectDir)CompileAllShadersRelease.bat"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -304,6 +304,7 @@
     <ClCompile Include="InstancedWCPHelper.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightShadow_RP.cpp" />
+    <None Include="CompileAllShadersRelease.bat" />
     <None Include="MeshFragmentPhotogrammetric.frag">
       <FileType>CppCode</FileType>
     </None>

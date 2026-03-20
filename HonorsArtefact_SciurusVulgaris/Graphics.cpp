@@ -262,7 +262,8 @@ void Graphics::SaveSwapChainImageToFile(std::string path)
     vkDestroyBuffer(instance.vkDevice, stagingBuffer, nullptr);
     instance.VRAMAllocator.FreeMemory(instance.vkDevice, stagingBufferMemory);
 
-    stbi_write_bmp(path.c_str(), instance.vkSwapChainExtent.width, instance.vkSwapChainExtent.height, 4, data);
+    int returnCode = stbi_write_bmp(path.c_str(), instance.vkSwapChainExtent.width, instance.vkSwapChainExtent.height, 4, data);
+    if (Graphics::IsFullCaptureRunActive()) std::cout << "Saved image with: " << returnCode << "\n";
 
     delete[] data;
 }
