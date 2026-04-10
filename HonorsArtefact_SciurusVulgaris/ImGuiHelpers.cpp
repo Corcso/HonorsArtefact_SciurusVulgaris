@@ -121,4 +121,9 @@ void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 		{ "./models/SpeedTrees/singleAColor.png", "", "", "",  "",  "",  "",  "", },
 		{ true, false, false, false, false, false, false, false }
 	};
+	presetDictionary[AVAILABLE_PRESETS[3] /*Pine 001*/] = {
+		"./models/SpeedTrees/Pine001/Model.fbx",
+		{ "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Material_Leaf_Example_Combined.png", "",  "",  "",  "",  "", },
+		{ true, true, true, false, false, false, false, false }
+	};
 }
