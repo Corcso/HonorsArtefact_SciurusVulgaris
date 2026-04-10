@@ -1,4 +1,4 @@
-## Cloudy Skyboxes
+## Cloudy Skyboxes - Texture 1
 By: Screaming Brain Studios
 Available at: https://screamingbrainstudios.itch.io/cloudy-skyboxes-pack
 Downloaded: 10 March 2026
@@ -47,3 +47,14 @@ Sarah Gray
 Just Matt
 Stray Molotov
 The Arcology Podcast
+
+## Kloofendal 48d Partly Cloudy (Pure Sky) - Texture 2  
+By: Greg Zaal & Jarod Guest
+Available at: https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
+Downloaded: 23 March 2026
+Created: 2023
+
+License: CC0 1.0 (Public Domain)
+
+### Reference
+Zaal, G. and Guest, J. (2023) *Kloofendal 48d Partly Cloudy (Pure Sky)* [Digital art]. Available at: https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky (Accessed: 23 March 2026).

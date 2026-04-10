@@ -777,7 +777,8 @@ void InstancedTreeRenderPass::CreateSkyboxMeshAndImage()
     skyboxMesh->LoadFile("./models/Skybox/Skybox.obj", 0);
     skyboxMesh->CopyPointsToVRAM();
 
-    activeSkyboxImage.CreateAndLoadImageFromFile("./models/Skybox/Texture1.png", VK_IMAGE_USAGE_SAMPLED_BIT);
+    // (Zaal and Guest, 2023)
+    activeSkyboxImage.CreateAndLoadImageFromFile("./models/Skybox/Texture2.png", VK_IMAGE_USAGE_SAMPLED_BIT);
     activeSkyboxImage.CreateImageView();
     
     size_t sizes[3] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
