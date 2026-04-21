@@ -60,7 +60,7 @@ void MainDisplayApp::Initialize() {
 
 			loadedPointModels.push_back(new PointTreeMesh());
 
-			loadedPointModels[0]->LoadFromTreeFile("./model/output512.tree");
+			loadedPointModels[0]->LoadFromTreeFile("./model/outputBubble512.tree");
 			descriptorSizes[0] = loadedPointModels[0]->GetPointsArraySize(true);
 			loadedPointModels[0]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 			loadedPointModels[0]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
