@@ -89,7 +89,6 @@ void ImGuiHelpers::MultiTriListMeshLoader::SwapToPreset(std::string presetName)
 
 void ImGuiHelpers::MultiTriListMeshLoader::LoadNow(std::function<void(TriListMesh*, Image*)> setupDescriptors)
 {
-	if (IsMeshLoaded()) return;
 	mesh.clear();
 	textures.clear();
 	textures.resize(8);

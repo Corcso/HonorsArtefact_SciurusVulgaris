@@ -60,7 +60,7 @@ void MainDisplayApp::Initialize() {
 
 			loadedPointModels.push_back(new PointTreeMesh());
 
-			loadedPointModels[0]->LoadFromTreeFile("./model/outputBubble512.tree");
+			loadedPointModels[0]->LoadFromTreeFile("./models/outputBubble512.tree");
 			descriptorSizes[0] = loadedPointModels[0]->GetPointsArraySize(true);
 			loadedPointModels[0]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 			loadedPointModels[0]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
@@ -615,80 +615,61 @@ void MainDisplayApp::ImageCaptureSequence()
 			loadedPointModels[0]->continousLOD_shallowness = 12.5f;
 			loadedPointModels[0]->continousLOD_decay = 1.5f;
 		} },
-		//{"DownTheValley16kMeshShade", [&]() {
-		//	instanceCount = 16000;
-		//} },
-		//{"DownTheValley32kMeshShade", [&]() {
-		//	instanceCount = 32000;
-		//} },
-		//{"DownTheValley64kMeshShade", [&]() {
-		//	instanceCount = 64000;
-		//} },
-		//{"DownTheValley128kMeshShade", [&]() {
-		//	instanceCount = 128000;
-		//} },
-		//{"DownTheValley256kMeshShade", [&]() {
-		//	instanceCount = 256000;
-		//} },
-		//{"DownTheValley512kMeshShade", [&]() {
-		//	instanceCount = 512000;
-		//} },
-		//{"DownTheValley1024kMeshShade", [&]() {
-		//	instanceCount = 1024000;
-		//} },
-		//// STANDARD VERTEX SHADER POINTS
-		//{"DownTheValley4kVertShade", [&]() {
-		//	instanceCount = 4000;
-		//	currentRendererType = RendererType::VERTEX_SHADED_POINTS;
-		//} },
-		//{"DownTheValley16kVertShade", [&]() {
-		//	instanceCount = 16000;
-		//} },
-		//{"DownTheValley32kVertShade", [&]() {
-		//	instanceCount = 32000;
-		//} },
-		//{"DownTheValley64kVertShade", [&]() {
-		//	instanceCount = 64000;
-		//} },
-		///*{"DownTheValley128kVertShade", [&]() {TOO SLOW ON 2060
-		//	instanceCount = 128000;
-		//} },
-		//{"DownTheValley256kVertShade", [&]() {TOO SLOW ON 2060
-		//	instanceCount = 256000;
-		//} },
-		//{"DownTheValley512kVertShade", [&]() {TOO SLOW ON 2060
-		//	instanceCount = 512000;
-		//} },
-		//{"DownTheValley1024kVertShade", [&]() {TOO SLOW ON 2060
-		//	instanceCount = 1024000;
-		//} },*/
-		//// STANDARD FULL MESH TRUE
-		//{"DownTheValley4True", [&]() {
-		//	instanceCount = 4;
-		//	currentRendererType = RendererType::MESH_TRUE;
-		//} },
-		//{"DownTheValley16True", [&]() {
-		//	instanceCount = 16;
-		//} },
-		//{"DownTheValley32True", [&]() {
-		//	instanceCount = 32;
-		//} },
-		//{"DownTheValley64True", [&]() {
-		//	instanceCount = 64;
-		//} },
-		//{"DownTheValley128True", [&]() {
-		//	instanceCount = 128;
-		//} },
-		//{"DownTheValley256True", [&]() {
-		//	instanceCount = 256;
-		//} },
-		/*
-		{"DownTheValley512True", [&]() { TOO SLOW ON 2060
-			instanceCount = 512;
+		{"DownTheValley16kMeshShade", [&]() {
+			instanceCount = 16000;
 		} },
-		{"DownTheValley1024True", [&]() { TOO SLOW ON 2060
-			instanceCount = 1024;
-		} }*/
+		{"DownTheValley32kMeshShade", [&]() {
+			instanceCount = 32000;
+		} },
+		{"DownTheValley64kMeshShade", [&]() {
+			instanceCount = 64000;
+		} },
+		{"DownTheValley128kMeshShade", [&]() {
+			instanceCount = 128000;
+		} },
+		{"DownTheValley256kMeshShade", [&]() {
+			instanceCount = 256000;
+		} },
+		{"DownTheValley512kMeshShade", [&]() {
+			instanceCount = 512000;
+		} },
+		{"DownTheValley1024kMeshShade", [&]() {
+			instanceCount = 1024000;
+		} },
+		// STANDARD VERTEX SHADER POINTS
+		{"DownTheValley4kVertShade", [&]() {
+			instanceCount = 4000;
+			currentRendererType = RendererType::VERTEX_SHADED_POINTS;
+		} },
+		{"DownTheValley16kVertShade", [&]() {
+			instanceCount = 16000;
+		} },
+		{"DownTheValley32kVertShade", [&]() {
+			instanceCount = 32000;
+		} },
+		{"DownTheValley64kVertShade", [&]() {
+			instanceCount = 64000;
+		} },
+		// STANDARD FULL MESH TRUE
+		{"DownTheValley4True", [&]() {
+			instanceCount = 4;
+			currentRendererType = RendererType::MESH_TRUE;
+		} },
+		{"DownTheValley16True", [&]() {
+			instanceCount = 16;
+		} },
+		{"DownTheValley32True", [&]() {
+			instanceCount = 32;
+		} },
+		{"DownTheValley64True", [&]() {
+			instanceCount = 64;
+		} },
+		{"DownTheValley128True", [&]() {
+			instanceCount = 128;
+		} },
+		{"DownTheValley256True", [&]() {
+			instanceCount = 256;
+		} },
 		// VISUAL COMPARISON
 		{"RenderComparisonCloseTrue", [&]() {
 			currentRendererType = RendererType::MESH_TRUE;
@@ -709,42 +690,36 @@ void MainDisplayApp::ImageCaptureSequence()
 			currentRendererType = RendererType::MESH_SHADED_POINTS;
 		} },
 		// 512 Comparisons | Triangles vs Points 
-		//{ "DownTheValley4kTrue512", [&]() {
-		//	cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
-		//	cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
-		//	instanceCount = 4000;
-		//	currentRendererType = RendererType::MESH_TRUE;
+		{ "DownTheValley4kTrue512", [&]() {
+			cameraTransform.position = HMM_V3(24.5, -15.2, -107.21);
+			cameraTransform.euler = HMM_V3(4.5, 23.5, 0);
+			instanceCount = 4000;
+			currentRendererType = RendererType::MESH_TRUE;
 
-		//	if (triangleMeshTreeLoader.WhatIsLoaded() != "./models/Testing/512TrianglePlane.obj") {
-		//		triangleMeshTreeLoader.SwapToPreset("512 Triangle Plane");
-		//		triangleMeshTreeLoader.LoadNow([&](TriListMesh* mesh, Image* texture) {
-		//			mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
-		//			mesh->GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
-		//			mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
-		//			});
-		//	}
-		//} },
-		//{ "DownTheValley16kTrue512", [&]() {
-		//	instanceCount = 16000;
-		//} },
-		//{ "DownTheValley32kTrue512", [&]() {
-		//	instanceCount = 32000;
-		//} },
-		//{ "DownTheValley64kTrue512", [&]() {
-		//	instanceCount = 64000;
-		//} },
-		//{ "DownTheValley128kTrue512", [&]() {
-		//	instanceCount = 128000;
-		//} },
-		//{ "DownTheValley256kTrue512", [&]() {
-		//	instanceCount = 256000;
-		//} },
-		//{ "DownTheValley512kTrue512", [&]() { TOO SLOW ON 2060
-		//	instanceCount = 512000;
-		//} }, 
-		//{ "DownTheValley1024kTrue512", [&]() { TOO SLOW ON 2060
-		//	instanceCount = 1024000;
-		//} },
+			if (triangleMeshTreeLoader.WhatIsLoaded() != "./models/Testing/512TrianglePlane.obj") {
+				triangleMeshTreeLoader.SwapToPreset("512 Triangle Plane");
+				triangleMeshTreeLoader.LoadNow([&](TriListMesh* mesh, Image* texture) {
+					mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
+					mesh->GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
+					mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
+					});
+			}
+		} },
+		{ "DownTheValley16kTrue512", [&]() {
+			instanceCount = 16000;
+		} },
+		{ "DownTheValley32kTrue512", [&]() {
+			instanceCount = 32000;
+		} },
+		{ "DownTheValley64kTrue512", [&]() {
+			instanceCount = 64000;
+		} },
+		{ "DownTheValley128kTrue512", [&]() {
+			instanceCount = 128000;
+		} },
+		{ "DownTheValley256kTrue512", [&]() {
+			instanceCount = 256000;
+		} },
 		// Points of that 
 		{ "DownTheValley4kMeshShade512", [&]() {
 			instanceCount = 4000;
@@ -768,12 +743,13 @@ void MainDisplayApp::ImageCaptureSequence()
 		{ "DownTheValley256kMeshShade512", [&]() {
 			instanceCount = 256000;
 		} },
-		//{ "DownTheValley512kMeshShade512", [&]() {
-		//	instanceCount = 512000;
-		//} },
-		//{ "DownTheValley1024kMeshShade512", [&]() {
-		//	instanceCount = 1024000;
-		//} },
+		{ "DownTheValley512kMeshShade512", [&]() {
+			instanceCount = 512000;
+		} },
+		{ "DownTheValley1024kMeshShade512", [&]() {
+			instanceCount = 1024000;
+		} },
+		// Vertex shaded too
 		{ "DownTheValley4kVertexShade512", [&]() {
 		instanceCount = 4000;
 		currentRendererType = RendererType::VERTEX_SHADED_POINTS;
