@@ -28,6 +28,7 @@ void MainDisplayApp::Initialize() {
 	//terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
 	terrain->LoadFile("./models/ChinaValley/ChinaValley.fbx", 0);
 	terrain->CopyPointsToVRAM();
+	// ChinaValley map from (Mustoe-Playfair, 2026)
 	terrainTexture.CreateAndLoadImageFromFile("./models/ChinaValley/Colour.png", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
 	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
