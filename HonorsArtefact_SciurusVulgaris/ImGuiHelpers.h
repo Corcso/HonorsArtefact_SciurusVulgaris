@@ -3,6 +3,8 @@
 #include <functional>
 
 namespace ImGuiHelpers {
+	void ImGuiSetupStyle();
+
 	class MultiTriListMeshLoader
 	{
 	public:

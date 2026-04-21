@@ -3,6 +3,7 @@
 #include "VulkanUtility.h"
 #include "VulkanSetup.h"
 #include "Input.h"
+#include "ImGuiHelpers.h"
 
 // The setup process is so long its getting its own CPP file.
 
@@ -452,6 +453,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     }
 #endif // NV_PERF_METER
 
+    ImGuiHelpers::ImGuiSetupStyle();
 
     return ;
 }
