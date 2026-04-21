@@ -9,12 +9,6 @@ layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec3 outNormal;
 layout(location = 3) out vec2 outVelocity;
 
-//struct WCPMatrices{
-//    mat4 world;
-//    mat4 view;
-//    mat4 proj;
-//};
-
 struct VPMatrices{
     mat4 view;
     mat4 proj;

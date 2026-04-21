@@ -1,10 +1,21 @@
 #pragma once
 #include "PCH.h"
 
+/// <summary>
+/// Triangle Instanced Mesh to GBuffer Graphics Pipeline
+/// </summary>
 class InstancedMeshTraditionalToGBuffer_GP
 {
 public:
+	/// <summary>
+	/// Create the descriptor layout
+	/// </summary>
 	void CreateDescriptorLayout();
+
+	/// <summary>
+	/// Create the pipeline.
+	/// </summary>
+	/// <param name="vkRenderPass">Render pass pipeline will render on.</param>
 	void CreatePipeline(const VkRenderPass& vkRenderPass);
 
 	VkDescriptorSetLayout vkDescriptorSetLayout;

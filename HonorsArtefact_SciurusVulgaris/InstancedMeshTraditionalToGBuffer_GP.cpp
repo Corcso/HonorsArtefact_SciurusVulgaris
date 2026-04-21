@@ -6,19 +6,19 @@
 void InstancedMeshTraditionalToGBuffer_GP::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[3]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // World Matrix Array
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // Color Texture
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[1].descriptorCount = 1;
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].binding = 2; // VP Matrices
     uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[2].descriptorCount = 1;
     uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

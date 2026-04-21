@@ -6,13 +6,13 @@
 void FXAA_GP::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // Colour image
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // FXAA Info
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[1].descriptorCount = 1;
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

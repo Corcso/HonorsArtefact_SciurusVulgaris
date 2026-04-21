@@ -87,7 +87,7 @@ void MeshRenderer::CreateRenderPass()
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-    // Read tutorial its hard to explain
+    
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -142,7 +142,7 @@ void MeshRenderer::CreateRenderPass()
     subpass.pColorAttachments = colorAttachments;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    // Subpass dependencies (not sure what these are at all)
+    // Subpass dependencies
     // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;

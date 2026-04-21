@@ -6,13 +6,13 @@
 void Skybox_GP::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[3]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // WCP Matrices including last frame
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // Skybox Texture
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[1].descriptorCount = 1;
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

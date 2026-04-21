@@ -29,11 +29,11 @@ void InstancedTreeRenderPass::CreateImages() {
 
     colorImageFinal.CreateImage(VK_FORMAT_R8G8B8A8_UNORM, Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     colorImageFinal.CreateImageView();
-    colorImageFinal.DebugNameImage("TAA Out Color");
+    colorImageFinal.DebugNameImage("GPaint Out Color");
 
     depthImageFinal.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), Graphics::GetSwapChainExtent().width, Graphics::GetSwapChainExtent().height, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     depthImageFinal.CreateImageView(true);
-    depthImageFinal.DebugNameImage("TAA Out Depth");
+    depthImageFinal.DebugNameImage("GPaint Out Depth");
 }
 
 void InstancedTreeRenderPass::CreateUniqueMeshData()
@@ -153,7 +153,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        // Read tutorial its hard to explain
+        
         VkAttachmentReference colorAttachmentRef{};
         colorAttachmentRef.attachment = 0;
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -222,7 +222,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         subpass.pColorAttachments = colorAttachments;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-        // Subpass dependencies (not sure what these are at all)
+        // Subpass dependencies
         // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
         VkSubpassDependency dependency{};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -261,7 +261,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        // Read tutorial its hard to explain
+        
         VkAttachmentReference colorAttachmentRef{};
         colorAttachmentRef.attachment = 0;
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -288,7 +288,7 @@ void InstancedTreeRenderPass::CreateRenderPasses() {
         subpass.pColorAttachments = colorAttachments;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-        // Subpass dependencies (not sure what these are at all)
+        // Subpass dependencies
         // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
         VkSubpassDependency dependency{};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -356,7 +356,7 @@ void InstancedTreeRenderPass::CreateTAAResources()
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
-    // Read tutorial its hard to explain
+    
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -503,14 +503,6 @@ void InstancedTreeRenderPass::RenderPointTree(PointTreeMesh* points, InstancingI
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-    //vkCmdBindIndexBuffer(commandBuffer, points->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-    //WCP_Matrices dataForUBO{
-    //    HMM_Scale(HMM_V3(5, 5, 5)) * HMM_Translate(HMM_V3(0, -0.8, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -10), HMM_V3(0, 0, -20), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 30)
-    //};
-
-    //points->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
-
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBuffer_GP.vkPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
@@ -521,11 +513,9 @@ void InstancedTreeRenderPass::RenderPointTreeViaMeshShader(PointTreeMesh* points
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
-    //vkCmdDrawMeshTasksEXT(commandBuffer, 1, 1, 1);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pointsToGBufferMeshShade_GP.vkPipelineLayout, 0, 1,
         points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
-    //reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkCmdDrawMeshTasksEXT"))(commandBuffer, points->GetMeshletCount() * instancingInfo.numberOfInstances, 1, 1);
     reinterpret_cast<PFN_vkCmdDrawMeshTasksEXT>(vkGetDeviceProcAddr(Graphics::GetVkDevice(), "vkCmdDrawMeshTasksEXT"))(commandBuffer, ceil(instancingInfo.numberOfInstances), 1, 1);
 }
 
@@ -739,6 +729,8 @@ void InstancedTreeRenderPass::EndTAARender(VkCommandBuffer commandBuffer)
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     vkCmdEndRenderPass(commandBuffer);
+
+    // Copy output image to history for next frame.
 
     VulkanUtility::TransitionImageLayout(commandBuffer, TAAHistoryImage.GetImage(), TAAHistoryImage.GetImageFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, false);
 

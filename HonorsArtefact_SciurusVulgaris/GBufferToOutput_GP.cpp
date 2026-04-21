@@ -6,37 +6,37 @@
 void GBufferToOutput_GP::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[6]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0;  // Color Image
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // Position Image
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[1].descriptorCount = 1;
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].binding = 2; // Normal Image
     uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[2].descriptorCount = 1;
     uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[2].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[3].binding = 3;
+    uboLayoutBindings[3].binding = 3; // Light buffer info
     uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[3].descriptorCount = 1;
     uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[3].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[4].binding = 4;
+    uboLayoutBindings[4].binding = 4; // Light shadow map
     uboLayoutBindings[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[4].descriptorCount = 1;
     uboLayoutBindings[4].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[4].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[5].binding = 5;
+    uboLayoutBindings[5].binding = 5; // Depth buffer
     uboLayoutBindings[5].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[5].descriptorCount = 1;
     uboLayoutBindings[5].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

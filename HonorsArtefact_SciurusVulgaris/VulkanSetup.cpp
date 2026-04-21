@@ -240,7 +240,7 @@ void VulkanSetup::CreateRenderPass(VkDevice device, VkPhysicalDevice physicalDev
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-    // Read tutorial its hard to explain
+    
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -265,7 +265,7 @@ void VulkanSetup::CreateRenderPass(VkDevice device, VkPhysicalDevice physicalDev
     subpass.pColorAttachments = &colorAttachmentRef;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    // Subpass dependencies (not sure what these are at all)
+    // Subpass dependencies
     // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;

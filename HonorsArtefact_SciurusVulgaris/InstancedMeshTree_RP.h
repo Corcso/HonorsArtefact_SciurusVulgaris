@@ -6,6 +6,9 @@
 #include "TriListMesh.h"
 #include "Graphics.h"
 
+/// <summary>
+/// Render pass for triangle trees.
+/// </summary>
 class InstancedMeshTree_RP
 {
 public:
@@ -15,6 +18,9 @@ public:
 	void CreateFrameBuffer();
 	void CreateRenderPass();
 
+	/// <summary>
+	/// Create all resources and initialise all pipelines
+	/// </summary>
 	void CreateAll() {
 		CreateImages();
 		CreateSampler();
@@ -28,12 +34,35 @@ public:
 
 		CreateUniqueMeshData();
 	}
-
+	/// <summary>
+	/// Begin the render pass
+	/// </summary>
+	/// <param name="commandBuffer">Command buffer to use, will use frame's if none provided. </param>
 	void BeginRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
-	void RenderMeshTree(TriListMesh* points, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	/// <summary>
+	/// Render a triangle tree
+	/// </summary>
+	/// <param name="mesh">Mesh to render</param>
+	/// <param name="instancingInfo">Instancing information struct</param>
+	/// <param name="commandBuffer">Command buffer to use, will use frame's if none provided. </param>
+	void RenderMeshTree(TriListMesh* mesh, InstancingInfo instancingInfo, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+
+	/// <summary>
+	/// End the render pass
+	/// </summary>
+	/// <param name="commandBuffer">Command buffer to use, will use frame's if none provided. </param>
 	void EndRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
+	/// <summary>
+	/// Execute Geometry paint pass. Colouring & Lighting the GBuffer data. 
+	/// </summary>
+	/// <param name="commandBuffer">Command buffer to use, will use frame's if none provided. </param>
 	void ExecuteSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
+	/// <summary>
+	/// End the Geometry paint pass
+	/// </summary>
+	/// <param name="commandBuffer">Command buffer to use, will use frame's if none provided. </param>
 	void EndSecondRender(VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return instancedMeshTraditionalToGBuffer_GP.vkDescriptorSetLayout; }

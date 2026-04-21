@@ -20,6 +20,7 @@ void InstancedMeshTree_RP::CreateImages() {
 
 void InstancedMeshTree_RP::CreateUniqueMeshData()
 {
+    // Full screen quad for geometry painting
     fullScreenQuad = new TriListMesh();
 
     fullScreenQuad->vertices.resize(4);
@@ -103,7 +104,6 @@ void InstancedMeshTree_RP::CreateRenderPass() {
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-    // Read tutorial its hard to explain
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -158,7 +158,7 @@ void InstancedMeshTree_RP::CreateRenderPass() {
     subpass.pColorAttachments = colorAttachments;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    // Subpass dependencies (not sure what these are at all)
+    // Subpass dependencies
     // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;

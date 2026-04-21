@@ -5,45 +5,37 @@
 
 void PointsToGBuffer_GP::CreateDescriptorLayout()
 {
+    // Shares identical layout to mesh shader version of pipeline
+
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[7]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // Storage buffer version of vertex buffer
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // World matrix array
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
     uboLayoutBindings[1].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[2].binding = 2;
+    uboLayoutBindings[2].binding = 2; // Instancing info
     uboLayoutBindings[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[2].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[2].stageFlags = VK_SHADER_STAGE_MESH_BIT_EXT | VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[2].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[3].binding = 3;
+    uboLayoutBindings[3].binding = 3; // Meshlet info
     uboLayoutBindings[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[3].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[3].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[3].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[4].binding = 4;
+    uboLayoutBindings[4].binding = 4; // LOD Data Info
     uboLayoutBindings[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[4].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[4].stageFlags = VK_SHADER_STAGE_TASK_BIT_EXT | VK_SHADER_STAGE_VERTEX_BIT;
-    // Not used for images
     uboLayoutBindings[4].pImmutableSamplers = nullptr;
 
     uboLayoutBindings[5].binding = 5; // TAA Info

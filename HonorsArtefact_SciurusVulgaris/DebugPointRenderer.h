@@ -63,7 +63,7 @@ private:
 	VkPipelineLayout vkMainPipelineLayout;
 	VkPipeline vkMainPipeline;
 
-	// Output Image
+	// GBuffers
 	Image outputImage;
 	Image depthImage;
 	ImTextureID outputImageImGuiTex;

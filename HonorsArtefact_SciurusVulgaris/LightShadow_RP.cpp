@@ -24,7 +24,7 @@ void LightShadow_RP::CreateRenderPass() {
     subpass.pColorAttachments = nullptr;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-    // Subpass dependencies (not sure what these are at all)
+    // Subpass dependencies
     // https://vulkan-tutorial.com/Drawing_a_triangle/Drawing/Rendering_and_presentation
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;

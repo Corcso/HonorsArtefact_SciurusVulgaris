@@ -1,10 +1,20 @@
 #pragma once
 #include "PCH.h"
 
+/// <summary>
+/// Triangle mesh to GBuffer Graphics Pipeline (for terrain)
+/// </summary>
 class MeshTraditionalToGBuffer_GP
 {
 public:
+	/// <summary>
+	/// Create the descriptor layout
+	/// </summary>
 	void CreateDescriptorLayout();
+	/// <summary>
+	/// Create the pipeline.
+	/// </summary>
+	/// <param name="vkRenderPass">Render pass pipeline will render on.</param>
 	void CreatePipeline(const VkRenderPass& vkRenderPass);
 
 	VkDescriptorSetLayout vkDescriptorSetLayout;
