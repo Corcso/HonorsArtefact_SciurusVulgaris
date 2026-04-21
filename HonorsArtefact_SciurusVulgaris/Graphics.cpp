@@ -173,8 +173,11 @@ void Graphics::EndRender()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(instance.vkGraphicsQueue, 1, &submitInfo, instance.vkInFlightFences[instance.currentFrame]) != VK_SUCCESS) {
-        throw - 1;
+    VkResult graphicsQueueSubmitResult = vkQueueSubmit(instance.vkGraphicsQueue, 1, &submitInfo, instance.vkInFlightFences[instance.currentFrame]);
+
+    if (graphicsQueueSubmitResult != VK_SUCCESS) {
+        std::cout << "ERROR GRAPHICS QUEUE SUBMIT: " << graphicsQueueSubmitResult;
+        throw -1;
     }
 
     //std::cout << "Draws this frame: " << thisFramesDrawCall << "\n";
