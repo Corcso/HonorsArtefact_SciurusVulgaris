@@ -10,11 +10,12 @@
 int main() {
 	srand(time(0));
 
+	// Setup singletons
 	Input::Initialize();
 	Graphics::Initialize(800, 800, L"Artefact");
 	Clock::FullReset();
 
-	// GENERATOR
+	// GENERATOR (PART 1)
 	GeneratorApp generator;
 	generator.Initialize();
 	while (true && !Graphics::IsFullCaptureRunActive()) { // Skip if capture
@@ -26,7 +27,7 @@ int main() {
 	}
 	generator.Shutdown();
 
-	// DISPLAY
+	// DISPLAY (PART 2)
 	MainDisplayApp displayApp;
 	displayApp.Initialize();
 	while (true) {

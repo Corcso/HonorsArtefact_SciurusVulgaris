@@ -1,5 +1,11 @@
 #pragma once
 #include "PCH.h"
+/// <summary>
+/// Input singleton which stores the state of every key and mouse button. 
+/// Contains functions for Down, Up, Pressed and Released. Where Pressed is also Down and Released is also Up
+/// Also contains functions for locking the mouse. 
+/// Singleton adapted from earlier work by myself, any references used within those works have been copied over. 
+/// </summary>
 class Input
 {
 public:

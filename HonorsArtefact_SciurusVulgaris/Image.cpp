@@ -98,11 +98,6 @@ bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage
     return true;
 }
 
-bool Image::LoadImageFromFile(std::string path)
-{
-    return false;
-}
-
 void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VulkanUtility::TransitionImageLayout(vkImage, vkFormat, oldLayout, newLayout, vkFormat == VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()));
@@ -110,6 +105,7 @@ void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayo
 
 std::unique_ptr<std::vector<uint8_t>> Image::ExtractImageData()
 {
+    // Copy image data to a buffer, then buffer back to CPU.
     VkBuffer stagingBuffer;
     VulkanMemoryAllocator::VulkanMemoryBlock stagingBufferMemory;
 

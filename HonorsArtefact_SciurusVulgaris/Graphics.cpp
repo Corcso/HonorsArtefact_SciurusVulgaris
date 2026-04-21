@@ -12,6 +12,7 @@ Graphics Graphics::instance;
 void Graphics::BeginRender()
 {
 #ifdef NV_PERF_METER
+    // Wait until device is idle, then begin a report generation frame.
     VkResult res = vkDeviceWaitIdle(instance.vkDevice);
     if (res != VK_SUCCESS){
         std::cout << "CANNOT IDLE WAIT FOR NVPERF\n";
@@ -25,6 +26,7 @@ void Graphics::BeginRender()
     }
     instance.nvperf_reportGenerator.OnFrameStart(instance.vkPresentQueue, VulkanSetup::GetQueueFamilyIndices(instance.vkPhysicalDevice, instance.vkSurface).presentFamily);
 #endif
+    // New ImGui Frame
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -60,39 +62,6 @@ void Graphics::BeginRender()
         throw - 1;
     }
     PushMetricRange("Program Render");
-    // Do mesh render
-    /*instance.meshRenderer.BeginRender(HMM_V4(0.3f, 0.6f, 0.8f, 1.0f));
-    instance.meshRenderer.Render(instance.myMesh);
-    instance.meshRenderer.EndRender();*/
-
-    /*VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = instance.vkRenderPass;
-    renderPassInfo.framebuffer = instance.vkSwapChainFrameBuffers[instance.thisRenderImageIndex];
-    renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = instance.vkSwapChainExtent;
-
-    std::vector<VkClearValue> clearColors = { {{instance.clearColor.R, instance.clearColor.G, instance.clearColor.B, instance.clearColor.A}}, {1.0f, 0} };
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColors.size());
-    renderPassInfo.pClearValues = clearColors.data();
-
-    vkCmdBeginRenderPass(instance.vkCommandBuffers[instance.currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-    vkCmdBindPipeline(instance.vkCommandBuffers[instance.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, instance.vkMainPipeline);
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(instance.vkSwapChainExtent.width);
-    viewport.height = static_cast<float>(instance.vkSwapChainExtent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(instance.vkCommandBuffers[instance.currentFrame], 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = { 0, 0 };
-    scissor.extent = instance.vkSwapChainExtent;
-    vkCmdSetScissor(instance.vkCommandBuffers[instance.currentFrame], 0, 1, &scissor);*/
 
     instance.thisFramesDrawCall = 0;
 }
@@ -100,18 +69,10 @@ void Graphics::BeginRender()
 void Graphics::FinishImGuiRender()
 {
     PopMetricRange(); // Program Render
-
-    //ImGui::ShowDemoWindow();
-
-    /*ImGui::Begin("Mesh");
-    ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
-    ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
-    ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
-    ImGui::End();*/
-
-    //instance.VRAMAllocator.RenderMemoryUsageStat();
+    // Dont want to include imgui in performance captures. 
 
 #ifdef NV_PERF_METER
+    // If NV Perf live stats enabled, show them.
     if (instance.nvperf_liveMode) {
         instance.nvperf_sampler.DecodeCounters();
         instance.nvperf_sampler.ConsumeSamples([&](const uint8_t* pCounterDataImage, size_t counterDataImageSize, uint32_t rangeIndex, bool& stop) {
@@ -137,21 +98,6 @@ void Graphics::FinishImGuiRender()
 
 void Graphics::EndRender()
 {
-    //ImGui::ShowDemoWindow();
-
-    //ImGui::Begin("Mesh");
-    //ImGui::Image(instance.meshRenderOutput, ImVec2(300, 300));
-    //ImGui::Image(instance.meshRenderOutput2, ImVec2(300, 300));
-    //ImGui::Image(instance.meshRenderOutput3, ImVec2(300, 300));
-    //ImGui::End();
-
-    //instance.VRAMAllocator.RenderMemoryUsageStat();
-
-    //ImGui::Render();
-    //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), instance.vkCommandBuffers[instance.currentFrame]);
-    //// Finish recording command buffer
-    //vkCmdEndRenderPass(instance.vkCommandBuffers[instance.currentFrame]);
-
     if (vkEndCommandBuffer(instance.vkCommandBuffers[instance.currentFrame]) != VK_SUCCESS) {
         throw - 1;
     }
@@ -180,8 +126,6 @@ void Graphics::EndRender()
         throw -1;
     }
 
-    //std::cout << "Draws this frame: " << thisFramesDrawCall << "\n";
-
     // Now we present
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -197,26 +141,19 @@ void Graphics::EndRender()
     presentInfo.pResults = nullptr; // Optional
 
 #ifdef NV_PERF_METER
-    
-    ////instance.nvperf_reportGenerator.Reset();
-    //vkQueueWaitIdle(instance.vkGraphicsQueue);
-    //vkQueueWaitIdle(instance.vkPresentQueue);
+    // End NvPerf frame, for report generator and if enabled, the live sampler
     vkDeviceWaitIdle(instance.vkDevice);
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
     instance.nvperf_reportGenerator.OnFrameEnd();
     if(instance.nvperf_liveMode) instance.nvperf_sampler.OnFrameEnd();
-    //if (instance.nvperf_InitiateReportNextFrame) {
-    //    instance.nvperf_reportGenerator.StartCollectionOnNextFrame();
-    //    instance.nvperf_InitiateReportNextFrame = false;
-    //}
-    //instance.nvperf_reportGenerator.OnFrameStart(instance.vkGraphicsQueue, VulkanSetup::GetQueueFamilyIndices(instance.vkPhysicalDevice, instance.vkSurface).graphicsFamily);
+
 #else
     VkResult result = vkQueuePresentKHR(instance.vkPresentQueue, &presentInfo);
 #endif // NV_PERF_METER
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || instance.swapChainNeedsRecreation) {
         instance.swapChainNeedsRecreation = false;
-        /*if (!Services::GetTree()->IsGameClosingThisFrame())*/ RecreateSwapChain();
+        RecreateSwapChain();
     }
     else if (result != VK_SUCCESS) {
         throw - 1;
@@ -331,18 +268,3 @@ void Graphics::PopMetricRange()
     instance.nvperf_reportGenerator.rangeCommands.PopRange(instance.vkCommandBuffers[instance.currentFrame]);
 #endif // NV_PERF_METER
 }
-
-
-
-
-//void Graphics::AddAdditionalDescriptorSet(std::vector<std::vector<VulkanObjectDescriptorSet>>& descriptorSetList, const VkDescriptorSetLayout& setLayout)
-//{
-//    std::vector<size_t> sizes = { sizeof(WCP_Matrices) };
-//
-//    for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
-//        int newSetIndex = descriptorSetList[i].size();
-//        descriptorSetList[i].push_back(VulkanObjectDescriptorSet());
-//        descriptorSetList[i][newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size());
-//        descriptorSetList[i][newSetIndex].CreateDescriptorSet(instance.vkDevice, instance.vkDescriptorSetLayout, instance.vkDescriptorPool);
-//    }
-//}

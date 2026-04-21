@@ -5,13 +5,13 @@
 #include "Input.h"
 #include "ImGuiHelpers.h"
 
-// The setup process is so long its getting its own CPP file.
+// The setup process is so long it gets its own CPP file.
 
 void Graphics::Initialize(int width, int height, std::wstring title)
 {
     // Begin Windows Window Setup
 
-        // Define and register window class with OS
+    // Define and register window class with OS
     WNDCLASSEX windowClass = { 0 };
     windowClass.cbSize = sizeof(WNDCLASSEX);
     windowClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -116,6 +116,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     }
 #endif
 #ifdef NV_PERF_METER
+    // Disable them if we are on a Metered build
     enableValidationLayers = false;
 #endif // NV_PERF_METER
 
@@ -127,7 +128,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "No Engine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_2;
+    appInfo.apiVersion = VK_API_VERSION_1_2; // 1.2 requried for mesh shaders
 
     // Setup instance creation info
     VkInstanceCreateInfo createInfo{};
@@ -140,6 +141,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     };
 
 #ifdef NV_PERF_METER
+    // Append NV Perf requried extensions to instance list. 
     nv::perf::VulkanAppendInstanceRequiredExtensions(extensionsNames, appInfo.apiVersion);
 #endif // NV_PERF_METER
 
@@ -198,6 +200,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
         instance.vkPhysicalDevice = devices[std::stoi(choice)];
     }
+    // If you only have 1 device, it will choose that one.
     else {
         std::cout << "Choosing Only Device Automatically...\n";
         if(bool isSuitable = VulkanSetup::CheckDeviceSuitability(devices[0], instance.vkSurface)) instance.vkPhysicalDevice = devices[0];
@@ -225,7 +228,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    // Coming back later here
+    // Enable mesh shader features for device
     VkPhysicalDeviceMeshShaderFeaturesEXT meshShaderFeatures{};
     meshShaderFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT;
     meshShaderFeatures.meshShader = true;
@@ -256,21 +259,13 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     std::vector<const char*> deviceExtensionsNames = VK_DEVICE_EXTENSIONS_REQUIRED;
 
 #ifdef NV_PERF_METER
+    // Append NV Perf requried extensions to device list. 
     nv::perf::VulkanAppendDeviceRequiredExtensions(instance.vkInstance, instance.vkPhysicalDevice, vkGetInstanceProcAddr(instance.vkInstance, "vkGetInstanceProcAddr"), deviceExtensionsNames);
     nv::perf::sampler::PeriodicSamplerTimeHistoryVulkan::AppendDeviceRequiredExtensions(appInfo.apiVersion, deviceExtensionsNames);
 #endif // NV_PERF_METER
 
     logicDeviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionsNames.size());
     logicDeviceCreateInfo.ppEnabledExtensionNames = deviceExtensionsNames.data();
-
-    // Not required only for backwards compat
-    /*if (enableValidationLayers) {
-        logicDeviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        logicDeviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-    }
-    else {
-        logicDeviceCreateInfo.enabledLayerCount = 0;
-    }*/
 
     if (vkCreateDevice(instance.vkPhysicalDevice, &logicDeviceCreateInfo, nullptr, &instance.vkDevice) != VK_SUCCESS) {
         throw - 1;
@@ -288,34 +283,6 @@ void Graphics::Initialize(int width, int height, std::wstring title)
 
     // Setup descriptor pool
     VulkanSetup::CreateDescriptorPool(instance.vkDevice, 100, VULKAN_MAX_FRAMES_IN_FLIGHT * 100, &instance.vkDescriptorPool);
-
-    //VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[1];
-    //uboLayoutBindings[0].binding = 0;
-    //uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    //uboLayoutBindings[0].descriptorCount = 1;
-    //// Only using this in vertex shader
-    //uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    //// Not used for images
-    //uboLayoutBindings[0].pImmutableSamplers = nullptr;
-
-    //instance.vkDescriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    //instance.vkDescriptorSetLayoutInfo.bindingCount = 1;
-    //instance.vkDescriptorSetLayoutInfo.pBindings = uboLayoutBindings;
-
-    //if (vkCreateDescriptorSetLayout(instance.vkDevice, &instance.vkDescriptorSetLayoutInfo, nullptr, &instance.vkDescriptorSetLayout) != VK_SUCCESS) {
-    //    throw - 1;
-    //}
-
-    /*for (int i = 0; i < VULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
-        instance.perFramePerObjectDescriptors.push_back(std::vector<VulkanDescriptor>());
-    }*/
-
-    // Setup pipeline
-    //std::vector<VkDescriptorSetLayout> allDescriptorSetLayouts = {
-    //    instance.vkDescriptorSetLayout
-    //};
-   // VulkanSetup::CreateGraphicsPipeline(instance.vkDevice, instance.vkRenderPass, instance.vkSwapChainExtent,
-     //   allDescriptorSetLayouts, &instance.vkMainPipelineLayout, &instance.vkMainPipeline);
 
     // Setup depth buffer
     VulkanSetup::CreateDepthBuffer(instance.vkDevice, instance.vkPhysicalDevice, instance.vkSwapChainExtent, &instance.vkDepthImage,
@@ -386,7 +353,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.noShadowMapImage.TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 #ifdef NV_PERF_METER
-
+    // Ask if user wants a full runthrough capture, this means the program will autoload capture data, run a capture and close. 
     std::cout << "Would you like a full runthrough capture? (Y/N) : ";
     std::string runthroughCaptureAnswer;
     std::cin >> runthroughCaptureAnswer;
@@ -396,7 +363,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
         std::cout << "Also please close combined.csv if you already have it open!\nSit back, relax, and enjoy the capture : )\n";
         std::cout << "\nRenders will be saved to imageout/XXXXX.bmp, metrics to nvperfout/combined.csv\n\n";
     }
-
+    // Setup NV Perf
     nv::perf::InitializeNvPerf();
     instance.nvperf_reportGenerator.additionalMetrics = { "crop__write_throughput" };
     instance.nvperf_reportGenerator.InitializeReportGenerator(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
@@ -410,6 +377,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     instance.nvperf_clockInfo = nv::perf::VulkanGetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice);
     nv::perf::VulkanSetDeviceClockState(instance.vkInstance, instance.vkPhysicalDevice, instance.vkDevice, NVPW_DEVICE_CLOCK_SETTING_LOCK_TO_RATED_TDP);
 
+    // Ask the user if they want live statistics, these cannot be enabled if the report generator is to be used. 
     std::cout << "Would you like live statistics? (Y/N) : ";
     std::string liveStatisticsEnabled;
     if(instance.fullCaptureModeEnabled){
@@ -419,7 +387,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     else {
         std::cin >> liveStatisticsEnabled;
     }
-    // LIVE STATS
+    // LIVE STATS SETUP
     if (liveStatisticsEnabled == "Y" || liveStatisticsEnabled == "y") {
         instance.nvperf_liveMode = true;
 
@@ -453,6 +421,7 @@ void Graphics::Initialize(int width, int height, std::wstring title)
     }
 #endif // NV_PERF_METER
 
+    // Set ImGui Style
     ImGuiHelpers::ImGuiSetupStyle();
 
     return ;
@@ -469,10 +438,6 @@ void Graphics::Shutdown()
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
-
-    //instance.meshRenderer.Shutdown();
-    //delete instance.myMesh;
-    //instance.myMeshImage.Destroy();
 
     // Destroy Sync Objects
     for (auto& thisSemaphore : instance.vkRenderFinishedSemaphores) vkDestroySemaphore(instance.vkDevice, thisSemaphore, nullptr);
@@ -500,15 +465,7 @@ void Graphics::Shutdown()
     vkDestroyImage(instance.vkDevice, instance.vkDepthImage, nullptr);
     vkFreeMemory(instance.vkDevice, instance.vkDepthImageMemory, nullptr);
 
-    // Destroy descriptors
-    /*for (auto& descriptorArray : instance.perFramePerObjectDescriptors) {
-        for (auto& descriptor : descriptorArray) {
-            descriptor.CleanupDescriptor();
-        }
-    }
-    instance.perFramePerObjectDescriptors.clear();*/
-   // vkDestroyDescriptorSetLayout(instance.vkDevice, instance.vkDescriptorSetLayout, nullptr);
-    //delete instance.vkDescriptorSetLayoutInfo.pBindings;
+    // Destroy descriptor pool
     vkDestroyDescriptorPool(instance.vkDevice, instance.vkDescriptorPool, nullptr);
 
     // Destroy surface
