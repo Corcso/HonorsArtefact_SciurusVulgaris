@@ -16,6 +16,8 @@ For metered builds, you must download NSight Perf yourself due to their licensin
 2. After Unzipping the files, copy the NvPerf folder to C:/VulkanSDK/
 3. Create a new folder in this folder called "utilities"
 4. Copy the imports and include folder from Samples/NvPerfUtility to your utilities folder. 
+5. Copy nvperf_grfx_host.dll into your working directory / exe folder. This DLL is in the NvPerf/bin/x64 folder.  
+
 The above should allow you to build with NSight Perf SDK with this project. 
 
 
