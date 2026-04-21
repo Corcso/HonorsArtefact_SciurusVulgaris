@@ -56,6 +56,7 @@ private:
 
 	std::vector<PointTreeMesh*> loadedPointModels; // List of loaded point models
 	InstancedWorldMatrixHelper treeInstancePositions; // List of positions of point models.
+	bool clearPointModelsAtFrameEnd = false;
 
 	/// <summary>
 	/// Reloads the Instance positions for both point and triangle trees from file. 

@@ -106,6 +106,15 @@ void MainDisplayApp::Frame() {
 		FrameVertexShaded();
 		break;
 	}
+
+	if (clearPointModelsAtFrameEnd) {
+		Graphics::WaitUntilGPUIdle();
+		for (auto& model : loadedPointModels) {
+			if (model != nullptr) delete model;
+		}
+		loadedPointModels.clear();
+		clearPointModelsAtFrameEnd = false;
+	}
 }
 
 void MainDisplayApp::Shutdown() {
@@ -433,7 +442,7 @@ void MainDisplayApp::RenderImGuiControls()
 	}
 	ImGui::Text("%i Models Loaded", loadedPointModels.size());
 	if (ImGui::Button("Clear All")) {
-		loadedPointModels.clear();
+		clearPointModelsAtFrameEnd = true;
 	}
 	ImGui::Text("Tree Transform");
 	modelBaseTransform.DisplayController();
