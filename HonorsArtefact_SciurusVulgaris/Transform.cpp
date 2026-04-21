@@ -71,19 +71,6 @@ void CameraTransform::CaptureControls()
 	}
 
 	// Rotation
-	if (Input::IsKeyDown('I')) {
-		euler.X += speed * ANGLE_SPEED_MULTIPLIER;
-	}
-	else if (Input::IsKeyDown('K')) {
-		euler.X -= speed * ANGLE_SPEED_MULTIPLIER;
-	}
-	if (Input::IsKeyDown('L')) {
-		euler.Y += speed * ANGLE_SPEED_MULTIPLIER;
-	}
-	else if (Input::IsKeyDown('J')) {
-		euler.Y -= speed * ANGLE_SPEED_MULTIPLIER;
-	}
-
 	if (Input::IsKeyPressed('P')) {
 		mouseLocked = !mouseLocked;
 		Input::SetMouseLock(mouseLocked);
