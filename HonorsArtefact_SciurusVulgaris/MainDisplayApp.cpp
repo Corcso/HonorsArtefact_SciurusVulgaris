@@ -419,6 +419,10 @@ void MainDisplayApp::RenderImGuiControls()
 		MeshletInfo meshletInfo{ loadedPointModels[loadedPointModels.size() - 1]->GetMeshletCount() };
 		loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 	}
+	ImGui::Text("%i Models Loaded", loadedPointModels.size());
+	if (ImGui::Button("Clear All")) {
+		loadedPointModels.clear();
+	}
 	/*ImGui::InputText("Mesh Model Path", meshModelPath, 256);
 	if (ImGui::Button("Load Mesh")) {
 		if (treeMesh.size() > 0) treeMesh.clear();
