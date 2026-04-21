@@ -30,7 +30,7 @@ void MainDisplayApp::Initialize() {
 	//terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
 	terrain->LoadFile("./models/ChinaValley/ChinaValley.fbx", 0);
 	terrain->CopyPointsToVRAM();
-	terrainTexture.CreateAndLoadImageFromFile("./models/Terrain004 - Lennart Demes/color.jpg", VK_IMAGE_USAGE_SAMPLED_BIT);
+	terrainTexture.CreateAndLoadImageFromFile("./models/ChinaValley/Colour.png", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
 	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
