@@ -42,7 +42,10 @@ private:
 	const int MAX_INSTANCE_POSITIONS = 1024000;
 	char modelPath[256] = "./models/output.tree";
 	float angle;
-	
+	bool initialControlsDisplayed = false;
+	bool toOpenSetupPopup = false;
+	void LoadAnotherPointTree(std::string path);
+
 	TriListMesh* terrain;
 	Image terrainTexture;
 	bool terrainEnabled;

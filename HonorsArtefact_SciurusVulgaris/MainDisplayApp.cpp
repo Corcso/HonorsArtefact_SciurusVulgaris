@@ -395,29 +395,34 @@ void MainDisplayApp::FrameMeshTrue()
 	Graphics::EndRender();
 }
 
+void MainDisplayApp::LoadAnotherPointTree(std::string path)
+{
+	loadedPointModels.push_back(new PointTreeMesh());
+
+	loadedPointModels[loadedPointModels.size() - 1]->LoadFromTreeFile(path);
+	//myModel->CopyPointsToVRAM();
+	descriptorSizes[0] = loadedPointModels[loadedPointModels.size() - 1]->GetPointsArraySize(true);
+	loadedPointModels[loadedPointModels.size() - 1]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+	loadedPointModels[loadedPointModels.size() - 1]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
+	loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAMMeshBuffer(0);
+	loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAM();
+
+	// Copy instance positions
+	loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+	loadedPointModels[loadedPointModels.size() - 1]->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+
+
+	MeshletInfo meshletInfo{ loadedPointModels[loadedPointModels.size() - 1]->GetMeshletCount() };
+	loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+}
+
 void MainDisplayApp::RenderImGuiControls()
 {
 	if (!renderImGui) return;
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
 	if (ImGui::Button("Load Another")) {
-		loadedPointModels.push_back(new PointTreeMesh());
-
-		loadedPointModels[loadedPointModels.size() - 1]->LoadFromTreeFile(modelPath);
-		//myModel->CopyPointsToVRAM();
-		descriptorSizes[0] = loadedPointModels[loadedPointModels.size() - 1]->GetPointsArraySize(true);
-		loadedPointModels[loadedPointModels.size() - 1]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
-		loadedPointModels[loadedPointModels.size() - 1]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
-		loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAMMeshBuffer(0);
-		loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAM();
-
-		// Copy instance positions
-		loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		loadedPointModels[loadedPointModels.size() - 1]->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		
-
-		MeshletInfo meshletInfo{ loadedPointModels[loadedPointModels.size() - 1]->GetMeshletCount() };
-		loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+		LoadAnotherPointTree(modelPath);
 	}
 	ImGui::Text("%i Models Loaded", loadedPointModels.size());
 	if (ImGui::Button("Clear All")) {
@@ -529,6 +534,57 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Checkbox("Enable Skybox", &pointRenderingPass.enableSkybox);
 	sun.RenderImGuiMenu(false);
 	ImGui::End();
+
+	if (ImGui::BeginPopupModal("Setup Automatically?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Would you like to automatically set up the scene?");
+		ImGui::Separator();
+		ImGui::Text("This will load three models, enable shadows, configure lighting, and enable terrain.\n 64,000 trees will be displayed. With Skybox Enabled");
+		ImGui::Text("Please note: You must have output, outputPine1 and outputConifer1 trees at ./models/,\n otherwise this may crash!");
+
+		if (ImGui::Button("Set up", ImVec2(120, 0))) { 
+			LoadAnotherPointTree("./models/output.tree");
+			LoadAnotherPointTree("./models/outputPine1.tree");
+			LoadAnotherPointTree("./models/outputConifer1.tree");
+			instanceCount = 64000;
+			terrainEnabled = true;
+			sun.SetShadowEnabled(true);
+			sun.SetDirection(HMM_V3(0.5, -1, 0));
+			pointRenderingPass.enableSkybox = true;
+
+			sun.SetAmbientColor(HMM_V3(240.0f / 255.0f, 240.0f / 255.0f, 255.0f / 255.0f));
+			sun.SetAmbientIntensity(0.3f);
+			sun.SetColor(HMM_V3(255.0f / 255.0f, 255.0f / 255.0f, 240.0f / 255.0f));
+			sun.SetIntensity(1.0f);
+
+			ImGui::CloseCurrentPopup(); 
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+
+		ImGui::EndPopup();
+	}
+	if (ImGui::BeginPopupModal("Controls", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Here is the controls information.");
+		ImGui::Separator();
+		ImGui::Text("WASD - Lateral movement");
+		ImGui::Text("QE - Vertical movement");
+		ImGui::Text("P - Lock mouse for first person camera");
+		ImGui::Text("Z/X - Slow and Speed up movement");
+
+		if (ImGui::Button("Gotcha", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); toOpenSetupPopup = true; }
+
+		ImGui::EndPopup();
+	}
+	if (!initialControlsDisplayed) {
+		ImGui::OpenPopup("Controls");
+		initialControlsDisplayed = true;
+	}
+	if (toOpenSetupPopup) {
+		ImGui::OpenPopup("Setup Automatically?");
+		toOpenSetupPopup = false;
+	}
 }
 
 void MainDisplayApp::ImageCaptureSequence()

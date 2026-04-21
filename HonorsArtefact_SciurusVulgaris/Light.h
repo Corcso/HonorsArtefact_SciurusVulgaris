@@ -34,12 +34,16 @@ public:
 	void SetName(std::string name) { this->name = name; }
 	void SetDirection(HMM_Vec3 direction) { this->direction = direction; }
 	void SetColor(HMM_Vec3 color) { this->color = color; }
+	void SetAmbientColor(HMM_Vec3 color) { this->ambientColor = color; }
 	void SetIntensity(float intensity) { this->intensity = intensity; }
+	void SetAmbientIntensity(float intensity) { this->ambientIntensity = intensity; }
 
 	std::string GetName() {return name; }
 	HMM_Vec3 GetDirection() {return direction; }
 	HMM_Vec3 GetColor() {return color; }
+	HMM_Vec3 GetAmbientColor() {return ambientColor; }
 	float GetIntensity() { return intensity; }
+	float GetAmbientIntensity() { return ambientIntensity; }
 
 	HMM_Mat4 GetProjectionMatrix(float radius, float backFactor, float forwardsFactor);
 	HMM_Mat4 GetViewMatrix(HMM_Vec3 focusPoint);
