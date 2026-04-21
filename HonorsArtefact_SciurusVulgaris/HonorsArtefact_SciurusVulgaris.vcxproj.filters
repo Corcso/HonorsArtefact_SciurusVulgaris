@@ -132,9 +132,6 @@
     <ClInclude Include="VulkanSetup.h">
       <Filter>VulkanUtility</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>VulkanUtility</Filter>
-    </ClInclude>
     <ClInclude Include="App.h">
       <Filter>Apps</Filter>
     </ClInclude>
@@ -197,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="Skybox_GP.h">
       <Filter>Renderers\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -278,9 +278,6 @@
     <ClCompile Include="VulkanUtility.cpp">
       <Filter>VulkanUtility</Filter>
     </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>VulkanUtility</Filter>
-    </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>Apps</Filter>
     </ClCompile>
@@ -343,6 +340,9 @@
     </ClCompile>
     <ClCompile Include="Skybox_GP.cpp">
       <Filter>Renderers\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

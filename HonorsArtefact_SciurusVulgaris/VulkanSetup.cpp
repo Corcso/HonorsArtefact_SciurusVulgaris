@@ -352,7 +352,7 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
-    // Vertex imput  stage setup // TODO when can i dealloc this
+    // Vertex imput  stage setup
     VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[3];
     uint32_t vertexAttributeDescriptionCount = 3;
 

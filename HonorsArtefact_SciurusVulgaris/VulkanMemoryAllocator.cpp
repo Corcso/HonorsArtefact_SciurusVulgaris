@@ -50,7 +50,7 @@
         else {
             // Drop the custom size pool
             vkFreeMemory(device, memoryPools[block.poolID][block.location.poolIndex], nullptr);
-            //memoryPools[block.poolID].erase(memoryPools[block.poolID].begin() + block.location.poolIndex); Cant delete it so just mark is as VK_NULL_HANDLE (Does cause slight memory leak as vector expands
+            //memoryPools[block.poolID].erase(memoryPools[block.poolID].begin() + block.location.poolIndex); Cant delete it so just mark is as VK_NULL_HANDLE (Does cause slight memory leak as vector expands)
             memoryPools[block.poolID][block.location.poolIndex] = VK_NULL_HANDLE;
         }
     }
@@ -203,7 +203,7 @@
                 void* blockMapLocation = (mapUsage == VulkanMemoryMapUsage::OPEN) ? mapBase + (i * blockSize) : nullptr;
                 freeMemoryLocations[poolID].push_back({ newPoolIndex , i * blockSize, blockMapLocation });
             }
-            //std::cout << "New pool made, Map Usage:" << (int)poolID.mapUsage << " Memory Index:" << poolID.memoryTypeIndex << " Size: " << poolID.blockSize << "*" << sizeToBlockCountPerAlloc[poolID.blockSize] << " Index: " << newPoolIndex << "\n";
+        
             // First block of the new pool is reserved
             return { poolID, { newPoolIndex, 0, mapBase } };
         }
@@ -226,7 +226,7 @@
         }
         // No free locations for this, were making a 1 block pool, just its own allocation. 
         // First block of the new pool is reserved
-        //std::cout << "New custom pool made, Map Usage:" << (int)poolID.mapUsage << " Memory Index:" << poolID.memoryTypeIndex << " Size: " << poolID.blockSize << " Index: " << newPoolIndex << "\n";
+        
         return { poolID, { newPoolIndex, 0, mapBase} };
         
     }

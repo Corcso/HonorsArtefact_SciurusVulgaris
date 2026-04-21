@@ -466,12 +466,3 @@ void* VulkanUtility::OpenMemoryMap(VkDeviceMemory memory, size_t size, VkDeviceS
     vkMapMemory(Graphics::GetVkDevice(), memory, offset, size, flags, &toReturn);
     return toReturn;
 }
-void* VulkanUtility::OpenMemoryBlockMap(VulkanMemoryAllocator::VulkanMemoryBlock memory, size_t size, VkMemoryMapFlags flags)
-{
-    /*if (memory.poolID.instantCloseMap) return nullptr;
-    
-    void* toReturn;
-    vkMapMemory(Graphics::GetVkDevice(), Graphics::GetMemoryAllocator().GetBlockMemoryAllocation(memory), memory.location.offset, size, flags, &toReturn);
-    return toReturn;*/
-    return nullptr;
-}
