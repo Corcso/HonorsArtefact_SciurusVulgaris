@@ -261,87 +261,96 @@ void MainDisplayApp::FrameMeshShaded()
 
 void MainDisplayApp::FrameVertexShaded()
 {
-	//InstancingInfo instancingInfo;
-	//LODDataBuffer lodData;
+	InstancingInfo instancingInfo;
+	LODDataBuffer lodData;
 
-	//Graphics::BeginRender();
+	Graphics::BeginRender();
 
-	//// Render logic
-	//Graphics::PushMetricRange("Render Point Trees");
-	//pointRenderingPass.BeginRenderVertexShade(HMM_V4(0, 0, 0, 1));
+	// Render logic
+	Graphics::PushMetricRange("Render Point Trees");
+	pointRenderingPass.BeginRenderVertexShade(HMM_V4(0, 0, 0, 1));
 
-	//if (myModel != nullptr) {
+	uint32_t index = 0;
+	for (auto& model : loadedPointModels) {
+		if (model != nullptr) {
 
-	//	for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-	//		lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
-	//	}
-	//	lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-	//	lodData.continousDecay = myModel->continousLOD_decay;
-	//	lodData.continousStart = myModel->continousLOD_start;
-	//	lodData.continousShallowness = myModel->continousLOD_shallowness;
-	//	lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
-	//	lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+			// LOD data always taken from the first model only, as multiple LOD settings not supported. 
+			// If we are in the loop there has to be 1 model loaded. 
+			if (loadedPointModels[0] != nullptr) {
+				for (int l = 0; l < loadedPointModels[0]->randomLevelsLODPointCount.size(); l++) {
+					lodData.maxVertexLevels[l][0] = loadedPointModels[0]->randomLevelsLODPointCount[l];
+				}
+				lodData.maxLevel = loadedPointModels[0]->randomLevelsLODPointCount.size();
+				lodData.continousDecay = loadedPointModels[0]->continousLOD_decay;
+				lodData.continousStart = loadedPointModels[0]->continousLOD_start;
+				lodData.continousShallowness = loadedPointModels[0]->continousLOD_shallowness;
+				lodData.lodType = static_cast<int>(loadedPointModels[0]->levelOfDetailType);
+			}
 
-	//	treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
-	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
-	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-	//	//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
+			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
+			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
+			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-	//	//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
-	//	instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
-	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 
-	//	pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
+			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount() , static_cast<uint32_t>(loadedPointModels.size()), index };
+			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
-	//	pointRenderingPass.RenderPointTree(myModel, instancingInfo);
-	//	//pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
-	//}
+			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
+
+			pointRenderingPass.RenderPointTree(model, instancingInfo);
+			//pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
+		}
+		index++;
+	}
 
 
 
 
-	//WCP_Matrices terrainBufferData[2] = { {
-	//	HMM_Translate(HMM_V3(0, 0, 0)),
-	//	cameraTransform.viewMatrix,
-	//	HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
-	//	},
-	//	{
-	//	HMM_Translate(HMM_V3(0, 0, 0)),
-	//	treeInstanceViewProjThisAndLastFrame[1].camera,
-	//	treeInstanceViewProjThisAndLastFrame[1].projection
-	//	}
-	//};
-	//terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
-	//pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
-	//Graphics::PopMetricRange();
-	//Graphics::PushMetricRange("Terrain Mesh Render");
-	//if (terrainEnabled) {
-	//	pointRenderingPass.SwitchToTraditionalMeshPipeline();
-	//	pointRenderingPass.RenderTraditionalMesh(terrain);
-	//}
-	//pointRenderingPass.EndRender();
-	//Graphics::PopMetricRange();
-	//RenderImGuiControls();
+	WCP_Matrices terrainBufferData[2] = { {
+		HMM_Translate(HMM_V3(0, 0, 0)),
+		cameraTransform.viewMatrix,
+		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
+		},
+		{
+		HMM_Translate(HMM_V3(0, 0, 0)),
+		treeInstanceViewProjThisAndLastFrame[1].camera,
+		treeInstanceViewProjThisAndLastFrame[1].projection
+		}
+	};
+	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+	pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
+	Graphics::PopMetricRange();
+	Graphics::PushMetricRange("Terrain Mesh Render");
+	if (terrainEnabled) {
+		pointRenderingPass.SwitchToTraditionalMeshPipeline();
+		pointRenderingPass.RenderTraditionalMesh(terrain);
+	}
+	pointRenderingPass.EndRender();
+	Graphics::PopMetricRange();
+	RenderImGuiControls();
 
-	//Light::BufferStruct rawSunData = sun.GetBufferData();
-	//pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
+	Light::BufferStruct rawSunData = sun.GetBufferData();
+	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
-	//Graphics::PushMetricRange("Colour Deferred");
-	//pointRenderingPass.ExecuteSecondRender();
-	//pointRenderingPass.EndSecondRender();
-	//Graphics::PopMetricRange();
-	//Graphics::PushMetricRange("Anti Aliasing");
-	//pointRenderingPass.ExecuteTAARender(taaEnabled, taaLogarithmicColorSpace);
-	//pointRenderingPass.EndTAARender();
+	Graphics::PushMetricRange("Colour Deferred");
+	pointRenderingPass.ExecuteSecondRender();
+	pointRenderingPass.EndSecondRender();
+	Graphics::PopMetricRange();
+	Graphics::PushMetricRange("Anti Aliasing");
+	pointRenderingPass.ExecuteTAARender(taaEnabled, taaLogarithmicColorSpace);
+	pointRenderingPass.EndTAARender();
 
-	//pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
-	//Graphics::PopMetricRange();
-	//Graphics::FinishImGuiRender();
-	//pointRenderingPass.EndFXAARender();
-	//Graphics::EndRender();
+	pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
+	Graphics::PopMetricRange();
+	Graphics::FinishImGuiRender();
+	pointRenderingPass.EndFXAARender();
+	Graphics::EndRender();
 
-	//treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
+	treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
 }
 
 void MainDisplayApp::FrameMeshTrue()

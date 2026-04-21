@@ -68,7 +68,7 @@ vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 }
 
 void main() {
-    uint instanceID = gl_InstanceIndex;
+    uint instanceID = gl_InstanceIndex * instanceInfo.modelCount + instanceInfo.myModelNumber;
 
     // Calculate LOD
     vec3 instancePosition = (transformation.worldMatrices[instanceID] * vec4(0, 0, 0, 1)).xyz;
