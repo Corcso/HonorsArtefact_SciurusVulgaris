@@ -44,6 +44,7 @@ private:
 	std::vector<float> LODViewDistances;
 	int exclusivleyViewing = -1;
 	bool isDebugCoverageViewOn;
+	bool shuffleAtEndOfFrame = false; // Used for shuffling points so that buffer swaps happen at the end of the frame. 
 
 };
 

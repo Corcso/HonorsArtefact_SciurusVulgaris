@@ -239,9 +239,6 @@ void VulkanObjectDescriptorSet::Create(VkDescriptorSetLayout layout, VkDescripto
 
 	void VulkanObjectDescriptorSet::CleanupDescriptor()
 	{
-		// Close map 
-		// TODO
-		// and free memory
 		for (int i = 0; i < descriptors.size(); i++) {
 			if (descriptors[i].type != VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER && descriptors[i].type != VK_DESCRIPTOR_TYPE_STORAGE_BUFFER) continue;
 			VulkanUtility::DestroyBuffer(descriptors[i].buffer);

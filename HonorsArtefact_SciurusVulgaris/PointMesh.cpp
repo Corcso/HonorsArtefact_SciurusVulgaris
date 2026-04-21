@@ -12,6 +12,13 @@
 
 void PointMesh::CopyPointsToVRAM()
 {
+    // Cleanup if data is already on GPU
+    if (isDataOnGPU) {
+        VulkanUtility::DestroyBuffer(pointBuffer);
+        VulkanUtility::FreeGPUMemoryBlock(pointBufferMemory);
+        pointBuffer = VK_NULL_HANDLE;
+    }
+
     // VERTEX BUFFER
     
     // Staging Vertex buffer

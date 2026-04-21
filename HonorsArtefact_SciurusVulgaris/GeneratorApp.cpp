@@ -138,6 +138,15 @@ void GeneratorApp::Frame() {
 
 		extractPointsAtEndOfThisFrame = false;
 	}
+
+	if (shuffleAtEndOfFrame) {
+		std::random_device rd;
+		std::mt19937 g(rd());
+		vkDeviceWaitIdle(Graphics::GetVkDevice());
+		std::shuffle(meshRenderingPipeline.GetPointMeshOutput()->points.begin(), meshRenderingPipeline.GetPointMeshOutput()->points.end(), g);
+		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
+		shuffleAtEndOfFrame = false;
+	}
 	
 }
 
@@ -201,11 +210,7 @@ void GeneratorApp::RenderLODPageMenu()
 	}
 	if (ImGui::Button("Reshuffle Points"))
 	{
-		std::random_device rd;
-		std::mt19937 g(rd());
-
-		std::shuffle(meshRenderingPipeline.GetPointMeshOutput()->points.begin(), meshRenderingPipeline.GetPointMeshOutput()->points.end(), g);
-		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
+		shuffleAtEndOfFrame = true;
 	}
 	if (ImGui::Button("-") && meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size() > 0) {
 		meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.pop_back();
