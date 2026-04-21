@@ -8,7 +8,8 @@
 
 void MainDisplayApp::Initialize() {
 
-	pointRenderingPass.CreateAll();
+	pointRenderingPass.CreateAll(); 
+	instancedMeshTree_RP.CreateAll();
 	descriptorSizes = { 0, sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo), sizeof(VP_Matrices) * 2};
 	descriptorSizesMesh = { sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, 0, sizeof(VP_Matrices) * 2 };
 	
@@ -35,21 +36,13 @@ void MainDisplayApp::Initialize() {
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
-	//treeInstancePositions.LoadFromFile("./models/Terrain004 - Lennart Demes/InstanceData4k.obj");
-	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
-	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation(Graphics::IsFullCaptureRunActive() ? 1 : 0);
-	//treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.1, 0.1, 0.1)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2000.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
-	treeInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
+	modelBaseTransform.position = HMM_V3(0, 0.03, 0);
+	modelBaseTransform.scale = HMM_V3(0.009, 0.009, 0.009);
+	modelBaseTransform.UpdateMatrix();
+	ReloadTreeInstancePositions();
 
-	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
-
-	instancedMeshTree_RP.CreateAll();
-	treeMeshInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
-	treeMeshInstancePositions.ApplyRandomRotation(chosenSeed);
-	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 0, 0)) * HMM_Rotate_LH(3.141 / 2000.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)));
-	treeMeshInstancePositions.ApplyAlternateTransform(HMM_Translate(HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(0.03, 0.03, 0.03)));
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
+	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
 	captureUnderway = false;
 	renderImGui = true;
@@ -395,6 +388,24 @@ void MainDisplayApp::FrameMeshTrue()
 	Graphics::EndRender();
 }
 
+void MainDisplayApp::ReloadTreeInstancePositions()
+{
+	vkDeviceWaitIdle(Graphics::GetVkDevice());
+	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
+	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation(Graphics::IsFullCaptureRunActive() ? 1 : 0);
+	treeInstancePositions.ApplyAlternateTransform(modelBaseTransform.matrix);
+
+	treeMeshInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
+	treeMeshInstancePositions.ApplyRandomRotation(chosenSeed);
+	treeMeshInstancePositions.ApplyAlternateTransform(modelBaseTransform.matrix);
+
+	for (auto& model : loadedPointModels) {
+		if (model == nullptr) continue;
+		model->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		model->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+	}
+}
+
 void MainDisplayApp::LoadAnotherPointTree(std::string path)
 {
 	loadedPointModels.push_back(new PointTreeMesh());
@@ -428,41 +439,15 @@ void MainDisplayApp::RenderImGuiControls()
 	if (ImGui::Button("Clear All")) {
 		loadedPointModels.clear();
 	}
-	/*ImGui::InputText("Mesh Model Path", meshModelPath, 256);
-	if (ImGui::Button("Load Mesh")) {
-		if (treeMesh.size() > 0) treeMesh.clear();
-
-		treeMesh = TriListMesh::LoadMultiMeshFile(meshModelPath);
-
-		treeMeshTextures.resize(2);
-		treeMeshTextures[0].CreateAndLoadImageFromFile("./models/SpeedTrees/singleAColor.png", VK_IMAGE_USAGE_SAMPLED_BIT);
-		treeMeshTextures[0].CreateImageView();
-		treeMeshTextures[1].CreateAndLoadImageFromFile("./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", VK_IMAGE_USAGE_SAMPLED_BIT);
-		treeMeshTextures[1].CreateImageView();
-
-		for (int i = 0; i < treeMesh.size(); i++) {
-			treeMesh[i].CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
-			treeMesh[i].GetDescriptorSet()->UpdateImageSampler(1, &treeMeshTextures[i], Graphics::GetBasicLinearSampler());
-		}
-	}*/
-	
-
-	
-
-	//ImGui::SliderAngle("Angle", &angle);
-	//if (myModel != nullptr) ImGui::SliderInt("N Points", &pointToRenderCount, 0, myModel->points.size());
-	//
-	//if (myModel != nullptr) {
-	//	if (ImGui::Button("Shuffle")) {
-	//		std::random_device rd;
-	//		std::mt19937 g(rd());
-
-	//		std::shuffle(myModel->points.begin(), myModel->points.end(), g);
-	//		myModel->CopyPointsToVRAM();
-	//	}
-	//}
-	
-	//ImGui::Checkbox("Mesh Render Instead", &meshRenderOn);
+	ImGui::Text("Tree Transform");
+	modelBaseTransform.DisplayController();
+	if (ImGui::Button("Update Transform")) {
+		modelBaseTransform.UpdateMatrix();
+		ReloadTreeInstancePositions();
+	}
+	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
+		ImGui::Text("Heads up! The transforms cannot\nupdate for the triangle model.\nInstead, please change them,\nthen load the model!");
+	}
 	ImGui::End();
 
 	ImGui::Begin("Meterage");

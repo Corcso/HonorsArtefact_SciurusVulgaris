@@ -38,6 +38,8 @@ private:
 
 	std::vector<PointTreeMesh*> loadedPointModels;
 	InstancedWorldMatrixHelper treeInstancePositions;
+	void ReloadTreeInstancePositions();
+	Transform modelBaseTransform;
 	VP_Matrices treeInstanceViewProjThisAndLastFrame[2]; // This index = 0, last index = 1
 	const int MAX_INSTANCE_POSITIONS = 1024000;
 	char modelPath[256] = "./models/output.tree";

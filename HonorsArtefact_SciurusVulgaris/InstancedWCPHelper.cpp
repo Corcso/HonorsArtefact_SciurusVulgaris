@@ -66,6 +66,8 @@ uint64_t InstancedWCPHelper::ApplyRandomRotation(uint64_t seed)
 
 void InstancedWorldMatrixHelper::LoadFromFile(std::string path)
 {
+    matrices.clear();
+
     // Read from the text file
     std::ifstream OBJFile(path);
 
