@@ -498,10 +498,38 @@ void MainDisplayApp::RenderImGuiControls()
 
 	ImGui::Begin("Live LOD Edits");
 
+	ImGui::Text("Please note:\nPoint count rounded up\nto nearest 128.");
+
+	// Continuous
 	if ((loadedPointModels.size() > 0 && loadedPointModels[0] != nullptr) && loadedPointModels[0]->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
+		if (ImGui::Button("Swap to Discrete")) loadedPointModels[0]->levelOfDetailType = PointTreeMesh::LODType::RANDOM_LEVELS;
 		ImGui::DragFloat("Level 0 Points", &loadedPointModels[0]->continousLOD_start, 128, 0, loadedPointModels[0]->points.size());
 		ImGui::DragFloat("Shallowness", &loadedPointModels[0]->continousLOD_shallowness, 1, 0, 100);
 		ImGui::DragFloat("Decay", &loadedPointModels[0]->continousLOD_decay, 0.1f, 1, 5);
+	}
+
+	// Discrete
+	if ((loadedPointModels.size() > 0 && loadedPointModels[0] != nullptr) && loadedPointModels[0]->levelOfDetailType == PointTreeMesh::LODType::RANDOM_LEVELS) {
+		if (ImGui::Button("Swap to Continuous")) loadedPointModels[0]->levelOfDetailType = PointTreeMesh::LODType::CONTINUOUS;
+		for (int i = 0; i < loadedPointModels[0]->randomLevelsLODPointCount.size(); i++) {
+			unsigned int max = loadedPointModels[0]->points.size();
+			ImGui::DragScalar(std::to_string(i).c_str(), ImGuiDataType_U32, &(loadedPointModels[0]->randomLevelsLODPointCount[i]), 1, 0, &max);
+		}
+		if (ImGui::Button("-") && loadedPointModels[0]->randomLevelsLODPointCount.size() > 0) {
+			loadedPointModels[0]->randomLevelsLODPointCount.pop_back();
+		}
+		if (ImGui::Button("+") && loadedPointModels[0]->randomLevelsLODPointCount.size() < 16) {
+			if (loadedPointModels[0]->randomLevelsLODPointCount.size() < 1) {
+				loadedPointModels[0]->randomLevelsLODPointCount.push_back(
+					loadedPointModels[0]->points.size()
+				);
+			}
+			else {
+				loadedPointModels[0]->randomLevelsLODPointCount.push_back(
+					loadedPointModels[0]->randomLevelsLODPointCount[loadedPointModels[0]->randomLevelsLODPointCount.size() - 1] / 2
+				);
+			}
+		}
 	}
 
 	ImGui::End();
