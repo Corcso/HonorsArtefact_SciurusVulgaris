@@ -187,7 +187,7 @@ void MainDisplayApp::FrameMeshShaded()
 
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
+			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
@@ -212,7 +212,7 @@ void MainDisplayApp::FrameMeshShaded()
 	WCP_Matrices terrainBufferData[2] = { {
 		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
+		HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
 		},
 		{
 		HMM_Translate(HMM_V3(0, 0, 0)),
@@ -282,7 +282,7 @@ void MainDisplayApp::FrameVertexShaded()
 
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
+			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
@@ -306,7 +306,7 @@ void MainDisplayApp::FrameVertexShaded()
 	WCP_Matrices terrainBufferData[2] = { {
 		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
+		HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
 		},
 		{
 		HMM_Translate(HMM_V3(0, 0, 0)),
@@ -359,13 +359,13 @@ void MainDisplayApp::FrameMeshTrue()
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		//treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
+		//treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		for (int i = 0; i < triangleMeshTreeLoader.GetMeshVector()->size(); i++) {
 			//(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
 			//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			InstancingInfo instancingInfo{ instanceCount, 0 };
-			VP_Matrices viewCamMatrices = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
+			VP_Matrices viewCamMatrices = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
 
 			(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateUniformBufferData(2, &viewCamMatrices); // Only 1/2 of buffer update but second half not used.
 			instancedMeshTree_RP.RenderMeshTree(&(*triangleMeshTreeLoader.GetMeshVector())[i], instancingInfo);

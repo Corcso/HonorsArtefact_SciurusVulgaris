@@ -187,6 +187,9 @@ void GeneratorApp::RenderLODPageMenu()
 	ImGui::End();
 	ImGui::Begin("Level Of Detail Studio");
 	ImGui::Checkbox("Coverage View", &isDebugCoverageViewOn);
+	ImGui::DragFloat("Camera Height", &LODCameraHeight, 0.01f, -100.0f, 100.0f);
+	ImGui::DragFloat("Scale", &LODViewScale, 0.0001f, 0.001f, 100.0f);
+	ImGui::SliderAngle("Rotation", &LODViewRotation);
 	ImGui::DragInt("Exclusive View", &exclusivleyViewing, 1, -1, 15);
 	if (ImGui::Button("Use Random Levels"))
 	{
@@ -220,7 +223,6 @@ void GeneratorApp::RenderLODPageMenu()
 			);
 		}
 	}
-	ImGui::SliderAngle("Rotation", &LODViewRotation);
 	if (meshRenderingPipeline.GetPointMeshOutput()->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
 		ImGui::DragFloat("Level 0 Points", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_start, 128, 0, meshRenderingPipeline.GetPointMeshOutput()->points.size());
 		ImGui::DragFloat("Shallowness", &meshRenderingPipeline.GetPointMeshOutput()->continousLOD_shallowness, 1, 0, 100);
@@ -242,9 +244,9 @@ void GeneratorApp::RenderLODPageMenu()
 
 	for (int i = 0; i < 16; i++) {
 		WCP_Matrices newData{
-				HMM_Translate(HMM_V3(0, 0, LODViewDistances[i])) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(LODViewRotation, HMM_V3(0, 1, 0)),
-				HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)),
-				HMM_Perspective_RH_ZO(70 * HMM_DegToRad, 1, 0.001, 100)
+				loadedModelTransform.matrix * HMM_Translate(HMM_V3(LODViewDistances[i], 0, 0)) * HMM_Rotate_LH(LODViewRotation, HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(LODViewScale, LODViewScale, LODViewScale)),
+				HMM_LookAt_LH(HMM_V3(0, LODCameraHeight, 0), HMM_V3(0, LODCameraHeight, -1), HMM_V3(0, -1, 0)),
+				HMM_Perspective_RH_ZO(50 * HMM_DegToRad, 1, 0.001, 100)
 		};
 
 		LODViewDescriptors[i].UpdateUniformBufferData(0, &newData);

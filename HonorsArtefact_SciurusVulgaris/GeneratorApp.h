@@ -39,6 +39,8 @@ private:
 	void RenderLODPageMenu();
 	std::vector<VulkanObjectDescriptorSet> LODViewDescriptors;
 	float LODViewRotation;
+	float LODViewScale = 0.009f; // The default for the renderer with the default trees. 
+	float LODCameraHeight = -9.5f; // Default for this summer bubble.
 	std::vector<float> LODViewDistances;
 	int exclusivleyViewing = -1;
 	bool isDebugCoverageViewOn;
