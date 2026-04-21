@@ -170,7 +170,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PCH.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)implot;C:\VulkanSDK\NvPerf\utilities\imports\rapidyaml-0.4.0;C:\VulkanSDK\NvPerf\utilities\include;C:\VulkanSDK\1.4.321.1\Include;$(ProjectDir);$(SolutionDir)include;C:\VulkanSDK\NvPerf\include;C:\VulkanSDK\NvPerf\include\windows-desktop-x64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)implot;C:\VulkanSDK\NvPerf\utilities\imports\rapidyaml-0.4.0;C:\VulkanSDK\NvPerf\utilities\include;C:\VulkanSDK\1.4.335.0\Include;$(ProjectDir);$(SolutionDir)include;C:\VulkanSDK\NvPerf\include;C:\VulkanSDK\NvPerf\include\windows-desktop-x64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
@@ -183,7 +183,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\NvPerf\bin\x64;$(SolutionDir)/lib;C:\VulkanSDK\1.4.321.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\NvPerf\bin\x64;$(SolutionDir)/lib;C:\VulkanSDK\1.4.335.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>assimp-vc143-mt.lib;nvperf_grfx_host.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
