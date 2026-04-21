@@ -81,15 +81,16 @@ void GeneratorApp::Frame() {
 		mesh->CreateDescriptorSet(meshRenderingPipeline.GetDescriptorSetLayout(), meshRenderingPipeline.GetDescriptorSetLayoutInfo(), descriptorSizes.data());
 		mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, meshRenderingPipeline.GetSampler());
 	});
-
-	if (ImGui::Button("Execute Point Generation")) {
-		extractPointsAtEndOfThisFrame = true;
+	if (treeMeshLoader.IsMeshLoaded()) {
+		loadedModelTransform.DisplayController();
+		if (ImGui::Button("Execute Point Generation")) {
+			extractPointsAtEndOfThisFrame = true;
+		}
+		ImGui::Checkbox("Debug : Constant Extraction", &extractPointsConstantly);
 	}
-	ImGui::Checkbox("Debug : Constant Extraction", &extractPointsConstantly);
 	if (ImGui::Button("Exit to Point Renderer")) {
 		quitMainLoop = true;
 	}
-	loadedModelTransform.DisplayController();
 	ImGui::End();
 
 	ImGui::Begin("Live Screen");
