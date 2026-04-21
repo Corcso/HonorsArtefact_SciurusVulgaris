@@ -12,6 +12,7 @@ HMM_Mat4 Light::GetProjectionMatrix(float radius, float backFactor, float forwar
 
 HMM_Mat4 Light::GetViewMatrix(HMM_Vec3 focusPoint)
 {
+    // Pick a non parallel vector (either 0, 1, 0 or 0, 0, 1) and cross with the direction to get any perpendicular vector as up direction doesn't matter.
     HMM_Vec3 nonParallelVector = HMM_V3(0, 1, 0);
     if (HMM_Dot(nonParallelVector, direction) < 0.01) nonParallelVector = HMM_V3(0, 0, 1);
     viewMatrix = HMM_LookAt_LH(focusPoint, focusPoint - direction, HMM_Cross(nonParallelVector, -direction));
@@ -41,16 +42,19 @@ void Light::RenderImGuiMenu(bool createWindow)
 
 void Light::CreateShadowResources(VkRenderPass vkRenderPass)
 {
+    // Create image
     shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 2048, 2048, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     shadowImage.CreateImageView(true);
     shadowImage.DebugNameImage(name + " light");
 
     VulkanUtility::TransitionImageLayout(shadowImage.GetImage(), VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, true);
 
+    // Create imgui image reference
     shadowImageImGuiTex = reinterpret_cast<ImTextureID>(
         ImGui_ImplVulkan_AddTexture(Graphics::GetBasicLinearSampler(), shadowImage.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
     );
-   
+    
+    // Create frame buffer
     VkImageView imageViewList[]{ shadowImage.GetImageView() };
 
     VkFramebufferCreateInfo frameBufferCreateInfo{};

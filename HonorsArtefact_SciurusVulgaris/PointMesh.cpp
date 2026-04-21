@@ -19,7 +19,7 @@ void PointMesh::CopyPointsToVRAM()
         pointBuffer = VK_NULL_HANDLE;
     }
 
-    // VERTEX BUFFER
+    // VERTEX BUFFER ONLY 
     
     // Staging Vertex buffer
     VkBuffer stagingVertexBuffer;
@@ -54,8 +54,6 @@ void PointMesh::CopyPointsToVRAMMeshBuffer(uint32_t bindingIndex)
     // STORAGE BUFFER
     // For Use In Mesh Shading
 
-    // TODO Stop no desciriptor from copying
-
     std::vector<PointPadded> tempPaddedPoints;
     tempPaddedPoints.resize(points.size());
     for (int i = 0; i < points.size(); i++) {
@@ -65,33 +63,6 @@ void PointMesh::CopyPointsToVRAMMeshBuffer(uint32_t bindingIndex)
     }
     GetDescriptorSet()->UpdateStorageBufferData(bindingIndex, tempPaddedPoints.data());
     GetShadowDescriptorSet()->UpdateStorageBufferData(bindingIndex, tempPaddedPoints.data());
-
-    //// Staging Storage buffer
-    //VkBuffer stagingStorageBuffer;
-    //VulkanMemoryAllocator::VulkanMemoryBlock stagingStorageBufferMemory;
-
-    //VkDeviceSize bufferSize = sizeof(points[0]) * points.size();
-    //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
-    //    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //    &stagingStorageBuffer, &stagingStorageBufferMemory, VulkanMemoryAllocator::VulkanMemoryMapUsage::INSTANT);
-
-    //// Map GPU memory to CPU memory
-    //VulkanUtility::MapCopyBlockToGPU(stagingStorageBufferMemory, points.data(), bufferSize);
-
-    //// Copy Staging -> Local
-    //VulkanUtility::CreateBufferAndAssignMemory(bufferSize,
-    //    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-    //    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-    //    &pointBuffer, &pointBufferMemory);
-
-    //VulkanUtility::CopyBufferData(stagingStorageBuffer, pointBuffer, bufferSize);
-
-    //// Dont need the stager anymore
-    //VulkanUtility::DestroyBuffer(stagingStorageBuffer);
-    //VulkanUtility::FreeGPUMemoryBlock(stagingStorageBufferMemory);
-
-    //isDataOnGPU = true;
 }
 
 void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
@@ -159,10 +130,6 @@ void PointMesh::LoadFromFileOBJMTL(std::string pathOBJ, std::string pathMTL)
         }
     }
 
-    /*for (int i = 0; i < points.size(); ++i) {
-        indices.push_back(i);
-    }*/
-
     // Close the file
     MTLFile.close();
 }
@@ -188,10 +155,6 @@ void PointMesh::LoadFromFile(std::string path)
                         color,
                         HMM_V3(scene->mMeshes[mesh]->mNormals[v].x, scene->mMeshes[mesh]->mNormals[v].y, scene->mMeshes[mesh]->mNormals[v].z)
                     });
-
-                // Points have no faces just push back 0 -> numVertices
-                //indices.push_back(currentIndex);
-                //currentIndex++;
             }
         }
        

@@ -31,7 +31,6 @@ void TriListMesh::CopyPointsToVRAM()
 
     // Dont need the stager anymore
     VulkanUtility::DestroyBuffer(stagingVertexBuffer);
-    //VulkanUtility::FreeGPUMemory(stagingVertexBufferMemory);
     VulkanUtility::FreeGPUMemoryBlock(stagingVertexBufferMemory);
 
     // INDEX BUFFER
@@ -55,7 +54,6 @@ void TriListMesh::CopyPointsToVRAM()
 
     VulkanUtility::DestroyBuffer(stagingIndexBuffer);
     VulkanUtility::FreeGPUMemoryBlock(stagingIndexBufferMemory);
-    //VulkanUtility::FreeGPUMemory(stagingIndexBufferMemory);
 }
 
 void TriListMesh::LoadFile(std::string path, int meshIndex)

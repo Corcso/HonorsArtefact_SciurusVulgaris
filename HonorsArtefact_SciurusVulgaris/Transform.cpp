@@ -12,7 +12,6 @@ Transform::Transform()
 void Transform::UpdateMatrix()
 {
 	// Calculate Matrix
-	// TODO Figure out the right order here.
 	HMM_Mat4 combinedRotation = HMM_Rotate_LH(euler.Y * HMM_DegToRad, HMM_V3(0, 1, 0)) * HMM_Rotate_LH(euler.X * HMM_DegToRad, HMM_V3(1, 0, 0)) * HMM_Rotate_LH(euler.Z * HMM_DegToRad, HMM_V3(0, 0, 1));
 	matrix = HMM_Translate(position) * combinedRotation * HMM_Scale(scale);
 

@@ -192,11 +192,11 @@
     <ClInclude Include="ImGuiHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox_GP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Guffer.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox_GP.h">
+      <Filter>Renderers\Pipelines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -342,7 +342,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Skybox_GP.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Renderers\Pipelines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

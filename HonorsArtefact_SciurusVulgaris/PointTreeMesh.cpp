@@ -5,6 +5,7 @@
 
 void PointTreeMesh::LoadFromTreeFile(std::string path)
 {
+	// Parse LOD data using JSON (Lohmann, 2025)
 	std::ifstream file(path);
 	nlohmann::json data = nlohmann::json::parse(file);
 	file.close();
@@ -31,8 +32,7 @@ void PointTreeMesh::LoadFromTreeFile(std::string path)
 
 void PointTreeMesh::SaveToTreeFile(std::string path)
 {
-	
-	
+	// Save JSON to file
 	nlohmann::json output;
 	switch (levelOfDetailType) {
 	case LODType::RANDOM_LEVELS:
