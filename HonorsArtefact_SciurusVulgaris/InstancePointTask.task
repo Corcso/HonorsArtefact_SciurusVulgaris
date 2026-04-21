@@ -17,6 +17,8 @@ layout(binding = 1) readonly buffer UniformBufferObject {
 layout(binding = 2) uniform InstancingInfo {
     uint instanceCount;
     uint instanceStride;
+    uint modelCount;
+	uint myModelNumber;
 } instanceInfo; 
 
 layout(binding = 3) uniform MeshletInfo {

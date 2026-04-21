@@ -32,6 +32,8 @@ layout(binding = 6) uniform VPMatricesObject {
 layout(binding = 2) uniform InstancingInfo {
     uint instanceCount;
     uint instanceStride;
+    uint modelCount;
+	uint myModelNumber;
 } instanceInfo; 
 
 layout(binding = 4) uniform LODDataBuffer {

@@ -36,7 +36,7 @@ private:
 	InstancedTreeRenderPass pointRenderingPass;
 	std::vector<size_t> descriptorSizes;
 
-	PointTreeMesh* myModel;
+	std::vector<PointTreeMesh*> loadedPointModels;
 	InstancedWorldMatrixHelper treeInstancePositions;
 	VP_Matrices treeInstanceViewProjThisAndLastFrame[2]; // This index = 0, last index = 1
 	const int MAX_INSTANCE_POSITIONS = 1024000;

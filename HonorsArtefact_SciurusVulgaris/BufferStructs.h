@@ -15,6 +15,8 @@ struct VP_Matrices {
 struct InstancingInfo {
 	uint32_t numberOfInstances;
 	uint32_t instanceStride;
+	uint32_t numberOfModels;
+	uint32_t myModelNumber;
 };
 
 struct MeshletInfo {

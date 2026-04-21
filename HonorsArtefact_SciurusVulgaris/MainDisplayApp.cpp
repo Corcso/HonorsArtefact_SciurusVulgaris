@@ -11,9 +11,7 @@ void MainDisplayApp::Initialize() {
 	pointRenderingPass.CreateAll();
 	descriptorSizes = { 0, sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo), sizeof(VP_Matrices) * 2};
 	descriptorSizesMesh = { sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, 0, sizeof(VP_Matrices) * 2 };
-	//descriptorSizes = { 0, sizeof(WCP_Matrices)};
-
-	myModel = nullptr;
+	
 	angle = 0;
 
 	cameraTransform.speed = 0.5f;
@@ -63,28 +61,33 @@ void MainDisplayApp::Initialize() {
 		// Load Point Mesh
 		std::cout << "Loading Point Tree (Summer Bubble)...\n";
 		{
-			if (myModel != nullptr) {
-				Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
-				delete myModel;
+			for (auto& model : loadedPointModels) {
+				if (model != nullptr) {
+					Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
+					delete model;
+					model = nullptr;
+				}
 			}
 
-			myModel = new PointTreeMesh();
+			loadedPointModels.clear();
 
-			myModel->LoadFromTreeFile(modelPath);
+			loadedPointModels.push_back(new PointTreeMesh());
+
+			loadedPointModels[0]->LoadFromTreeFile(modelPath);
 			//myModel->CopyPointsToVRAM();
-			descriptorSizes[0] = myModel->GetPointsArraySize(true);
-			myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
-			myModel->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
-			myModel->CopyPointsToVRAMMeshBuffer(0);
-			myModel->CopyPointsToVRAM();
+			descriptorSizes[0] = loadedPointModels[0]->GetPointsArraySize(true);
+			loadedPointModels[0]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+			loadedPointModels[0]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
+			loadedPointModels[0]->CopyPointsToVRAMMeshBuffer(0);
+			loadedPointModels[0]->CopyPointsToVRAM();
 
 			// Copy instance positions
-			myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-			myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			loadedPointModels[0]->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+			loadedPointModels[0]->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 
 
-			MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
-			myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+			MeshletInfo meshletInfo{ loadedPointModels[0]->GetMeshletCount() };
+			loadedPointModels[0]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 		}
 		// Load mesh
 		std::cout << "Loading Full Tree (Summer Bubble)... This can take some time.\n";
@@ -121,7 +124,12 @@ void MainDisplayApp::Frame() {
 
 void MainDisplayApp::Shutdown() {
 	Graphics::WaitUntilGPUIdle();
-	if (myModel != nullptr) delete myModel;
+	for (auto& model : loadedPointModels) {
+		if (model != nullptr) {
+			delete model;
+		}
+	}
+	loadedPointModels.clear();
 	triangleMeshTreeLoader.Cleanup();
 	delete terrain; // Always loaded
 	terrainTexture.Destroy();
@@ -139,34 +147,36 @@ void MainDisplayApp::FrameMeshShaded()
 	Graphics::BeginRender();
 
 	// Set LOD & instance Data based on model
-	if (myModel != nullptr) {
-		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+	if (loadedPointModels.size() > 0 && loadedPointModels[0] != nullptr) {
+		for (int l = 0; l < loadedPointModels[0]->randomLevelsLODPointCount.size(); l++) {
+			lodData.maxVertexLevels[l][0] = loadedPointModels[0]->randomLevelsLODPointCount[l];
 		}
-		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.continousDecay = myModel->continousLOD_decay;
-		lodData.continousStart = myModel->continousLOD_start;
-		lodData.continousShallowness = myModel->continousLOD_shallowness;
-		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
-
-		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+		lodData.maxLevel = loadedPointModels[0]->randomLevelsLODPointCount.size();
+		lodData.continousDecay = loadedPointModels[0]->continousLOD_decay;
+		lodData.continousStart = loadedPointModels[0]->continousLOD_start;
+		lodData.continousShallowness = loadedPointModels[0]->continousLOD_shallowness;
+		lodData.lodType = static_cast<int>(loadedPointModels[0]->levelOfDetailType);
 	}
 
 	if (sun.IsShadowEnabled()) {
 		Graphics::PushMetricRange("Shadow Map Render");
 		lightShadow_RP.BeginRender(&sun);
-		if (myModel != nullptr) {
-			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
+		uint32_t index = 0;
+		for (auto& model : loadedPointModels) {
+			if (model != nullptr) {
+				lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
 
-			VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
-			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
-			myModel->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+				VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
+				model->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
+				model->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-			//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
+				//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
+				instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
+				model->GetShadowDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
-			lightShadow_RP.RenderPointTree(myModel, instancingInfo);
-
-
+				lightShadow_RP.RenderPointTree(model, instancingInfo);
+			}
+			index++;
 		}
 		lightShadow_RP.EndRender();
 		Graphics::PopMetricRange();
@@ -177,42 +187,29 @@ void MainDisplayApp::FrameMeshShaded()
 	pointRenderingPass.UpdateCameraInfoForSkybox(cameraTransform);
 	pointRenderingPass.BeginRenderMeshShade(HMM_V4(0, 0, 0, 1));
 
+	uint32_t index = 0;
+	for (auto& model : loadedPointModels) {
+		if (model != nullptr) {
 
-	if (myModel != nullptr) {
+			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		//std::vector<WCP_Matrices> dataForUBO(400);
+			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
+			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
+			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-		//for (int x = 0; x < 20; x++) {
-		//	for (int y = 0; y < 20; y++) {
-		//		dataForUBO[x * 20 + y] = {
-		//			//HMM_M4D(1) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Perspective_RH_ZO(70, 1, 0.001, 10)
-		//			HMM_Translate(HMM_V3(x * 2.5f, 0, y * 2.5f)) * HMM_Scale(HMM_V3(0.2, 0.2, 0.2)) * HMM_Rotate_LH(angle, HMM_V3(0, 1, 0)),
-		//			cameraTransform.viewMatrix,
-		//			HMM_Perspective_RH_ZO(70, 1, 0.001, 100)
-		//		};
-		//	}
-		//}
+			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 
-		//LODDataBuffer lodData;
-		//for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-		//	lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
-		//}
-		//lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
 
-		treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
+			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
-		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
+			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
 
-		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
-
-		pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
-
-		//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
-		pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
+			//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
+			pointRenderingPass.RenderPointTreeViaMeshShader(model, instancingInfo);
+		}
+		index++;
 	}
 
 
@@ -263,87 +260,87 @@ void MainDisplayApp::FrameMeshShaded()
 
 void MainDisplayApp::FrameVertexShaded()
 {
-	InstancingInfo instancingInfo;
-	LODDataBuffer lodData;
+	//InstancingInfo instancingInfo;
+	//LODDataBuffer lodData;
 
-	Graphics::BeginRender();
+	//Graphics::BeginRender();
 
-	// Render logic
-	Graphics::PushMetricRange("Render Point Trees");
-	pointRenderingPass.BeginRenderVertexShade(HMM_V4(0, 0, 0, 1));
+	//// Render logic
+	//Graphics::PushMetricRange("Render Point Trees");
+	//pointRenderingPass.BeginRenderVertexShade(HMM_V4(0, 0, 0, 1));
 
-	if (myModel != nullptr) {
+	//if (myModel != nullptr) {
 
-		for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
-			lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
-		}
-		lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
-		lodData.continousDecay = myModel->continousLOD_decay;
-		lodData.continousStart = myModel->continousLOD_start;
-		lodData.continousShallowness = myModel->continousLOD_shallowness;
-		lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
-		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
+	//	for (int l = 0; l < myModel->randomLevelsLODPointCount.size(); l++) {
+	//		lodData.maxVertexLevels[l][0] = myModel->randomLevelsLODPointCount[l];
+	//	}
+	//	lodData.maxLevel = myModel->randomLevelsLODPointCount.size();
+	//	lodData.continousDecay = myModel->continousLOD_decay;
+	//	lodData.continousStart = myModel->continousLOD_start;
+	//	lodData.continousShallowness = myModel->continousLOD_shallowness;
+	//	lodData.lodType = static_cast<int>(myModel->levelOfDetailType);
+	//	lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
+	//	treeInstanceViewProjThisAndLastFrame[0] = {cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)};
+	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
+	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-		//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
+	//	//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
 
-		//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
-		instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
+	//	//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
+	//	instancingInfo = { static_cast<uint32_t>(instanceCount), myModel->GetMeshletCount() };
+	//	myModel->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
-		pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
+	//	pointRenderingPass.UpdateTAADescriptor(myModel->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
 
-		pointRenderingPass.RenderPointTree(myModel, instancingInfo);
-		//pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
-	}
-
-
+	//	pointRenderingPass.RenderPointTree(myModel, instancingInfo);
+	//	//pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
+	//}
 
 
-	WCP_Matrices terrainBufferData[2] = { {
-		HMM_Translate(HMM_V3(0, 0, 0)),
-		cameraTransform.viewMatrix,
-		HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
-		},
-		{
-		HMM_Translate(HMM_V3(0, 0, 0)),
-		treeInstanceViewProjThisAndLastFrame[1].camera,
-		treeInstanceViewProjThisAndLastFrame[1].projection
-		}
-	};
-	terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
-	pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
-	Graphics::PopMetricRange();
-	Graphics::PushMetricRange("Terrain Mesh Render");
-	if (terrainEnabled) {
-		pointRenderingPass.SwitchToTraditionalMeshPipeline();
-		pointRenderingPass.RenderTraditionalMesh(terrain);
-	}
-	pointRenderingPass.EndRender();
-	Graphics::PopMetricRange();
-	RenderImGuiControls();
 
-	Light::BufferStruct rawSunData = sun.GetBufferData();
-	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
-	Graphics::PushMetricRange("Colour Deferred");
-	pointRenderingPass.ExecuteSecondRender();
-	pointRenderingPass.EndSecondRender();
-	Graphics::PopMetricRange();
-	Graphics::PushMetricRange("Anti Aliasing");
-	pointRenderingPass.ExecuteTAARender(taaEnabled, taaLogarithmicColorSpace);
-	pointRenderingPass.EndTAARender();
+	//WCP_Matrices terrainBufferData[2] = { {
+	//	HMM_Translate(HMM_V3(0, 0, 0)),
+	//	cameraTransform.viewMatrix,
+	//	HMM_Perspective_RH_ZO(70, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000)
+	//	},
+	//	{
+	//	HMM_Translate(HMM_V3(0, 0, 0)),
+	//	treeInstanceViewProjThisAndLastFrame[1].camera,
+	//	treeInstanceViewProjThisAndLastFrame[1].projection
+	//	}
+	//};
+	//terrain->GetDescriptorSet()->UpdateUniformBufferData(0, &terrainBufferData);
+	//pointRenderingPass.UpdateTAADescriptor(terrain->GetDescriptorSet(), 2, taaEnabled, taaLogarithmicColorSpace);
+	//Graphics::PopMetricRange();
+	//Graphics::PushMetricRange("Terrain Mesh Render");
+	//if (terrainEnabled) {
+	//	pointRenderingPass.SwitchToTraditionalMeshPipeline();
+	//	pointRenderingPass.RenderTraditionalMesh(terrain);
+	//}
+	//pointRenderingPass.EndRender();
+	//Graphics::PopMetricRange();
+	//RenderImGuiControls();
 
-	pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
-	Graphics::PopMetricRange();
-	Graphics::FinishImGuiRender();
-	pointRenderingPass.EndFXAARender();
-	Graphics::EndRender();
+	//Light::BufferStruct rawSunData = sun.GetBufferData();
+	//pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
-	treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
+	//Graphics::PushMetricRange("Colour Deferred");
+	//pointRenderingPass.ExecuteSecondRender();
+	//pointRenderingPass.EndSecondRender();
+	//Graphics::PopMetricRange();
+	//Graphics::PushMetricRange("Anti Aliasing");
+	//pointRenderingPass.ExecuteTAARender(taaEnabled, taaLogarithmicColorSpace);
+	//pointRenderingPass.EndTAARender();
+
+	//pointRenderingPass.ExecuteFXAARender(fxaaEnabled);
+	//Graphics::PopMetricRange();
+	//Graphics::FinishImGuiRender();
+	//pointRenderingPass.EndFXAARender();
+	//Graphics::EndRender();
+
+	//treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
 }
 
 void MainDisplayApp::FrameMeshTrue()
@@ -393,29 +390,24 @@ void MainDisplayApp::RenderImGuiControls()
 	if (!renderImGui) return;
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
-	if (ImGui::Button("Load")) {
-		if (myModel != nullptr) {
-			Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
-			delete myModel;
-		}
+	if (ImGui::Button("Load Another")) {
+		loadedPointModels.push_back(new PointTreeMesh());
 
-		myModel = new PointTreeMesh();
-
-		myModel->LoadFromTreeFile(modelPath);
+		loadedPointModels[loadedPointModels.size() - 1]->LoadFromTreeFile(modelPath);
 		//myModel->CopyPointsToVRAM();
-		descriptorSizes[0] = myModel->GetPointsArraySize(true);
-		myModel->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
-		myModel->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
-		myModel->CopyPointsToVRAMMeshBuffer(0);
-		myModel->CopyPointsToVRAM();
+		descriptorSizes[0] = loadedPointModels[loadedPointModels.size() - 1]->GetPointsArraySize(true);
+		loadedPointModels[loadedPointModels.size() - 1]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
+		loadedPointModels[loadedPointModels.size() - 1]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
+		loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAMMeshBuffer(0);
+		loadedPointModels[loadedPointModels.size() - 1]->CopyPointsToVRAM();
 
 		// Copy instance positions
-		myModel->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
-		myModel->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
+		loadedPointModels[loadedPointModels.size() - 1]->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 		
 
-		MeshletInfo meshletInfo{ myModel->GetMeshletCount() };
-		myModel->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
+		MeshletInfo meshletInfo{ loadedPointModels[loadedPointModels.size() - 1]->GetMeshletCount() };
+		loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 	}
 	/*ImGui::InputText("Mesh Model Path", meshModelPath, 256);
 	if (ImGui::Button("Load Mesh")) {
@@ -484,7 +476,7 @@ void MainDisplayApp::RenderImGuiControls()
 	ImGui::Begin("Render Method");
 	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points" };
 	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
-	if((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && myModel == nullptr) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "No Point Mesh Tree Loaded");
+	if((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && loadedPointModels.size() == 0) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "No Point Mesh Tree Loaded");
 	else if (currentRendererType == RendererType::MESH_TRUE && !triangleMeshTreeLoader.IsMeshLoaded()) ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "No Triangle Mesh Tree Loaded");
 
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("FXAA", &fxaaEnabled);
@@ -493,7 +485,7 @@ void MainDisplayApp::RenderImGuiControls()
 	else ImGui::Text("TAA Not Available");
 	if ((currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) && taaEnabled) ImGui::Checkbox("Logarithmic Colour Space", &taaLogarithmicColorSpace);
 
-	if (myModel != nullptr || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::DragInt("N Instances", &instanceCount, 64, 0, HMM_MIN(treeInstancePositions.matrices.size(), MAX_INSTANCE_POSITIONS),"%d", ImGuiSliderFlags_Logarithmic);
+	if ((loadedPointModels.size() > 0 && loadedPointModels[0] != nullptr) || triangleMeshTreeLoader.IsMeshLoaded()) ImGui::DragInt("N Instances", &instanceCount, 64, 0, HMM_MIN(treeInstancePositions.matrices.size(), MAX_INSTANCE_POSITIONS),"%d", ImGuiSliderFlags_Logarithmic);
 	else ImGui::Text("Please load a model to instance items");
 
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);
@@ -502,10 +494,10 @@ void MainDisplayApp::RenderImGuiControls()
 
 	ImGui::Begin("Live LOD Edits");
 
-	if (myModel != nullptr && myModel->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
-		ImGui::DragFloat("Level 0 Points", &myModel->continousLOD_start, 128, 0, myModel->points.size());
-		ImGui::DragFloat("Shallowness", &myModel->continousLOD_shallowness, 1, 0, 100);
-		ImGui::DragFloat("Decay", &myModel->continousLOD_decay, 0.1f, 1, 5);
+	if ((loadedPointModels.size() > 0 && loadedPointModels[0] != nullptr) && loadedPointModels[0]->levelOfDetailType == PointTreeMesh::LODType::CONTINUOUS) {
+		ImGui::DragFloat("Level 0 Points", &loadedPointModels[0]->continousLOD_start, 128, 0, loadedPointModels[0]->points.size());
+		ImGui::DragFloat("Shallowness", &loadedPointModels[0]->continousLOD_shallowness, 1, 0, 100);
+		ImGui::DragFloat("Decay", &loadedPointModels[0]->continousLOD_decay, 0.1f, 1, 5);
 	}
 
 	ImGui::End();
@@ -541,9 +533,9 @@ void MainDisplayApp::ImageCaptureSequence()
 			terrainEnabled = false;
 			sun.SetShadowEnabled(false);
 			pointRenderingPass.enableSkybox = false;
-			myModel->continousLOD_start = 512.0f;
-			myModel->continousLOD_shallowness = 12.5f;
-			myModel->continousLOD_decay = 1.5f;
+			loadedPointModels[0]->continousLOD_start = 512.0f;
+			loadedPointModels[0]->continousLOD_shallowness = 12.5f;
+			loadedPointModels[0]->continousLOD_decay = 1.5f;
 		} },
 		//{"DownTheValley16kMeshShade", [&]() {
 		//	instanceCount = 16000;
@@ -622,8 +614,8 @@ void MainDisplayApp::ImageCaptureSequence()
 		// VISUAL COMPARISON
 		{"RenderComparisonCloseTrue", [&]() {
 			currentRendererType = RendererType::MESH_TRUE;
-			myModel->continousLOD_start = myModel->points.size(); // Disable LOD
-			myModel->continousLOD_decay = 1.0f;
+			loadedPointModels[0]->continousLOD_start = loadedPointModels[0]->points.size(); // Disable LOD
+			loadedPointModels[0]->continousLOD_decay = 1.0f;
 			instanceCount = 100; // To get the two trees next to eachother
 			cameraTransform.position = HMM_V3(-29.2, -11.2, -29.9);
 			cameraTransform.euler = HMM_V3(-17.3, 518.7, 0);
@@ -679,9 +671,9 @@ void MainDisplayApp::ImageCaptureSequence()
 		{ "DownTheValley4kMeshShade512", [&]() {
 			instanceCount = 4000;
 			currentRendererType = RendererType::MESH_SHADED_POINTS;
-			myModel->continousLOD_start = 512.0f;
-			myModel->continousLOD_shallowness = 12.5f;
-			myModel->continousLOD_decay = 1.0f;
+			loadedPointModels[0]->continousLOD_start = 512.0f;
+			loadedPointModels[0]->continousLOD_shallowness = 12.5f;
+			loadedPointModels[0]->continousLOD_decay = 1.0f;
 		} },
 		{ "DownTheValley16kMeshShade512", [&]() {
 			instanceCount = 16000;
@@ -707,9 +699,9 @@ void MainDisplayApp::ImageCaptureSequence()
 		{ "DownTheValley4kVertexShade512", [&]() {
 		instanceCount = 4000;
 		currentRendererType = RendererType::VERTEX_SHADED_POINTS;
-		myModel->continousLOD_start = 512.0f;
-		myModel->continousLOD_shallowness = 12.5f;
-		myModel->continousLOD_decay = 1.0f;
+		loadedPointModels[0]->continousLOD_start = 512.0f;
+		loadedPointModels[0]->continousLOD_shallowness = 12.5f;
+		loadedPointModels[0]->continousLOD_decay = 1.0f;
 		} },
 		{ "DownTheValley16kVertexShade512", [&]() {
 			instanceCount = 16000;
