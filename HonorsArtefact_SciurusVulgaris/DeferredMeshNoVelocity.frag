@@ -1,5 +1,8 @@
 #version 450 
 
+// Triangle -> GBuffer with texture sampling
+// Doesn't include velocity data
+
 layout(binding = 1) uniform sampler2D colorTexture;
 
 layout(location = 0) in vec3 inWorldPos;

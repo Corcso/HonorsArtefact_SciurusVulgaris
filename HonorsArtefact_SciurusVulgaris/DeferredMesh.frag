@@ -1,5 +1,7 @@
 #version 450 
 
+// Triangle -> GBuffer with texture sampling
+
 layout(binding = 1) uniform sampler2D colorTexture;
 
 layout(location = 0) in vec3 inWorldPos;

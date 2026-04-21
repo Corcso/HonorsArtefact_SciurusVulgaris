@@ -1,5 +1,7 @@
 #version 450
 
+// Triangle Vertex Shader (For things like terrain)
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTex;
@@ -30,24 +32,26 @@ vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 {
     oldPos /= oldPos.w;
     oldPos.xy = (oldPos.xy + vec2(1,1))/2.0f;
-    //oldPos.y = 1 - oldPos.y;
     
     newPos /= newPos.w;
     newPos.xy = (newPos.xy + vec2(1,1))/2.0f;
-    //newPos.y = 1 - newPos.y;
     
     return (newPos - oldPos).xy;
 }
 
 void main() {
 
+    // Position on screen
     gl_Position = ubo.proj * ubo.view * ubo.world * vec4(inPosition, 1.0);
+
+    // Calc Velocity
     vec4 lastScreenSpacePosition = ubo.projLast * ubo.viewLast * ubo.worldLast * vec4(inPosition, 1.0);
     outVelocity = CalcVelocity(gl_Position, lastScreenSpacePosition);
 
     // Apply TAA Jitter (if enabled)
     if(taaInfo.enabled) gl_Position += vec4(taaInfo.currentJitter * gl_Position.w, 0, 0);
-
+   
+    // Calc world pos, normal and tex.
     outWorldPos = (ubo.world * vec4(inPosition, 1.0)).xyz;
     outNormal = normalize((ubo.world * vec4(inNormal, 0.0)).xyz);
     outTex = inTex;

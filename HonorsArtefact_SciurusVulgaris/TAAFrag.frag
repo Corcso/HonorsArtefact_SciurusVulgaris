@@ -1,5 +1,7 @@
 #version 450 
 
+// TAA Shader Taken from (Lee, 2021; Riñón, 2022)
+
 layout(binding = 0) uniform sampler2D renderInput; // Sampled Nearest
 layout(binding = 1) uniform sampler2D historyInput; // Sampled Linear
 layout(binding = 2) uniform sampler2D velocityInput; // Sampled Nearest

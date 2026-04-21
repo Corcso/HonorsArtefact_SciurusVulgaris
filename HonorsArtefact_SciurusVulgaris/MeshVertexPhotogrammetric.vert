@@ -1,5 +1,7 @@
 #version 450
 
+// Photogrammetric version of MeshVertex, doesn't apply TAA.
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTex;

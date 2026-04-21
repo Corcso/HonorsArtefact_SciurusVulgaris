@@ -1,5 +1,7 @@
 #version 450
 
+// Instanced triangle vertex shader
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
 layout(location = 2) in vec2 inTex;
@@ -14,7 +16,7 @@ struct VPMatrices{
 };
 
 layout(binding = 0) readonly buffer UniformBufferObject {
-    mat4 worldMatrices[1024000];
+    mat4 worldMatrices[1024000]; // Up to 1,024,000 instances
 } transformation;
 
 layout(binding = 2) uniform VPMatricesObject {

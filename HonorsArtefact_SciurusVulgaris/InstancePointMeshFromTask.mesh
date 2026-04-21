@@ -2,6 +2,8 @@
 
 #extension GL_EXT_mesh_shader : require
 
+// Mesh shader part of mesh shader point tree rendering. 
+
 layout(local_size_x = 128) in;
 layout(points, max_vertices = 128, max_primitives = 128) out;
 
@@ -14,12 +16,6 @@ struct Point{
 layout(binding = 0) buffer readonly PointData{
 	Point pointArray[];
 } pointsData;
-
-//struct WCPMatrices{
-//    mat4 world;
-//    mat4 view;
-//    mat4 proj;
-//};
 
 struct VPMatrices{
     mat4 view;
@@ -67,38 +63,37 @@ vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 {
     oldPos /= oldPos.w;
     oldPos.xy = (oldPos.xy + vec2(1,1))/2.0f;
-    //oldPos.y = 1 - oldPos.y;
     
     newPos /= newPos.w;
     newPos.xy = (newPos.xy + vec2(1,1))/2.0f;
-    //newPos.y = 1 - newPos.y;
     
     return (newPos - oldPos).xy;
 }
 
 void main(){
 	uint instanceID = payload.instanceIndex;
-	uint pointDataIndex = gl_GlobalInvocationID.x;// % (instanceInfo.instanceStride * 64);
-
-	
+	uint pointDataIndex = gl_GlobalInvocationID.x;
 
 	// Vertices position
 	vec4 screenSpacePosition =  camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
 	vec4 lastScreenSpacePosition =  camProjMatrices.thisFrame.proj * camProjMatrices.thisFrame.view * transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0); 
 	outVelocity[gl_LocalInvocationID.x] = CalcVelocity(screenSpacePosition, lastScreenSpacePosition);
+
 	// Apply TAA Jitter
 	if(taaInfo.enabled) screenSpacePosition += vec4(taaInfo.currentJitter * screenSpacePosition.w * 1.2f, 0, 0);
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_Position = screenSpacePosition;
 
+	// Size 1
 	gl_MeshVerticesEXT[gl_LocalInvocationID.x].gl_PointSize = 1;
 
+	// World pos and normals
 	outWorldPos[gl_LocalInvocationID.x] = (transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].position, 1.0)).xyz;
-
 	outNormal[gl_LocalInvocationID.x] = (transformation.worldMatrices[instanceID] * vec4(pointsData.pointArray[pointDataIndex].normal, 0.0)).xyz;
 
 	// Vertices color
 	outColor[gl_LocalInvocationID.x] = vec4(pointsData.pointArray[pointDataIndex].color, 1.0);
-	//outColor[gl_LocalInvocationID.x] = vec4(debugColors[payload.debugLevel % 8], 1.0);
+	//outColor[gl_LocalInvocationID.x] = vec4(debugColors[payload.debugLevel % 8], 1.0); 
+
 	// Points indices
 	gl_PrimitivePointIndicesEXT[gl_LocalInvocationID.x] = gl_LocalInvocationID.x;
 	

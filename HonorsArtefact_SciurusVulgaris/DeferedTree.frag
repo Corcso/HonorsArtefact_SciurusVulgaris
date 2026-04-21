@@ -1,5 +1,7 @@
 #version 450 
 
+// GBuffer Paint Shader
+
 layout(binding = 0) uniform sampler2D colorBuffer;
 layout(binding = 1) uniform sampler2D positionBuffer;
 layout(binding = 2) uniform sampler2D normalBuffer;
@@ -22,6 +24,7 @@ layout(location = 0) in vec2 inTex;
 
 layout(location = 0) out vec4 outColor;
 
+// Calculate if a pixel is in shadow using the shadow map.
 bool IsInShadow(vec3 positionOfPixel) {
     vec4 projectedPosition = light.projMatrix * light.viewMatrix * vec4(positionOfPixel, 1.0);
     projectedPosition = projectedPosition / projectedPosition.w;
@@ -46,27 +49,26 @@ bool IsInShadow(vec3 positionOfPixel) {
 }
 
 void main() {
+    // Get all GBuffer values. 
     vec4 color = texture(colorBuffer, inTex);
     vec4 position = texture(positionBuffer, inTex);
     vec4 normal = texture(normalBuffer, inTex);
-    float depth = (texture(depthBuffer, inTex).r - 0.99998) / (1.0f - 0.99998); 
+    float depth = (texture(depthBuffer, inTex).r - 0.99998) / (1.0f - 0.99998);  // Setup for an unused fog effect. 
 
     if(color.a == 0) discard;
 
-    //vec3 diffuseDirection = vec3(-0.707, -0.707, 0);
-
     float diffuseStrengthFront = dot(normalize(normal.xyz), normalize(-light.direction));
-    float diffuseStrengthBack = dot(normalize(-normal.xyz), normalize(-light.direction)) * 0.5;
-    if(color.y < 0.5) diffuseStrengthBack = 0;
+    float diffuseStrengthBack = dot(normalize(-normal.xyz), normalize(-light.direction)) * 0.5; // Use for subsurface scattering
+    if(color.y < 0.5) diffuseStrengthBack = 0; // If the pixel is over a certain greenness consider it a leaf. You could use a trunk/leaf buffer here too. 
     float diffuseStrength = max(diffuseStrengthFront, diffuseStrengthBack) * light.intensity;
     if(IsInShadow(position.xyz) && light.shadowEnabled > 0.0) diffuseStrength = 0;
-    //diffuseStrength = max(diffuseStrength, 0.1);
+
     vec3 diffuseColor = light.color * diffuseStrength;
     vec3 ambientColor = light.ambientColor * light.ambientIntensity;
-    vec3 fogColor = vec3(0.3f, 0.3f, 0.32f);
+    vec3 fogColor = vec3(0.3f, 0.3f, 0.32f); // Setup for an unused fog effect. 
 
     // Return ambient + diffuse + specular
-    outColor = vec4(mix(color.rgb * (diffuseColor + ambientColor), fogColor, /*depth*/0.0f), /*1.0f - depth*/1.0f);
+    outColor = vec4(mix(color.rgb * (diffuseColor + ambientColor), fogColor, /*depth*/0.0f), /*1.0f - depth*/1.0f); // Don't blend fog color, not used
     //outColor = vec4(inNormal /0.5 + 0.5, 1);
     //outColor = vec4(depth, depth, depth , 1.0);
 }

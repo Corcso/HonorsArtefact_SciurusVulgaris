@@ -1,5 +1,10 @@
 #version 450 
 
+// Triangle rendering shader which outputs to GBuffer
+// But does not output world position as position, instead uses local model position. 
+// This is used for virtual photogrammetry
+// Also samples a texture.
+
 layout(binding = 1) uniform sampler2D texSampler;
 
 layout(location = 0) in vec3 inPosition;

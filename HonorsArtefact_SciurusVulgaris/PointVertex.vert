@@ -1,5 +1,8 @@
 #version 450
 
+// Vertex shader used for debug point renderer (LOD Viewer) 
+// This isnt used for rendering the trees with the vertex shader. See InstancePointVertex.vert
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec3 inNormal;
@@ -13,10 +16,6 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 view;
     mat4 proj;
 } ubo;
-
-//layout(set = 1, binding = 1) uniform LightInfo {
-//    float intensity;
-//} li;
 
 void main() {
 

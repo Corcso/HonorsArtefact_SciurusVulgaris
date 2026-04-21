@@ -1,5 +1,8 @@
 #version 450 
-// Mostly from (Rodriguez, 2016)
+
+// FXAA Shader
+// Implementation from (Rodriguez, 2016)
+
 layout(binding = 0) uniform sampler2D colorBuffer;
 
 layout(binding = 1) uniform FXAAInfo{
