@@ -39,8 +39,6 @@ public:
 	void ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matrices transformation);
 	void CollapsePoints();
 
-	void TEMP_TestImageData();
-
 	VkImageView GetColorImageView() const { return colorImage.GetImageView(); }
 	VkDescriptorSetLayout GetDescriptorSetLayout() const { return vkDescriptorSetLayout; }
 	VkDescriptorSetLayoutCreateInfo GetDescriptorSetLayoutInfo() const { return vkDescriptorSetLayoutInfo; }
@@ -66,10 +64,6 @@ private:
 
 	VkFence vkIsLastExtractionFinishedFence;
 	PointTreeMesh* output;
-
-	// TODO REMOVE AND TIDY
-	int frameinc;
-
 	
 	uint64_t thisFramesDrawCall;
 };

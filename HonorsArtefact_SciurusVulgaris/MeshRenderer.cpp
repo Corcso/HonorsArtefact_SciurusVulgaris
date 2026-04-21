@@ -486,11 +486,6 @@ void MeshRenderer::Render(TriListMesh* mesh, VkCommandBuffer commandBuffer)
     //    perObjectDescriptors[newSetIndex].CreateDescriptorSet(Graphics::GetVkDevice(), vkDescriptorSetLayout, Graphics::GetDescriptorPool()); // Should i use the same one
     //}
 
-    frameinc++;
-    //WCP_Matrices dataForUBO{
-    //    HMM_M4D(1), HMM_LookAt_LH(HMM_V3(5 * sin(frameinc / 1000.0f), 0, 5 * cos(frameinc / 1000.0f)), HMM_V3(0, 0, 0), HMM_V3(0, 1, 0)), HMM_Orthographic_LH_ZO(-1.5, 1.5, 2.2, -0.2, 0.001, 10)
-    //};
-
     //memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
 
     //mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
@@ -744,19 +739,4 @@ void MeshRenderer::CollapsePoints()
     }
     //output->indices.resize(output->points.size());
     std::cout << "Now have " << std::to_string(output->points.size()) << " points.\n";
-}
-
-void MeshRenderer::TEMP_TestImageData()
-{
-    std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
-    std::vector<HMM_Vec4> formattedData(data->size() / sizeof(HMM_Vec4));
-    for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
-        formattedData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
-    }
-    data.release();
-
-    for (int p = 0; p < formattedData.size(); p++) {
-        if(formattedData[p].R != 0) std::cout << formattedData[p].R;
-        if (p % 512 == 0) std::cout << "\n";
-    }
 }
