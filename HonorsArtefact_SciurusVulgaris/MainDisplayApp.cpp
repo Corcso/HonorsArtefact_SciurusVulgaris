@@ -566,7 +566,7 @@ void MainDisplayApp::RenderImGuiControls()
 	}
 	if (ImGui::BeginPopupModal("Controls", NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		ImGui::Text("Here is the controls information.");
+		ImGui::Text("See control scheme below.");
 		ImGui::Separator();
 		ImGui::Text("WASD - Lateral movement");
 		ImGui::Text("QE - Vertical movement");
