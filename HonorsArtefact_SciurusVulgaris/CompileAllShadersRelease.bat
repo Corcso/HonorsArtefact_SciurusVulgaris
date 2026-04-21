@@ -8,7 +8,6 @@ C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstancePointVertex.vert -O -o ./COMPILEDSH
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe PointFragment.frag -O -o ./COMPILEDSHADER_PointFragment.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshVertex.vert -O -o ./COMPILEDSHADER_MeshVertex.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe InstanceMeshVertex.vert -O -o ./COMPILEDSHADER_InstanceMeshVertex.spv
-C:\VulkanSDK\1.4.335.0\Bin\glslc.exe MeshFragment.frag -O -o ./COMPILEDSHADER_MeshFragment.spv
 C:\VulkanSDK\1.4.335.0\Bin\glslc.exe Skybox.frag -O -o ./COMPILEDSHADER_Skybox.spv
 
 :: Defered Stuff

@@ -1,7 +1,6 @@
 #pragma once
 #include "App.h"
 #include "MeshRenderer.h"
-#include "PointRenderPipeline.h"
 #include "ImGuiBlankRenderPass.h"
 #include "DebugPointRenderer.h"
 

@@ -262,7 +262,6 @@
     <ClInclude Include="MeshTraditionalToGBuffer_GP.h" />
     <ClInclude Include="PCH.h" />
     <ClInclude Include="PointMesh.h" />
-    <ClInclude Include="PointRenderPipeline.h" />
     <ClInclude Include="PointsToGBufferMeshShade_GP.h" />
     <ClInclude Include="PointsToGBuffer_GP.h" />
     <ClInclude Include="PointsToShadowMeshShade_GP.h" />
@@ -312,11 +311,6 @@
     <None Include="MeshVertexPhotogrammetric.vert">
       <FileType>CppCode</FileType>
     </None>
-    <ClCompile Include="OLDentry.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Metered|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="GeneratorApp.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsInitialize.cpp" />
@@ -367,7 +361,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PointMesh.cpp" />
-    <ClCompile Include="PointRenderPipeline.cpp" />
     <ClCompile Include="PointsToGBufferMeshShade_GP.cpp" />
     <ClCompile Include="PointsToGBuffer_GP.cpp" />
     <ClCompile Include="PointsToShadowMeshShade_GP.cpp" />
@@ -393,7 +386,6 @@
     <None Include="InstancePointMeshFromTask.mesh" />
     <None Include="InstancePointTask.task" />
     <None Include="InstancePointVertex.vert" />
-    <None Include="MeshFragment.frag" />
     <None Include="CompileAllShaders.bat" />
     <None Include="PointFragment.frag" />
     <None Include="MeshVertex.vert" />

@@ -84,9 +84,6 @@
     <ClInclude Include="json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PointRenderPipeline.h">
-      <Filter>OldUnifiedRenderers</Filter>
-    </ClInclude>
     <ClInclude Include="MeshRenderer.h">
       <Filter>OldUnifiedRenderers</Filter>
     </ClInclude>
@@ -203,9 +200,6 @@
     <ClCompile Include="PCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OLDentry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="imgui.cpp">
       <Filter>ImGui</Filter>
     </ClCompile>
@@ -229,9 +223,6 @@
     </ClCompile>
     <ClCompile Include="entry.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PointRenderPipeline.cpp">
-      <Filter>OldUnifiedRenderers</Filter>
     </ClCompile>
     <ClCompile Include="MeshRenderer.cpp">
       <Filter>OldUnifiedRenderers</Filter>
@@ -356,9 +347,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="PointVertex.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="MeshFragment.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="DeferedQuad.vert">
