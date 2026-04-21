@@ -45,7 +45,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::Display(std::function<void(TriListMes
 		ImGui::PopID();
 		ImGui::PopID();
 	}
-	if (ImGui::Button("Load")) {
+	if (!IsMeshLoaded() && ImGui::Button("Load")) {
 		// Load mesh and texture
 		mesh.clear();
 		textures.clear();
@@ -66,6 +66,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::Display(std::function<void(TriListMes
 
 		meshPathCurrentlyLoaded = meshPath;
 	}
+	else if (IsMeshLoaded()) ImGui::Text("Cannot reload triangle meshes.");
 }
 
 void ImGuiHelpers::MultiTriListMeshLoader::Cleanup()
@@ -88,6 +89,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::SwapToPreset(std::string presetName)
 
 void ImGuiHelpers::MultiTriListMeshLoader::LoadNow(std::function<void(TriListMesh*, Image*)> setupDescriptors)
 {
+	if (IsMeshLoaded()) return;
 	mesh.clear();
 	textures.clear();
 	textures.resize(8);
