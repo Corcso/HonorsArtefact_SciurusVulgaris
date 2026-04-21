@@ -77,7 +77,7 @@ vec2 CalcVelocity(vec4 newPos, vec4 oldPos)
 }
 
 void main(){
-	uint instanceID = payload.instanceIndex * instanceInfo.modelCount + instanceInfo.myModelNumber;
+	uint instanceID = payload.instanceIndex;
 	uint pointDataIndex = gl_GlobalInvocationID.x;// % (instanceInfo.instanceStride * 64);
 
 	

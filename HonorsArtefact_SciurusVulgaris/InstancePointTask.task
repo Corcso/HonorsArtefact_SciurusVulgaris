@@ -40,7 +40,7 @@ struct MyPayloadStruct {
 taskPayloadSharedEXT MyPayloadStruct payload;
 
 void main(){
-    uint instanceID = gl_GlobalInvocationID.x;
+    uint instanceID = gl_GlobalInvocationID.x * instanceInfo.modelCount + instanceInfo.myModelNumber;
     vec3 instancePosition = (transformation.worldMatrices[instanceID] * vec4(0, 0, 0, 1)).xyz;
     vec3 cameraPosition = levelOfDetailData.cameraPosition.xyz; // Assumed for now
 
