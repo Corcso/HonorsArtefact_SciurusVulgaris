@@ -3,6 +3,11 @@
 #include "VulkanUtility.h"
 #include "Graphics.h"
 
+// ====
+// ! UNUSED CLASS
+// For point rendering Render passes see InstancedTreeRenderPass
+// ====
+
 void PointRenderPipeline::Shutdown()
 {
     // Destroy Pipeline
@@ -111,7 +116,7 @@ void PointRenderPipeline::CreatePipeline()
     vertexBindingDescription.binding = 0;
     vertexBindingDescription.stride = sizeof(PointMesh::Point);
     vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    // Hardcoded vertices for now so no CPU to GPU pass
+    
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     VkVertexInputBindingDescription bindingDesc = vertexBindingDescription;
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

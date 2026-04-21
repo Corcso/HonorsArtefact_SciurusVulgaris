@@ -3,6 +3,8 @@
 #include "VulkanUtility.h"
 #include "Graphics.h"
 
+// Only contains a simple render pass to the swap chain.
+
 void ImGuiBlankRenderPass::Shutdown()
 {
 

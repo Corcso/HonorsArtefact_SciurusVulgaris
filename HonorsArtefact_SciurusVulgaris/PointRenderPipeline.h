@@ -4,6 +4,10 @@
 #include "VulkanDescriptor.h"
 #include "Image.h"
 
+
+/// <summary>
+/// UNUSED CLASS - DO NOT USE
+/// </summary>
 class PointRenderPipeline
 {
 public:

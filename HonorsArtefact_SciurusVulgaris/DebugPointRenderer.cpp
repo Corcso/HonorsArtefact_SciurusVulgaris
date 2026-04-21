@@ -128,17 +128,15 @@ void DebugPointRenderer::CreateFrameBuffer()
 void DebugPointRenderer::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Freed upon shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // WCP Matrices
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
-    // Only using this in vertex shader
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // Point Debug Info
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[1].descriptorCount = 1;
-    // Make accessible to both for ease
     uboLayoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
 
@@ -189,7 +187,7 @@ void DebugPointRenderer::CreatePipeline()
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
-    // Vertex imput  stage setup // TODO when can i dealloc this
+    // Vertex imput stage setup
     VkVertexInputAttributeDescription* vertexAttributeDescriptions = new VkVertexInputAttributeDescription[3];
     uint32_t vertexAttributeDescriptionCount = 3;
 
@@ -212,7 +210,7 @@ void DebugPointRenderer::CreatePipeline()
     vertexBindingDescription.binding = 0;
     vertexBindingDescription.stride = sizeof(PointMesh::Point);
     vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    // Hardcoded vertices for now so no CPU to GPU pass
+    
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     VkVertexInputBindingDescription bindingDesc = vertexBindingDescription;
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -227,7 +225,7 @@ void DebugPointRenderer::CreatePipeline()
     inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
-    // Setup viewport see section in https://vulkan-tutorial.com/en/Drawing_a_triangle/Graphics_pipeline_basics/Fixed_functions
+    // Viewport will be changed later based on level displayed
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -284,8 +282,6 @@ void DebugPointRenderer::CreatePipeline()
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
 
-    // Skipping depth & stencil 
-
     // Colour blending (blending section of the OM)
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -308,11 +304,11 @@ void DebugPointRenderer::CreatePipeline()
     colorBlending.blendConstants[2] = 0.0f; // Optional
     colorBlending.blendConstants[3] = 0.0f; // Optional
 
-    // Pipeline layout, this is like your constant buffer setup bit
+    // Pipeline layout
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1; // 
-    pipelineLayoutInfo.pSetLayouts = &vkDescriptorSetLayout; // 
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &vkDescriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
@@ -370,8 +366,6 @@ void DebugPointRenderer::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer comman
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipeline);
-
-    
 }
 
 void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned int LODLevel, VulkanObjectDescriptorSet* descriptorSet, float distanceToUse, VkCommandBuffer commandBuffer)
@@ -382,6 +376,7 @@ void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned i
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
+    // Set view based on passed in view.
     VkViewport viewport{};
     viewport.x = static_cast<float>(view.offset.x);
     viewport.y = static_cast<float>(view.offset.y);
@@ -396,6 +391,7 @@ void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned i
     scissor.extent = view.extent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+    // Descriptor set override
     if (descriptorSet == nullptr) {
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
             points->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
@@ -413,6 +409,9 @@ void DebugPointRenderer::Render(PointTreeMesh* points, VkRect2D view, unsigned i
         pointCount = points->continousLOD_start * pow(points->continousLOD_decay, -distanceToUse * (1.0f / points->continousLOD_shallowness));
         pointCount = HMM_MAX(pointCount, 1);
     }
+
+    // Round point count to the nearest 128 to be in parity with renderer
+    pointCount = ceil(pointCount / 128.0f) * 128;
 
     vkCmdDraw(commandBuffer, pointCount, 1, 0, 0);
 }

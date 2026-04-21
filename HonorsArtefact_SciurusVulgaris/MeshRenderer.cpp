@@ -189,13 +189,13 @@ void MeshRenderer::CreateFrameBuffer()
 void MeshRenderer::CreateDescriptorLayout()
 {
     VkDescriptorSetLayoutBinding* uboLayoutBindings = new VkDescriptorSetLayoutBinding[2]; // Will be freed in shutdown
-    uboLayoutBindings[0].binding = 0;
+    uboLayoutBindings[0].binding = 0; // WCP
     uboLayoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     uboLayoutBindings[0].descriptorCount = 1;
     uboLayoutBindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBindings[0].pImmutableSamplers = nullptr;
 
-    uboLayoutBindings[1].binding = 1;
+    uboLayoutBindings[1].binding = 1; // Color Texture
     uboLayoutBindings[1].descriptorCount = 1;
     uboLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     uboLayoutBindings[1].pImmutableSamplers = nullptr;
@@ -430,7 +430,6 @@ void MeshRenderer::BeginRender(HMM_Vec4 clearColor, VkCommandBuffer commandBuffe
 {
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
-    // Assume command buffer is ready and open
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vkRenderPass;
@@ -473,23 +472,6 @@ void MeshRenderer::Render(TriListMesh* mesh, VkCommandBuffer commandBuffer)
 
     vkCmdBindIndexBuffer(commandBuffer, mesh->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    // TODO MAKE descriptors better
-    //if (thisFramesDrawCall >= perObjectDescriptors.size())
-    //{
-    //    std::vector<size_t> sizes = { sizeof(WCP_Matrices), 0 };
-
-    //    int newSetIndex = perObjectDescriptors.size();
-    //    perObjectDescriptors.push_back(VulkanObjectDescriptorSet());
-    //    Image* imagesOnSet[2] = { nullptr, &testImage };
-    //    VkSampler samplersOnSet[2] = { VK_NULL_HANDLE, vkSampler };
-    //    perObjectDescriptors[newSetIndex].CreateAndAllocateBuffers(sizes.data(), sizes.size(), imagesOnSet, samplersOnSet);
-    //    perObjectDescriptors[newSetIndex].CreateDescriptorSet(Graphics::GetVkDevice(), vkDescriptorSetLayout, Graphics::GetDescriptorPool()); // Should i use the same one
-    //}
-
-    //memcpy(perObjectDescriptors[thisFramesDrawCall].GetMappedMemoryLocation(0), &dataForUBO, sizeof(WCP_Matrices));
-
-    //mesh->GetDescriptorSet()->UpdateUniformBufferData(0, &dataForUBO);
-
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkMainPipelineLayout, 0, 1,
         mesh->GetDescriptorSet()->GetDescriptorSet(), 0, nullptr);
 
@@ -503,38 +485,11 @@ void MeshRenderer::EndRender(VkCommandBuffer commandBuffer)
     if (commandBuffer == VK_NULL_HANDLE) commandBuffer = Graphics::GetThisFramesCommandBuffer();
 
     vkCmdEndRenderPass(commandBuffer);
-
-    // I think I can get away with the below as I instruct the render pass to finish with the attachment in shader state
-
-    //// Wait for viewport to be available for rendering
-    //// TODO learn more about this!
-    //VkImageMemoryBarrier barrier{};
-    //barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    //barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    //barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    //barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    //barrier.image = vkColorImage;
-    //barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    //barrier.subresourceRange.baseMipLevel = 0;
-    //barrier.subresourceRange.levelCount = 1;
-    //barrier.subresourceRange.baseArrayLayer = 0;
-    //barrier.subresourceRange.layerCount = 1;
-    //barrier.srcAccessMask = 0; // TODO
-    //barrier.dstAccessMask = 0; // TODO
-
-    //vkCmdPipelineBarrier(
-    //    Graphics::GetThisFramesCommandBuffer(),
-    //    VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT /* TODO */, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT /* TODO */,
-    //    0,
-    //    0, nullptr,
-    //    0, nullptr,
-    //    1, &barrier
-    //);
 }
 
 void MeshRenderer::ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_Vec3 viewingFrom, HMM_Vec3 upDirection)
 {
+    // OLD UNUSED FUNCTION, SEE EXTRACT POINTS NEW
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = Graphics::GetCommandPool();
@@ -627,6 +582,7 @@ void MeshRenderer::ExtractPoints(TriListMesh** meshes, uint64_t meshCount, HMM_V
 
 void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matrices transformation)
 {
+    // Record extraction on out of frame new buffer. 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = Graphics::GetCommandPool();
@@ -651,9 +607,11 @@ void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matric
     if (vkBeginCommandBuffer(thisExtractionCommandBuffer, &beginInfo) != VK_SUCCESS) {
         throw - 1;
     }
+    // Update the meshes' buffers with the provided transform
     for (int meshIndex = 0; meshIndex < meshes->size(); meshIndex++) {
         (*meshes)[meshIndex].GetDescriptorSet()->UpdateUniformBufferData(0, &transformation);
     }
+    // Render each mesh using the existing functions. 
     BeginRender(HMM_V4(0, 0, 0, 0), thisExtractionCommandBuffer);
     for (int meshIndex = 0; meshIndex < meshes->size(); meshIndex++) Render(&(*meshes)[meshIndex], thisExtractionCommandBuffer);
     EndRender(thisExtractionCommandBuffer);
@@ -687,6 +645,8 @@ void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matric
     // Reset it 
     vkResetFences(Graphics::GetVkDevice(), 1, &vkIsLastExtractionFinishedFence);
 
+    // Extract data from GBuffers into vectors of data. 
+    // Extract as bytes and rearrange into float 4 vectors. 
     std::unique_ptr<std::vector<uint8_t>> data = positionImage.ExtractImageData();
     std::vector<HMM_Vec4> formattedPositionData(data->size() / sizeof(HMM_Vec4));
     for (int p = 0; p < data->size() / sizeof(HMM_Vec4); p++) {
@@ -694,7 +654,7 @@ void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matric
     }
     data.release();
     data = colorImage.ExtractImageData();
-    struct UNORMColor { uint8_t r, g, b, a; };
+    struct UNORMColor { uint8_t r, g, b, a; }; // UNORM colour not float data.
     std::vector<UNORMColor> formattedColorData(data->size() / sizeof(UNORMColor));
     for (int p = 0; p < data->size() / sizeof(UNORMColor); p++) {
         formattedColorData[p] = *reinterpret_cast<UNORMColor*>(&(*data)[p * sizeof(UNORMColor)]);
@@ -706,10 +666,10 @@ void MeshRenderer::ExtractPointsNew(std::vector<TriListMesh>* meshes, WCP_Matric
         formattedNormalData[p] = *reinterpret_cast<HMM_Vec4*>(&(*data)[p * sizeof(HMM_Vec4)]);
     }
     data.release();
+    // For each pixel with alpha, push data to point array in output mesh. 
     for (int p = 0; p < formattedPositionData.size(); p++) {
         if (formattedPositionData[p].A != 0) {
             output->points.push_back({ formattedPositionData[p].RGB , HMM_V3(formattedColorData[p].r / 255.0f, formattedColorData[p].g / 255.0f , formattedColorData[p].b / 255.0f), formattedNormalData[p].RGB });
-            //output->indices.push_back(output->indices.size());
         }
     }
 }

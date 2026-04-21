@@ -375,7 +375,7 @@ void VulkanSetup::CreateGraphicsPipeline(VkDevice device, VkRenderPass renderPas
     vertexBindingDescription.binding = 0;
     vertexBindingDescription.stride = sizeof(PointMesh::Point);
     vertexBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-    // Hardcoded vertices for now so no CPU to GPU pass
+    
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     VkVertexInputBindingDescription bindingDesc = vertexBindingDescription;
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
