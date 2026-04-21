@@ -7,46 +7,47 @@
 #include "csv2.hpp"
 
 void MainDisplayApp::Initialize() {
-
+	// Create point and tree Render passes
 	pointRenderingPass.CreateAll(); 
 	instancedMeshTree_RP.CreateAll();
 	descriptorSizes = { 0, sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, sizeof(InstancingInfo), sizeof(MeshletInfo), sizeof(LODDataBuffer), sizeof(TAAInfo), sizeof(VP_Matrices) * 2};
 	descriptorSizesMesh = { sizeof(HMM_Mat4) * MAX_INSTANCE_POSITIONS, 0, sizeof(VP_Matrices) * 2 };
 	
-	angle = 0;
-
+	// Setup camera above scene
 	cameraTransform.speed = 0.5f;
 	cameraTransform.position = HMM_V3(0, 30, 0);
 	cameraTransform.euler = HMM_V3(-45, 0, 0);
-
-	pointToRenderCount = 0;
 	
+	// Setup sun and shadow render pass
 	lightShadow_RP.CreateAll();
 	sun.SetName("Sun");
 	sun.CreateShadowResources(lightShadow_RP.GetRenderPass());
 
+	// Setup terrain
 	terrain = new TriListMesh();
-	//terrain->LoadFile("./models/Terrain004 - Lennart Demes/model.fbx", 0);
+	// ChinaValley map from (Mustoe-Playfair, 2026)
 	terrain->LoadFile("./models/ChinaValley/ChinaValley.fbx", 0);
 	terrain->CopyPointsToVRAM();
-	// ChinaValley map from (Mustoe-Playfair, 2026)
 	terrainTexture.CreateAndLoadImageFromFile("./models/ChinaValley/Colour.png", VK_IMAGE_USAGE_SAMPLED_BIT);
 	terrainTexture.CreateImageView();
 	size_t sizes[] = { sizeof(WCP_Matrices) * 2, 0, sizeof(TAAInfo)};
 	terrain->GetDescriptorSet()->Create(pointRenderingPass.GetMeshTraditionalDescriptorSetLayout(), pointRenderingPass.GetMeshTraditionalDescriptorSetLayoutInfo(), sizes);
 	terrain->GetDescriptorSet()->UpdateImageSampler(1, &terrainTexture, Graphics::GetBasicLinearSampler());
 
+	// Setup instance positions, with defaults for default set of trees and terrain
 	modelBaseTransform.position = HMM_V3(0, 0.03, 0);
 	modelBaseTransform.scale = HMM_V3(0.009, 0.009, 0.009);
 	modelBaseTransform.UpdateMatrix();
 	ReloadTreeInstancePositions();
 
+	// Set shadow images for the geometry paint pass
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateImageSampler(4, Graphics::GetNoShadowMapImage(), Graphics::GetBasicNearestSampler());
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateImageSampler(4, sun.GetShadowImage(), Graphics::GetBasicNearestSampler());
 
 	captureUnderway = false;
 	renderImGui = true;
 
+	// Default to mesh shaded
 	currentRendererType = RendererType::MESH_SHADED_POINTS;
 
 	// If we are doing a full capture run, load the relevant models
@@ -55,20 +56,11 @@ void MainDisplayApp::Initialize() {
 		// Load Point Mesh
 		std::cout << "Loading Point Tree (Summer Bubble)...\n";
 		{
-			for (auto& model : loadedPointModels) {
-				if (model != nullptr) {
-					Graphics::WaitUntilGPUIdle(); // TODO fix this or not allow it. 
-					delete model;
-					model = nullptr;
-				}
-			}
-
 			loadedPointModels.clear();
 
 			loadedPointModels.push_back(new PointTreeMesh());
 
-			loadedPointModels[0]->LoadFromTreeFile(modelPath);
-			//myModel->CopyPointsToVRAM();
+			loadedPointModels[0]->LoadFromTreeFile("./model/output512.tree");
 			descriptorSizes[0] = loadedPointModels[0]->GetPointsArraySize(true);
 			loadedPointModels[0]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 			loadedPointModels[0]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
@@ -99,10 +91,10 @@ void MainDisplayApp::Initialize() {
 }
 
 void MainDisplayApp::Frame() {
-	ImageCaptureSequence();
+	ImageCaptureSequence(); // Apply settings for capture 
 
 	cameraTransform.CaptureControls();
-
+	
 	switch (currentRendererType) {
 	case RendererType::MESH_TRUE:
 		FrameMeshTrue();
@@ -152,19 +144,21 @@ void MainDisplayApp::FrameMeshShaded()
 		lodData.lodType = static_cast<int>(loadedPointModels[0]->levelOfDetailType);
 	}
 
+	// Perform shadow pass
 	if (sun.IsShadowEnabled()) {
 		Graphics::PushMetricRange("Shadow Map Render");
 		lightShadow_RP.BeginRender(&sun);
 		uint32_t index = 0;
 		for (auto& model : loadedPointModels) {
 			if (model != nullptr) {
+				// Update LOD with y=0 (where the shadow renders from)
 				lodData.cameraPosition = HMM_V4(cameraTransform.position.X, 0, cameraTransform.position.Z, 1);
 
+				// Update all buffers
 				VP_Matrices shadowMap = { sun.GetViewMatrix(HMM_V3(cameraTransform.position.X, 0.0f, cameraTransform.position.Z)), sun.GetProjectionMatrix(150, 150, 150) };
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-				//myModel->GetShadowDescriptorSet()->FlushBuffer(1);
 				instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
@@ -175,7 +169,7 @@ void MainDisplayApp::FrameMeshShaded()
 		lightShadow_RP.EndRender();
 		Graphics::PopMetricRange();
 	}
-	// Render logic
+	// Render point trees to GBuffers
 	Graphics::PushMetricRange("Render Point Trees");
 
 	pointRenderingPass.UpdateCameraInfoForSkybox(cameraTransform);
@@ -184,23 +178,18 @@ void MainDisplayApp::FrameMeshShaded()
 	uint32_t index = 0;
 	for (auto& model : loadedPointModels) {
 		if (model != nullptr) {
-
+			// LOD now with Y value
 			lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
 			treeInstanceViewProjThisAndLastFrame[0] = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
-
-			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
-
 			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
 			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
 
-			//pointRenderingPass.RenderPointTree(myModel, pointToRenderCount);
 			pointRenderingPass.RenderPointTreeViaMeshShader(model, instancingInfo);
 		}
 		index++;
@@ -208,7 +197,7 @@ void MainDisplayApp::FrameMeshShaded()
 
 
 
-
+	// Terrain render
 	WCP_Matrices terrainBufferData[2] = { {
 		HMM_Translate(HMM_V3(0, 0, 0)),
 		cameraTransform.viewMatrix,
@@ -230,8 +219,11 @@ void MainDisplayApp::FrameMeshShaded()
 	}
 	pointRenderingPass.EndRender();
 	Graphics::PopMetricRange();
+
+	// Render ImGui Menu (please note, imgui always renders last, this is just where the windows are called)
 	RenderImGuiControls();
 
+	// Paint deferred pass, and AA.
 	Light::BufferStruct rawSunData = sun.GetBufferData();
 	pointRenderingPass.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
 
@@ -249,17 +241,20 @@ void MainDisplayApp::FrameMeshShaded()
 	pointRenderingPass.EndFXAARender();
 	Graphics::EndRender();
 
+	// Store last VP matrices for TAA
 	treeInstanceViewProjThisAndLastFrame[1] = treeInstanceViewProjThisAndLastFrame[0];
 }
 
 void MainDisplayApp::FrameVertexShaded()
 {
+	// Very similar to Mesh shaded. Without shadow depth pass.
+	// Read above comments for more detail. 
+
 	InstancingInfo instancingInfo;
 	LODDataBuffer lodData;
 
 	Graphics::BeginRender();
 
-	// Render logic
 	Graphics::PushMetricRange("Render Point Trees");
 	pointRenderingPass.BeginRenderVertexShade(HMM_V4(0, 0, 0, 1));
 
@@ -286,22 +281,15 @@ void MainDisplayApp::FrameVertexShaded()
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-			//InstancingInfo instancingInfo{ instanceCount, myModel->GetMeshletCount()};
-
-			//myModel->GetDescriptorSet()->UpdateUniformBufferData(1, &treeInstancePositions.matrices[0]);
 			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount() , static_cast<uint32_t>(loadedPointModels.size()), index };
 			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
 
 			pointRenderingPass.RenderPointTree(model, instancingInfo);
-			//pointRenderingPass.RenderPointTreeViaMeshShader(myModel, instancingInfo);
 		}
 		index++;
 	}
-
-
-
 
 	WCP_Matrices terrainBufferData[2] = { {
 		HMM_Translate(HMM_V3(0, 0, 0)),
@@ -324,6 +312,8 @@ void MainDisplayApp::FrameVertexShaded()
 	}
 	pointRenderingPass.EndRender();
 	Graphics::PopMetricRange();
+
+	// Imgui not placed here, its always rendered last.
 	RenderImGuiControls();
 
 	Light::BufferStruct rawSunData = sun.GetBufferData();
@@ -359,10 +349,7 @@ void MainDisplayApp::FrameMeshTrue()
 	if (triangleMeshTreeLoader.GetMeshVector()->size() > 0) {
 		lodData.cameraPosition = HMM_V4(cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z, 1);
 
-		//treeMeshInstancePositions.SetViewAndProjection(cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000));
 		for (int i = 0; i < triangleMeshTreeLoader.GetMeshVector()->size(); i++) {
-			//(*triangleMeshTreeLoader.GetMeshVector())[i].GetDescriptorSet()->UpdateStorageBufferData(0, treeMeshInstancePositions.matrices.data());
-			//myModel->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
 			InstancingInfo instancingInfo{ instanceCount, 0 };
 			VP_Matrices viewCamMatrices = { cameraTransform.viewMatrix, HMM_Perspective_RH_ZO(50 * HMM_DegToRad, Graphics::GetSwapChainExtent().width / (float)Graphics::GetSwapChainExtent().height, 0.1, 1000) };
@@ -375,7 +362,10 @@ void MainDisplayApp::FrameMeshTrue()
 
 	instancedMeshTree_RP.EndRender();
 
+	// Imgui not placed here, its always rendered last.
 	RenderImGuiControls();
+
+	// Still deferred, but no post processing.
 
 	Light::BufferStruct rawSunData = sun.GetBufferData();
 	instancedMeshTree_RP.GetQuadDescriptorSet()->UpdateUniformBufferData(3, &rawSunData);
@@ -390,6 +380,8 @@ void MainDisplayApp::FrameMeshTrue()
 
 void MainDisplayApp::ReloadTreeInstancePositions()
 {
+	// Load the 1,024,000 position files and replace the existing data. 
+	// Then apply the new transform on top.
 	vkDeviceWaitIdle(Graphics::GetVkDevice());
 	treeInstancePositions.LoadFromFile("./models/ChinaValley/ChinaValleyLocations1024K.obj");
 	uint64_t chosenSeed = treeInstancePositions.ApplyRandomRotation(Graphics::IsFullCaptureRunActive() ? 1 : 0);
@@ -399,11 +391,13 @@ void MainDisplayApp::ReloadTreeInstancePositions()
 	treeMeshInstancePositions.ApplyRandomRotation(chosenSeed);
 	treeMeshInstancePositions.ApplyAlternateTransform(modelBaseTransform.matrix);
 
+	// Update point trees buffers
 	for (auto& model : loadedPointModels) {
 		if (model == nullptr) continue;
 		model->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 		model->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 	}
+	// Note: doesn't update triangle trees. Must be called before load.
 }
 
 void MainDisplayApp::LoadAnotherPointTree(std::string path)
@@ -411,7 +405,8 @@ void MainDisplayApp::LoadAnotherPointTree(std::string path)
 	loadedPointModels.push_back(new PointTreeMesh());
 
 	loadedPointModels[loadedPointModels.size() - 1]->LoadFromTreeFile(path);
-	//myModel->CopyPointsToVRAM();
+
+	// Load model to GPU and create descriptor sets
 	descriptorSizes[0] = loadedPointModels[loadedPointModels.size() - 1]->GetPointsArraySize(true);
 	loadedPointModels[loadedPointModels.size() - 1]->CreateDescriptorSet(pointRenderingPass.GetMeshShadeDescriptorSetLayout(), pointRenderingPass.GetMeshShadeDescriptorSetLayoutInfo(), descriptorSizes.data());
 	loadedPointModels[loadedPointModels.size() - 1]->CreateShadowDescriptorSet(lightShadow_RP.GetShadowSetLayout(), lightShadow_RP.GetShadowSetLayoutInfo(), descriptorSizes.data());
@@ -422,7 +417,7 @@ void MainDisplayApp::LoadAnotherPointTree(std::string path)
 	loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 	loadedPointModels[loadedPointModels.size() - 1]->GetShadowDescriptorSet()->UpdateStorageBufferData(1, treeInstancePositions.matrices.data());
 
-
+	// Setup meshlet info
 	MeshletInfo meshletInfo{ loadedPointModels[loadedPointModels.size() - 1]->GetMeshletCount() };
 	loadedPointModels[loadedPointModels.size() - 1]->GetDescriptorSet()->UpdateUniformBufferData(3, &meshletInfo);
 }
@@ -430,6 +425,7 @@ void MainDisplayApp::LoadAnotherPointTree(std::string path)
 void MainDisplayApp::RenderImGuiControls()
 {
 	if (!renderImGui) return;
+	// == Point model selection & transform window == 
 	ImGui::Begin("Point Model Selection");
 	ImGui::InputText("Model Path", modelPath, 256);
 	if (ImGui::Button("Load Another")) {
@@ -449,12 +445,12 @@ void MainDisplayApp::RenderImGuiControls()
 		ImGui::Text("Heads up! The transforms cannot\nupdate for the triangle model.\nInstead, please change them,\nthen load the model!");
 	}
 	ImGui::End();
-
+	// == Metrics window == 
 	ImGui::Begin("Meterage");
 	ImGui::Text("FPS %i", Clock::GetFPS());
 	ImGui::Text("MS Render %f", Clock::DeltaTime() * 1000);
 #ifdef NV_PERF_METER
-	if (ImGui::Button("NVPERFRUN")) {
+	if (ImGui::Button("NV Perf Run")) {
 		Graphics::nvperf_InitiateReport("Manual Trigger");
 	}
 	ImGui::Text(("Saved to" + Graphics::nfperf_GetLastReportDir()).c_str());
@@ -468,7 +464,7 @@ void MainDisplayApp::RenderImGuiControls()
 		stageImagesSaved = -1;
 	}
 	ImGui::End();
-
+	// == Triangle model loader (transform shared with point) == 
 	ImGui::Begin("Triangle Model");
 	triangleMeshTreeLoader.Display([&](TriListMesh* mesh, Image* texture) {
 		mesh->CreateDescriptorSet(instancedMeshTree_RP.GetDescriptorSetLayout(), instancedMeshTree_RP.GetDescriptorSetLayoutInfo(), descriptorSizesMesh.data());
@@ -476,7 +472,7 @@ void MainDisplayApp::RenderImGuiControls()
 		mesh->GetDescriptorSet()->UpdateImageSampler(1, texture, Graphics::GetBasicLinearSampler());
 		});
 	ImGui::End();
-
+	// == Render method & options window == 
 	ImGui::Begin("Render Method");
 	const char* items[] = { "True Mesh", "Mesh Shaded Points", "Vertex Shaded Points" };
 	ImGui::Combo("Renderer", reinterpret_cast<int*>(&currentRendererType), items, 3);
@@ -495,9 +491,8 @@ void MainDisplayApp::RenderImGuiControls()
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);
 	else ImGui::Text("Terrain Not Available");
 	ImGui::End();
-
+	// == LOD editor == 
 	ImGui::Begin("Live LOD Edits");
-
 	ImGui::Text("Please note:\nPoint count rounded up\nto nearest 128.");
 
 	// Continuous
@@ -534,20 +529,18 @@ void MainDisplayApp::RenderImGuiControls()
 
 	ImGui::End();
 
-	ImGui::Begin("Shadow Map");
-	ImGui::Image(sun.GetShadowImageImGuiTex(), ImVec2(800, 800));
-	ImGui::End();
-
+	// == Camera position viewer == 
 	ImGui::Begin("Camera Position Information");
 	ImGui::Text("Pos: %f %f %f", cameraTransform.position.X, cameraTransform.position.Y, cameraTransform.position.Z);
 	ImGui::Text("Rot: %f %f %f", cameraTransform.euler.X, cameraTransform.euler.Y, cameraTransform.euler.Z);
 	ImGui::End();
 
+	// == lighting window == 
 	ImGui::Begin("Lighting");
 	ImGui::Checkbox("Enable Skybox", &pointRenderingPass.enableSkybox);
 	sun.RenderImGuiMenu(false);
 	ImGui::End();
-
+	// == Popups == 
 	if (ImGui::BeginPopupModal("Setup Automatically?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text("Would you like to automatically set up the scene?");
@@ -590,6 +583,7 @@ void MainDisplayApp::RenderImGuiControls()
 
 		ImGui::EndPopup();
 	}
+	// First display controls, when closed, display setup 
 	if (!initialControlsDisplayed) {
 		ImGui::OpenPopup("Controls");
 		initialControlsDisplayed = true;
@@ -603,7 +597,8 @@ void MainDisplayApp::RenderImGuiControls()
 void MainDisplayApp::ImageCaptureSequence()
 {
 	if (!captureUnderway) return;
-
+	// Set out capture rules, these are named captures which perform the lambda each frame to setup options for the capture. 
+	// Last capture's options are not wiped, so the full list of options isn't needed every time. 
 	std::vector<ImageCaptureRule> rules{
 		// STANDARD MESH SHADER POINTS
 		{"DownTheValley4kMeshShade", [&]() {
@@ -804,218 +799,12 @@ void MainDisplayApp::ImageCaptureSequence()
 
 	};
 
-	//std::cout << Graphics::nfperf_GetLastReportDir() << "\n";
-	bool pauseTimer = false;
+	bool pauseTimer = false; // If we should wait until capture is complete.
 
-	renderImGui = false;
-//	if (imageSequenceTimer < 1.0f) {
-//		if (stageImagesSaved == -1) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001a");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 4000;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001a\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 2.0f) {
-//		if (stageImagesSaved == 0) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001b");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 3000;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001b\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 3.0f) {
-//		if (stageImagesSaved == 1) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001c");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 2000;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001c\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 4.0f) {
-//		if (stageImagesSaved == 2) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001d");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 1000;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001d\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 5.0f) {
-//		if (stageImagesSaved == 3) {
-//			Graphics::SaveSwapChainImageToFile("./Render001e.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001e");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 750;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001e\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 6.0f) {
-//		if (stageImagesSaved == 4) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001f");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 500;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001f\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 7.0f) {
-//		if (stageImagesSaved == 5) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001g");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 250;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001g\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//	else if (imageSequenceTimer < 8.0f) {
-//		if (stageImagesSaved == 6) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render001h");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 0, 0);
-//		instanceCount = 125;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render001h\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//		}
-//
-//	else if (imageSequenceTimer < 9.0f) {
-//		if (stageImagesSaved == 7) {
-//			Graphics::SaveSwapChainImageToFile("./Render001.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render002");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, -90, 0);
-//		instanceCount = 1000;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render002\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//
-//	else if (imageSequenceTimer < 10.0f) {
-//		if (stageImagesSaved == 8) {
-//			Graphics::SaveSwapChainImageToFile("./Render002.bmp");
-//#ifdef NV_PERF_METER
-//			Graphics::nvperf_InitiateReport("Render003");
-//#endif // NV_PERF_METER
-//			stageImagesSaved++;
-//		}
-//		cameraTransform.position = HMM_V3(0, 30, 0);
-//		cameraTransform.euler = HMM_V3(-45, 90, 0);
-//		instanceCount = 100;
-//#ifdef NV_PERF_METER
-//		if (Graphics::nfperf_GetLastReportDir() != "nvperfout\\Render003\\") pauseTimer = true;
-//#endif // NV_PERF_METER
-//	}
-//
-//	else {
-//		if (stageImagesSaved == 9) {
-//			Graphics::SaveSwapChainImageToFile("./Render003.bmp");
-//			stageImagesSaved++;
-//		}
-//		captureUnderway = false;
-//		renderImGui = true;
-//
-//#ifdef NV_PERF_METER
-//		// Combine CSVS
-//		std::vector<std::pair<std::string, std::string>> reportsToCombine{
-//			{"nvperfout\\Render001a\\nvperf_metrics_summary.csv", "1a"},
-//			{"nvperfout\\Render001b\\nvperf_metrics_summary.csv", "1b"},
-//			{"nvperfout\\Render001c\\nvperf_metrics_summary.csv", "1c"},
-//			{"nvperfout\\Render001d\\nvperf_metrics_summary.csv", "1d"},
-//			{"nvperfout\\Render001e\\nvperf_metrics_summary.csv", "1e"},
-//			{"nvperfout\\Render001f\\nvperf_metrics_summary.csv", "1f"},
-//			{"nvperfout\\Render001g\\nvperf_metrics_summary.csv", "1g"},
-//			{"nvperfout\\Render001h\\nvperf_metrics_summary.csv", "1h"},
-//			{"nvperfout\\Render002\\nvperf_metrics_summary.csv", "2"},
-//			{"nvperfout\\Render003\\nvperf_metrics_summary.csv", "3"},
-//		};
-//		std::vector<std::vector<std::string>> outRows;
-//
-//		csv2::Reader<csv2::delimiter<','>,
-//			csv2::quote_character<'"'>,
-//			csv2::first_row_is_header<true>,
-//			csv2::trim_policy::trim_whitespace> csv;
-//
-//		for (auto& report : reportsToCombine) {
-//			if (csv.mmap(report.first)) {
-//				const auto header = csv.header();
-//				for (const auto& row : csv) {
-//					outRows.push_back(std::vector<std::string>());
-//					outRows[outRows.size() - 1].push_back(report.second);
-//					for (const auto& cell : row) {
-//						// Do something with cell value
-//						std::string value;
-//						cell.read_value(value);
-//						outRows[outRows.size() - 1].push_back(value);
-//					}
-//				}
-//			}
-//		}
-//
-//		std::ofstream stream("nvperfout\\combined.csv");
-//		csv2::Writer<csv2::delimiter<','>> writer(stream);
-//
-//		writer.write_rows(outRows);
-//		stream.close();
-//
-//#endif // NV_PERF_METER
-//	}
+	renderImGui = false; // Turn off imgui
 
-
+	// For each capture, capture the last captures swap chain. Then run the settings.
+	// If running metered mode, capture with NV Perf too
 	for (int i = 0; i < rules.size(); i++) {
 		if (imageSequenceTimer >= (float)i && imageSequenceTimer < (float)i + 1.0f) {
 			if (stageImagesSaved == i - 1) {
@@ -1034,30 +823,21 @@ void MainDisplayApp::ImageCaptureSequence()
 		#endif // NV_PERF_METER
 		}
 	}
+	// All captures complete
 	if (imageSequenceTimer > (float)rules.size()) {
+		// Grab last capture's image.
 		Graphics::SaveSwapChainImageToFile(".\\imagesout\\" + rules[rules.size() - 1].name + ".bmp");
 		std::cout << "Completed " << rules[rules.size() - 1].name << "\n";
-		//Graphics::SaveSwapChainImageToFile("./Render003.bmp");
-		//stageImagesSaved++;
+
 		captureUnderway = false;
 		renderImGui = true;
-
+		
+		// If it was a full capture run, finish the application execution here. 
 		if (Graphics::IsFullCaptureRunActive()) Input::QuitMainLoop();
 
+		// If metered mode enabled, combine all CSVs into one. 
 #ifdef NV_PERF_METER
 		// Combine CSVS
-		/*std::vector<std::pair<std::string, std::string>> reportsToCombine{
-			{"nvperfout\\Render001a\\nvperf_metrics_summary.csv", "1a"},
-			{"nvperfout\\Render001b\\nvperf_metrics_summary.csv", "1b"},
-			{"nvperfout\\Render001c\\nvperf_metrics_summary.csv", "1c"},
-			{"nvperfout\\Render001d\\nvperf_metrics_summary.csv", "1d"},
-			{"nvperfout\\Render001e\\nvperf_metrics_summary.csv", "1e"},
-			{"nvperfout\\Render001f\\nvperf_metrics_summary.csv", "1f"},
-			{"nvperfout\\Render001g\\nvperf_metrics_summary.csv", "1g"},
-			{"nvperfout\\Render001h\\nvperf_metrics_summary.csv", "1h"},
-			{"nvperfout\\Render002\\nvperf_metrics_summary.csv", "2"},
-			{"nvperfout\\Render003\\nvperf_metrics_summary.csv", "3"},
-		};*/
 		std::vector<std::vector<std::string>> outRows;
 
 		csv2::Reader<csv2::delimiter<','>,
@@ -1091,5 +871,6 @@ void MainDisplayApp::ImageCaptureSequence()
 	}
 
 	if (!pauseTimer) imageSequenceTimer += Clock::DeltaTime();
+	// Say gibberish for fun
 	guffer.SayGuff(Clock::DeltaTime());
 }

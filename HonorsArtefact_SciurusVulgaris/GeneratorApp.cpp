@@ -10,27 +10,26 @@
 #include "Clock.h"
 
 void GeneratorApp::Initialize(){
-	
+	// Create all pipelines and render passes
 	meshRenderingPipeline.CreateAll();
 	debugPointRenderer.CreateAll();
 	imguiRenderPass.CreateAll(); // Not needed but just incase stuff is added later
+
 	descriptorSizes = { sizeof(WCP_Matrices), 0, sizeof(TAAInfo)};
 	liveColorOut = reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(meshRenderingPipeline.GetSampler(), meshRenderingPipeline.GetColorImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
 
-	
+	// Setup default transform for summer bubble. 
 	loadedModelTransform.position = HMM_V3(0, -9.5, 0);
 	loadedModelTransform.euler = HMM_V3(0, 90, 0);
 	loadedModelTransform.scale = HMM_V3(0.3, 0.3, 0.3);
 
-	//modelPath[256] = "./models/SpeedTrees/SpeedTree.obj";
-	//imageActive[8]{ true, true, false, false, false, false, false, false };
-	//texturePaths[8][256]{ "./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", };
 	isTopView = false;
 
 	extractPointsAtEndOfThisFrame = false; // Will flip true when points should be extracted, and save them to file. 
 	extractPointsConstantly = false; // Extracts and saves points every frame, just used for easy render doc capture
 	quitMainLoop = false;
 
+	// Setup LOD view descriptors and distance vectors. 
 	LODViewDescriptors.resize(16);
 	LODViewDistances.resize(16);
 	for (int i = 0; i < 16; i++) {
@@ -50,18 +49,19 @@ void GeneratorApp::Initialize(){
 void GeneratorApp::Frame() {
 	// Render logic
 	Graphics::BeginRender();
+
+	// Render the tri model in the live view
 	meshRenderingPipeline.BeginRender(HMM_V4(0, 0, 0, 1));
 	for (auto& mesh : *treeMeshLoader.GetMeshVector()) {
+		// Models are rendered orthographically for capture
 		WCP_Matrices dataForUBO;
 		if (isTopView) {
 			dataForUBO = {
-				//HMM_Translate(HMM_V3(0, -9.5, 0)) * HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 				loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, 5, 0), HMM_V3(0, 10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 			};
 		}
 		else {
 			dataForUBO = {
-				//HMM_Translate(HMM_V3(0, -9.5, 0))* HMM_Rotate_LH(3.141 / 2.0, HMM_V3(1, 0, 0)) * HMM_Scale(HMM_V3(0.3, 0.3, 0.3)), HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 				loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 			};
 		}
@@ -98,13 +98,16 @@ void GeneratorApp::Frame() {
 	ImGui::Image(liveColorOut, ImVec2(512, 512));
 	ImGui::End();
 
+	// Show LOD menu if extracted
 	if (meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU)	RenderLODPageMenu();
 
 	Graphics::FinishImGuiRender();
 	imguiRenderPass.EndRender();
 	Graphics::EndRender();
 
+	// If we should extract this frame, do it. 
 	if (extractPointsAtEndOfThisFrame || extractPointsConstantly) {
+		// Extract for every cardinal axis, +ve and -ve
 		WCP_Matrices dataForUBO;
 		dataForUBO = {
 				loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, 0, -5), HMM_V3(0, 0, -10), HMM_V3(0, -1, 0)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
@@ -130,15 +133,13 @@ void GeneratorApp::Frame() {
 				loadedModelTransform.matrix, HMM_LookAt_LH(HMM_V3(0, -5, 0), HMM_V3(0, -10, 0), HMM_V3(0, 0, -1)), HMM_Orthographic_RH_ZO(-10, 10, -10, 10, 0.001, 10)
 		};
 		meshRenderingPipeline.ExtractPointsNew(treeMeshLoader.GetMeshVector(), dataForUBO);
-		//meshRenderingPipeline.GetPointMeshOutput()->SaveToFile("./models/output.fbx");
 		
 		meshRenderingPipeline.GetPointMeshOutput()->CopyPointsToVRAM();
-		//size_t sizes = sizeof(WCP_Matrices);
-		//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->Create(debugPointRenderer.GetDescriptorSetLayout(), debugPointRenderer.GetDescriptorSetLayoutInfo(), &sizes);
 
 		extractPointsAtEndOfThisFrame = false;
 	}
-
+	// If we need to shuffle points, do it now. 
+	// Cannot do mid frame as need to delete old buffer and make new one. 
 	if (shuffleAtEndOfFrame) {
 		std::random_device rd;
 		std::mt19937 g(rd());
@@ -157,12 +158,12 @@ void GeneratorApp::Shutdown() {
 	for (int i = 0; i < 16; i++) {
 		LODViewDescriptors[i].CleanupDescriptor();
 	}
-	//for (auto& texture : loadedImages) texture.Destroy();
 	treeMeshLoader.Cleanup();
 }
 
 void GeneratorApp::RenderLODPagePrerequisites()
 {
+	// Render the LOD Views,
 	if (!meshRenderingPipeline.GetPointMeshOutput()->isDataOnGPU) return;
 
 	PointRenderDebugInfo debugInfo{ isDebugCoverageViewOn };
@@ -171,9 +172,9 @@ void GeneratorApp::RenderLODPagePrerequisites()
 	}
 	
 	debugPointRenderer.BeginRender(HMM_V4(0, 0, 0, 1));
+	// Either all 16 or 1 depending on if exclusive is on. 
 	if (exclusivleyViewing == -1) {
 		for (int i = 0; i < meshRenderingPipeline.GetPointMeshOutput()->randomLevelsLODPointCount.size(); i++) {
-			//meshRenderingPipeline.GetPointMeshOutput()->GetDescriptorSet()->UpdateUniformBufferData(0, &newData);
 			VkRect2D view{
 				{i % 4 * 256, i / 4 * 256}, {256, 256}
 			};
@@ -191,9 +192,11 @@ void GeneratorApp::RenderLODPagePrerequisites()
 
 void GeneratorApp::RenderLODPageMenu()
 {
+	// LOD viewer
 	ImGui::Begin("Level Of Detail View");
 	ImGui::Image(debugPointRenderer.GetImGuiOutputTexture(), ImVec2{ 700, 700 });
 	ImGui::End();
+	// LOD Settings
 	ImGui::Begin("Level Of Detail Studio");
 	ImGui::Checkbox("Coverage View", &isDebugCoverageViewOn);
 	ImGui::DragFloat("Camera Height", &LODCameraHeight, 0.01f, -100.0f, 100.0f);
@@ -246,7 +249,7 @@ void GeneratorApp::RenderLODPageMenu()
 	
 	ImGui::End();
 
-
+	// Update matrices
 	for (int i = 0; i < 16; i++) {
 		WCP_Matrices newData{
 				loadedModelTransform.matrix * HMM_Translate(HMM_V3(LODViewDistances[i], 0, 0)) * HMM_Rotate_LH(LODViewRotation, HMM_V3(0, 1, 0)) * HMM_Scale(HMM_V3(LODViewScale, LODViewScale, LODViewScale)),
