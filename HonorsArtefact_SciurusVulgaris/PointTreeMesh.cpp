@@ -54,7 +54,7 @@ void PointTreeMesh::SaveToTreeFile(std::string path)
 		output["start"] = continousLOD_start;
 
 		// Truncate model if needed
-		if (randomLevelsLODPointCount.size() > 0 && continousLOD_start < points.size()) {
+		if (continousLOD_start < points.size()) {
 			points.resize(continousLOD_start);
 		}
 		break;
