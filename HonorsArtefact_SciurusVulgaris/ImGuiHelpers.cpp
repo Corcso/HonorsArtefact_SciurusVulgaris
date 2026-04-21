@@ -126,4 +126,9 @@ void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 		{ "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Material_Leaf_Example_Combined.png", "",  "",  "",  "",  "", },
 		{ true, true, true, false, false, false, false, false }
 	};
+	presetDictionary[AVAILABLE_PRESETS[4] /*Conifer 001*/] = {
+		"./models/SpeedTrees/Conifer001/Model.fbx",
+		{"./models/SpeedTrees/Conifer001/Example_Combined.png", "./models/SpeedTrees/Pine001/Pine_Bark.png",  "", "",  "",  "",  "",  "",},
+		{ true, true, false, false, false, false, false, false }
+	};
 }
