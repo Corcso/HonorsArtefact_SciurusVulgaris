@@ -32,6 +32,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::Display(std::function<void(TriListMes
 	}
 
 	ImGui::InputText("Model Path", meshPath.data(), 256);
+	// Texture selection & enabled menu
 	ImGui::Text("Textures");
 	for (int i = 0; i < 8; i++) {
 		ImGui::PushID(i);
@@ -45,6 +46,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::Display(std::function<void(TriListMes
 		ImGui::PopID();
 	}
 	if (ImGui::Button("Load")) {
+		// Load mesh and texture
 		mesh.clear();
 		textures.clear();
 		textures.resize(8);
@@ -57,6 +59,7 @@ void ImGuiHelpers::MultiTriListMeshLoader::Display(std::function<void(TriListMes
 		}
 
 		mesh = TriListMesh::LoadMultiMeshFile(meshPath);
+		// Now call setupDescriptors lambda for each mesh and texture pair
 		for (int i = 0; i < mesh.size(); i++) {
 			setupDescriptors(&mesh[i], texturesEnabled[i] ? &textures[i] : nullptr);
 		}
@@ -106,11 +109,13 @@ void ImGuiHelpers::MultiTriListMeshLoader::LoadNow(std::function<void(TriListMes
 
 void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 {
+	// (Unity Technologies, 2025)
 	presetDictionary[AVAILABLE_PRESETS[0] /*Summer Bubble*/] = {
 		"./models/SpeedTrees/SpeedTree.obj",
 		{ "./models/SpeedTrees/singleAColor.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", },
 		{ true, true, false, false, false, false, false, false }
 	};
+	// (Unity Technologies, 2025)
 	presetDictionary[AVAILABLE_PRESETS[1] /*Autumn Bubble*/] = {
 		"./models/SpeedTrees/SpeedTree.obj",
 		{ "./models/SpeedTrees/singleAColor_autumn.png", "./models/Low Poly Trees Free - Nicholas-3D/trunk_color.jpeg", "", "",  "",  "",  "",  "", },
@@ -121,11 +126,13 @@ void ImGuiHelpers::MultiTriListMeshLoader::SetupPresetDictionary()
 		{ "./models/SpeedTrees/singleAColor.png", "", "", "",  "",  "",  "",  "", },
 		{ true, false, false, false, false, false, false, false }
 	};
+	// (Unity Technologies, 2025)
 	presetDictionary[AVAILABLE_PRESETS[3] /*Pine 001*/] = {
 		"./models/SpeedTrees/Pine001/Model.fbx",
 		{ "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Pine_Bark.png", "./models/SpeedTrees/Pine001/Material_Leaf_Example_Combined.png", "",  "",  "",  "",  "", },
 		{ true, true, true, false, false, false, false, false }
 	};
+	// (Unity Technologies, 2025)
 	presetDictionary[AVAILABLE_PRESETS[4] /*Conifer 001*/] = {
 		"./models/SpeedTrees/Conifer001/Model.fbx",
 		{"./models/SpeedTrees/Conifer001/Example_Combined.png", "./models/SpeedTrees/Pine001/Pine_Bark.png",  "", "",  "",  "",  "",  "",},

@@ -4,12 +4,11 @@
 
 void InstancedWCPHelper::LoadFromFile(std::string path)
 {
-    // Read from the text file
     std::ifstream OBJFile(path);
 
     std::string line;
 
-    // Use a while loop together with the getline() function to read the file line by line
+    // Get vertex positions as positions for instances.
     while (std::getline(OBJFile, line)) {
         if (line.length() < 3) continue;
         if (line[0] == 'v') {
@@ -34,7 +33,6 @@ void InstancedWCPHelper::LoadFromFile(std::string path)
         }
     }
 
-    // Close the file
     OBJFile.close();
 }
 void InstancedWCPHelper::SetViewAndProjection(HMM_Mat4 view, HMM_Mat4 projection)
@@ -68,12 +66,11 @@ void InstancedWorldMatrixHelper::LoadFromFile(std::string path)
 {
     matrices.clear();
 
-    // Read from the text file
     std::ifstream OBJFile(path);
 
     std::string line;
 
-    // Use a while loop together with the getline() function to read the file line by line
+    // Get vertex positions as positions for instances.
     while (std::getline(OBJFile, line)) {
         if (line.length() < 3) continue;
         if (line[0] == 'v') {
@@ -97,7 +94,6 @@ void InstancedWorldMatrixHelper::LoadFromFile(std::string path)
         }
     }
 
-    // Close the file
     OBJFile.close();
 }
 
@@ -110,6 +106,7 @@ void InstancedWorldMatrixHelper::ApplyAlternateTransform(HMM_Mat4 transform)
 
 uint64_t InstancedWorldMatrixHelper::ApplyRandomRotation(uint64_t seed)
 {
+    // Use given seed, or if given 0, pick a random seed.
     std::random_device rd;
     uint64_t chosenSeed = seed == 0 ? rd() : seed;
     std::mt19937 chooseRand(chosenSeed);

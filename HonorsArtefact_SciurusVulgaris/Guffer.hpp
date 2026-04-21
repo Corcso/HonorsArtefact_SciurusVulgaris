@@ -1,4 +1,9 @@
 #include "PCH.h"
+
+/// <summary>
+/// Guffer class which says guff every so often. 
+/// Used as a bit of fun while captures are running.
+/// </summary>
 class Guffer {
 public:
 	void SayGuff(float deltaTime) {
