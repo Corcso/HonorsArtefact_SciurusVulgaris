@@ -20,4 +20,11 @@ For metered builds, you must download NSight Perf yourself due to their licensin
 
 The above should allow you to build with NSight Perf SDK with this project. 
 
+### Important notes
+You should not:
+- Generate points when there is no model in view. 
+- Have multiple point trees rendering when their LOD 0 point count is not equal. 
+- Attempt to render more than 1,024,000 trees (As there is only this many authored instance positions).
+- Attempt to run NV PERF captures when on live mode.
+
 
