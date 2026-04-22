@@ -60,7 +60,7 @@ void Image::DebugNameImage(std::string name)
 
 bool Image::CreateAndLoadImageFromFile(std::string path, VkImageUsageFlags usage)
 {
-    // (Overvoorde, no date) https://vulkan-tutorial.com/Texture_mapping/Images
+    // (Overvoorde, 2023) https://vulkan-tutorial.com/Texture_mapping/Images
     // Load image
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);

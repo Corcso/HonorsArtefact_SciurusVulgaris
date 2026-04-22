@@ -36,7 +36,7 @@ LRESULT Input::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_KEYDOWN:
     {
-        // Windows sends repeat messages (Microsoft, 2019) so use the lParam to check the last state and break early if it was down
+        // Windows sends repeat messages (Microsoft, 2025) so use the lParam to check the last state and break early if it was down
         if (lParam & 0x40000000) break;
         Input::LogKeyPress(wParam);
     }
