@@ -28,6 +28,8 @@ struct InstancingInfo {
 	uint32_t instanceStride;
 	uint32_t numberOfModels;
 	uint32_t myModelNumber;
+	uint32_t showLODView; // The below two shouldn't be here, but just for speed of development, they are.
+	uint32_t pointSize;
 };
 
 /// <summary>

@@ -168,7 +168,7 @@ void MainDisplayApp::FrameMeshShaded()
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(6, &shadowMap);
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-				instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
+				instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index, (uint32_t)isLODViewOn, pointSize };
 				model->GetShadowDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 				lightShadow_RP.RenderPointTree(model, instancingInfo);
@@ -194,7 +194,7 @@ void MainDisplayApp::FrameMeshShaded()
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index };
+			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount(), static_cast<uint32_t>(loadedPointModels.size()), index, (uint32_t)isLODViewOn, pointSize};
 			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
@@ -290,7 +290,7 @@ void MainDisplayApp::FrameVertexShaded()
 			model->GetDescriptorSet()->UpdateUniformBufferData(6, &treeInstanceViewProjThisAndLastFrame);
 			model->GetDescriptorSet()->UpdateUniformBufferData(4, &lodData);
 
-			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount() , static_cast<uint32_t>(loadedPointModels.size()), index };
+			instancingInfo = { static_cast<uint32_t>(instanceCount / loadedPointModels.size()), model->GetMeshletCount() , static_cast<uint32_t>(loadedPointModels.size()), index, (uint32_t)isLODViewOn, pointSize };
 			model->GetDescriptorSet()->UpdateUniformBufferData(2, &instancingInfo);
 
 			pointRenderingPass.UpdateTAADescriptor(model->GetDescriptorSet(), 5, taaEnabled, taaLogarithmicColorSpace);
@@ -499,6 +499,12 @@ void MainDisplayApp::RenderImGuiControls()
 
 	if (currentRendererType == RendererType::MESH_SHADED_POINTS || currentRendererType == RendererType::VERTEX_SHADED_POINTS) ImGui::Checkbox("Terrain", &terrainEnabled);
 	else ImGui::Text("Terrain Not Available");
+
+	ImGui::Checkbox("Visible Level of Detail", &isLODViewOn);
+	uint32_t pointSizeMin = 1; 
+	uint32_t pointSizeMax = 128;
+	ImGui::SliderScalar("Point Size", ImGuiDataType_U32, &pointSize, &pointSizeMin, &pointSizeMax);
+
 	ImGui::End();
 	// == LOD editor == 
 	ImGui::Begin("Live LOD Edits");

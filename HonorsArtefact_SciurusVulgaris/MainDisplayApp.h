@@ -94,6 +94,9 @@ private:
 	bool fxaaEnabled;
 	bool taaEnabled; bool taaLogarithmicColorSpace;
 
+	// Debug controls
+	bool isLODViewOn; uint32_t pointSize = 1;
+
 	/// <summary>
 	/// Renders the ImGui menu
 	/// <para>Rather Large, so in its own function.</para>

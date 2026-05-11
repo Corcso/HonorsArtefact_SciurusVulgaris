@@ -30,6 +30,8 @@ layout(binding = 2) uniform InstancingInfo {
     uint instanceStride;
     uint modelCount;
 	uint myModelNumber;
+    uint showLODView; // The below two shouldn't be here, but just for speed of development, they are.
+	uint pointSize;
 } instanceInfo; 
 
 layout(binding = 4) uniform LODDataBuffer {
@@ -100,7 +102,7 @@ void main() {
 	gl_Position = screenSpacePosition;
 
     // Size 1
-	gl_PointSize = 1;
+	gl_PointSize = instanceInfo.pointSize;
 
     // World pos and normals
 	outWorldPos = (transformation.worldMatrices[instanceID] * vec4(inPosition, 1.0)).xyz;
@@ -108,5 +110,5 @@ void main() {
 
 	// Vertices color
 	outColor = vec4(inColor, 1.0);
-	//outColor[gl_LocalInvocationID.x] = vec4(debugColors[level % 8], 1.0);
+	if(instanceInfo.showLODView > 0) outColor = vec4(debugColors[level % 8], 1.0);
 }
