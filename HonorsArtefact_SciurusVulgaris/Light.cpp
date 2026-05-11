@@ -43,7 +43,7 @@ void Light::RenderImGuiMenu(bool createWindow)
 void Light::CreateShadowResources(VkRenderPass vkRenderPass)
 {
     // Create image
-    shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 2048, 2048, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    shadowImage.CreateImage(VulkanSetup::GetDepthBufferFormat(Graphics::GetVkPhysicalDevice()), 16384, 16384, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
     shadowImage.CreateImageView(true);
     shadowImage.DebugNameImage(name + " light");
 
