@@ -92,6 +92,12 @@ void MainDisplayApp::Initialize() {
 
 void MainDisplayApp::Frame() {
 	ImageCaptureSequence(); // Apply settings for capture 
+	PlayAutoShowSequence();
+
+	if (Input::IsKeyPressed('B')) {
+		autoShowEnabled = !autoShowEnabled;
+		renderImGui = true;
+	}
 
 	cameraTransform.CaptureControls();
 	
@@ -872,4 +878,80 @@ void MainDisplayApp::ImageCaptureSequence()
 	if (!pauseTimer) imageSequenceTimer += Clock::DeltaTime();
 	// Say gibberish for fun
 	guffer.SayGuff(Clock::DeltaTime());
+}
+
+void MainDisplayApp::PlayAutoShowSequence()
+{
+	std::vector<AutoShowRule> rules{
+		{5, [&](float t) {
+			cameraTransform.position = HMM_V3(-82.3, 2, -80.6) * (1.0f - t) + HMM_V3(50, 5.5, 26.5) * t;
+			cameraTransform.euler = HMM_V3(1, -42, 0);
+			instanceCount = 64000;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{5, [&](float t) {
+			cameraTransform.position = HMM_V3(25.6, 41, 66.7) * (1.0f - t) + HMM_V3(25.6, 41, -44.3) * t;
+			cameraTransform.euler = HMM_V3(-90, -180, 0);
+			instanceCount = 64000;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{2.5, [&](float t) {
+			cameraTransform.position = HMM_V3(81.27, 12.73, -34.98);
+			cameraTransform.euler = HMM_V3(-7.7, 61.89, 0);
+
+			t = t * t;
+			instanceCount = 128 * (1.0f - t) + 512000 * t;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{1, [&](float t) {}},
+		{2.5, [&](float t) {
+			cameraTransform.position = HMM_V3(81.27, 12.73, -34.98);
+			cameraTransform.euler = HMM_V3(-7.7, 61.89, 0);
+
+			t = 1.0f - t;
+			t = t * t;
+			instanceCount = 128 * (1.0f - t) + 512000 * t;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{5, [&](float t) {
+			cameraTransform.position = HMM_V3(32.21, -10.34, -64.4) * (1.0f - t) + HMM_V3(-63.7, -10.34, 18.42) * t;
+			cameraTransform.euler = HMM_V3(0, 47.5, 0) * (1.0f - t) + HMM_V3(0, -8, 0) * t;
+			instanceCount = 64000;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{2.5, [&](float t) {
+			cameraTransform.position = HMM_V3(-2.83, -13.72, 3.21) * (1.0f - t) + HMM_V3(-4.95, -19.47, -24.31) * t;
+			cameraTransform.euler = HMM_V3(-11.75, 175.6, 0);
+			instanceCount = 128;
+
+			t = t * t;
+			pointSize = 1 * (1.0f - t) + 16 * t;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} },
+		{1, [&](float t) {}},
+		{2.5, [&](float t) {
+			cameraTransform.position = HMM_V3(-4.95, -19.47, -24.31) * (1.0f - t) + HMM_V3(-2.83, -13.72, 3.21) * t;
+			cameraTransform.euler = HMM_V3(-11.75, 175.6, 0);
+			instanceCount = 128;
+
+			t = 1.0f - t;
+			t = t * t;
+			pointSize = 1 * (1.0f - t) + 16 * t;
+			currentRendererType = RendererType::MESH_SHADED_POINTS;
+		} }
+	};
+
+	if (!autoShowEnabled) return;
+
+	currentShowT += Clock::DeltaTime();
+	float scaledT = currentShowT / rules[currentShowIndex].length;
+	if (scaledT > 1.0f) scaledT = 1.0f;
+	rules[currentShowIndex].settings(scaledT);
+	if (currentShowT >= rules[currentShowIndex].length) {
+		currentShowIndex++;
+		if (currentShowIndex >= rules.size()) currentShowIndex = 0;
+		currentShowT = 0;
+	}
+
+	renderImGui = false;
 }

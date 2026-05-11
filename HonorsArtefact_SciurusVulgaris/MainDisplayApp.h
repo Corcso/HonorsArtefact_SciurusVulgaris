@@ -127,5 +127,12 @@ private:
 	/// <para>Sets settings for each capture, performs them and keeps track of progress.</para>
 	/// </summary>
 	void ImageCaptureSequence();
+
+	struct AutoShowRule {
+		float length;
+		std::function<void(float)> settings;
+	};
+	bool autoShowEnabled; int currentShowIndex; float currentShowT;
+	void PlayAutoShowSequence();
 };
 
